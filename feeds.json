@@ -1,0 +1,580 @@
+[
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "147",
+        "id": 133657
+      },
+      "dateCreated": "2013-03-04T20:19:49+0000",
+      "dateLastTaken": "2019-10-03T10:05:00+0000",
+      "latitude": 55.706493,
+      "currentOwner": {
+        "name": "Regeldavve",
+        "id": 166728
+      },
+      "name": "Bookworm",
+      "id": 15529,
+      "totalTakeovers": 15266,
+      "region": {
+        "country": "se",
+        "name": "Skåne",
+        "id": 135
+      },
+      "pointsPerHour": 7,
+      "longitude": 13.192075,
+      "takeoverPoints": 95
+    },
+    "latitude": 55.706493,
+    "currentOwner": {
+      "name": "Regeldavve",
+      "id": 166728
+    },
+    "time": "2019-10-03T10:05:00+0000",
+    "type": "takeover",
+    "longitude": 13.192075
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "Ostystning",
+        "id": 177954
+      },
+      "dateCreated": "2014-05-23T12:00:00+0000",
+      "dateLastTaken": "2019-10-03T10:05:00+0000",
+      "latitude": 57.666579,
+      "currentOwner": {
+        "name": "dcode",
+        "id": 18619
+      },
+      "name": "Solstensgärde",
+      "id": 29777,
+      "totalTakeovers": 738,
+      "region": {
+        "country": "se",
+        "name": "Västra Götaland",
+        "id": 132
+      },
+      "pointsPerHour": 2,
+      "longitude": 12.117362,
+      "takeoverPoints": 170
+    },
+    "latitude": 57.666579,
+    "currentOwner": {
+      "name": "dcode",
+      "id": 18619
+    },
+    "time": "2019-10-03T10:05:00+0000",
+    "type": "takeover",
+    "longitude": 12.117362
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "Karamella",
+        "id": 158664
+      },
+      "dateCreated": "2017-04-23T11:49:15+0000",
+      "dateLastTaken": "2019-10-03T10:04:51+0000",
+      "latitude": 60.619825,
+      "currentOwner": {
+        "name": "Zoegas",
+        "id": 92496
+      },
+      "name": "Korvstoppet",
+      "id": 99924,
+      "totalTakeovers": 3872,
+      "region": {
+        "country": "se",
+        "name": "Dalarna",
+        "id": 129
+      },
+      "pointsPerHour": 6,
+      "longitude": 15.61901,
+      "takeoverPoints": 110
+    },
+    "latitude": 60.619825,
+    "currentOwner": {
+      "name": "Zoegas",
+      "id": 92496
+    },
+    "time": "2019-10-03T10:04:51+0000",
+    "type": "takeover",
+    "longitude": 15.61901
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "Rooffiddler",
+        "id": 188291
+      },
+      "dateCreated": "2018-06-10T05:35:00+0000",
+      "dateLastTaken": "2019-10-03T10:04:50+0000",
+      "latitude": 58.918358,
+      "currentOwner": {
+        "name": "QueenElle",
+        "id": 58481
+      },
+      "name": "Mustadfors",
+      "id": 153637,
+      "totalTakeovers": 103,
+      "region": {
+        "country": "se",
+        "name": "Västra Götaland",
+        "id": 132
+      },
+      "pointsPerHour": 1,
+      "longitude": 12.308715,
+      "takeoverPoints": 185
+    },
+    "latitude": 58.918358,
+    "currentOwner": {
+      "name": "QueenElle",
+      "id": 58481
+    },
+    "time": "2019-10-03T10:04:50+0000",
+    "type": "takeover",
+    "longitude": 12.308715
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "strober",
+        "id": 1981
+      },
+      "dateCreated": "2011-04-13T14:06:08+0000",
+      "dateLastTaken": "2019-10-03T10:04:49+0000",
+      "latitude": 59.343489,
+      "currentOwner": {
+        "name": "ZoneCrawler",
+        "id": 184949
+      },
+      "name": "KarlBeach",
+      "id": 1618,
+      "totalTakeovers": 6547,
+      "region": {
+        "country": "se",
+        "name": "Stockholm",
+        "id": 141
+      },
+      "pointsPerHour": 7,
+      "longitude": 18.00132,
+      "takeoverPoints": 95
+    },
+    "latitude": 59.343489,
+    "currentOwner": {
+      "name": "ZoneCrawler",
+      "id": 184949
+    },
+    "time": "2019-10-03T10:04:49+0000",
+    "type": "takeover",
+    "longitude": 18.00132
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "Yatafo",
+        "id": 19806
+      },
+      "dateLastTaken": "2019-10-03T10:04:49+0000",
+      "latitude": 60.150124,
+      "totalTakeovers": 3409,
+      "pointsPerHour": 4,
+      "takeoverPoints": 140,
+      "dateCreated": "2012-03-19T21:57:55+0000",
+      "currentOwner": {
+        "name": "Veganvarg",
+        "id": 188106
+      },
+      "name": "EntréLudvika",
+      "id": 7013,
+      "region": {
+        "country": "se",
+        "name": "Dalarna",
+        "id": 129
+      },
+      "longitude": 15.183003
+    },
+    "latitude": 60.150124,
+    "currentOwner": {
+      "name": "Veganvarg",
+      "id": 188106
+    },
+    "time": "2019-10-03T10:04:49+0000",
+    "type": "takeover",
+    "longitude": 15.183003
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "Turfgrabben",
+        "id": 61177
+      },
+      "dateCreated": "2015-04-30T10:00:00+0000",
+      "dateLastTaken": "2019-10-03T10:04:46+0000",
+      "latitude": 59.375881,
+      "currentOwner": {
+        "name": "Weeturfarn",
+        "id": 63172
+      },
+      "name": "Västanvind",
+      "id": 47514,
+      "totalTakeovers": 4437,
+      "region": {
+        "country": "se",
+        "name": "Värmland",
+        "id": 130
+      },
+      "pointsPerHour": 6,
+      "longitude": 13.549318,
+      "takeoverPoints": 110
+    },
+    "latitude": 59.375881,
+    "currentOwner": {
+      "name": "Weeturfarn",
+      "id": 63172
+    },
+    "time": "2019-10-03T10:04:46+0000",
+    "type": "takeover",
+    "longitude": 13.549318
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "homeguard",
+        "id": 185087
+      },
+      "dateCreated": "2015-04-03T18:49:08+0000",
+      "dateLastTaken": "2019-10-03T10:04:46+0000",
+      "latitude": 59.276406,
+      "currentOwner": {
+        "name": "tuvali",
+        "id": 188134
+      },
+      "name": "Mickelsberg",
+      "id": 47769,
+      "totalTakeovers": 3609,
+      "region": {
+        "country": "se",
+        "name": "Stockholm",
+        "id": 141
+      },
+      "pointsPerHour": 5,
+      "longitude": 17.953443,
+      "takeoverPoints": 125
+    },
+    "latitude": 59.276406,
+    "currentOwner": {
+      "name": "tuvali",
+      "id": 188134
+    },
+    "time": "2019-10-03T10:04:46+0000",
+    "type": "takeover",
+    "longitude": 17.953443
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "Smile",
+        "id": 69951
+      },
+      "dateLastTaken": "2019-10-03T10:04:46+0000",
+      "latitude": 60.674924,
+      "totalTakeovers": 267,
+      "pointsPerHour": 1,
+      "takeoverPoints": 185,
+      "dateCreated": "2017-11-04T16:17:51+0000",
+      "currentOwner": {
+        "name": "Bert-Göran",
+        "id": 136662
+      },
+      "name": "InsjönStation",
+      "id": 136224,
+      "region": {
+        "country": "se",
+        "name": "Dalarna",
+        "id": 129
+      },
+      "longitude": 15.094966
+    },
+    "latitude": 60.674924,
+    "currentOwner": {
+      "name": "Bert-Göran",
+      "id": 136662
+    },
+    "time": "2019-10-03T10:04:46+0000",
+    "type": "takeover",
+    "longitude": 15.094966
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "hoss",
+        "id": 40709
+      },
+      "dateCreated": "2010-09-30T22:00:02+0000",
+      "dateLastTaken": "2019-10-03T10:04:45+0000",
+      "latitude": 56.666775,
+      "currentOwner": {
+        "name": "CCcowboy69",
+        "id": 163960
+      },
+      "name": "Klapphuset",
+      "id": 951,
+      "totalTakeovers": 11814,
+      "region": {
+        "country": "se",
+        "name": "Kalmar",
+        "id": 137
+      },
+      "pointsPerHour": 6,
+      "longitude": 16.370922,
+      "takeoverPoints": 110
+    },
+    "latitude": 56.666775,
+    "currentOwner": {
+      "name": "CCcowboy69",
+      "id": 163960
+    },
+    "time": "2019-10-03T10:04:45+0000",
+    "type": "takeover",
+    "longitude": 16.370922
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "stinabus",
+        "id": 93156
+      },
+      "dateLastTaken": "2019-10-03T10:04:41+0000",
+      "latitude": 58.413067,
+      "totalTakeovers": 19995,
+      "pointsPerHour": 8,
+      "takeoverPoints": 80,
+      "dateCreated": "2013-03-05T15:19:20+0000",
+      "currentOwner": {
+        "name": "Mazarin",
+        "id": 26774
+      },
+      "name": "MazarinSquare",
+      "id": 15569,
+      "region": {
+        "country": "se",
+        "name": "Östergötland",
+        "id": 139
+      },
+      "longitude": 15.615561
+    },
+    "latitude": 58.413067,
+    "currentOwner": {
+      "name": "Mazarin",
+      "id": 26774
+    },
+    "time": "2019-10-03T10:04:41+0000",
+    "type": "takeover",
+    "longitude": 15.615561
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "snattarn",
+        "id": 141073
+      },
+      "dateCreated": "2015-08-16T20:00:00+0000",
+      "dateLastTaken": "2019-10-03T10:04:35+0000",
+      "latitude": 59.623151,
+      "currentOwner": {
+        "name": "hwalla",
+        "id": 200710
+      },
+      "name": "Orrspelsskog",
+      "id": 56140,
+      "totalTakeovers": 2819,
+      "region": {
+        "country": "se",
+        "name": "Västmanland",
+        "id": 143
+      },
+      "pointsPerHour": 4,
+      "longitude": 16.250558,
+      "takeoverPoints": 140
+    },
+    "latitude": 59.623151,
+    "currentOwner": {
+      "name": "hwalla",
+      "id": 200710
+    },
+    "time": "2019-10-03T10:04:35+0000",
+    "type": "takeover",
+    "longitude": 16.250558
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "asil",
+        "id": 48947
+      },
+      "dateCreated": "2014-06-19T08:11:34+0000",
+      "dateLastTaken": "2019-10-03T10:04:34+0000",
+      "latitude": 59.5964,
+      "currentOwner": {
+        "name": "boki",
+        "id": 208220
+      },
+      "name": "Bryggan",
+      "id": 31803,
+      "totalTakeovers": 12062,
+      "region": {
+        "country": "se",
+        "name": "Västmanland",
+        "id": 143
+      },
+      "pointsPerHour": 8,
+      "longitude": 16.529953,
+      "takeoverPoints": 80
+    },
+    "latitude": 59.5964,
+    "currentOwner": {
+      "name": "boki",
+      "id": 208220
+    },
+    "time": "2019-10-03T10:04:34+0000",
+    "type": "takeover",
+    "longitude": 16.529953
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "GW007",
+        "id": 77704
+      },
+      "dateLastTaken": "2019-10-03T10:04:31+0000",
+      "latitude": 56.656392,
+      "totalTakeovers": 6995,
+      "pointsPerHour": 6,
+      "takeoverPoints": 110,
+      "dateCreated": "2013-11-04T11:00:00+0000",
+      "currentOwner": {
+        "name": "Sol2012",
+        "id": 222227
+      },
+      "name": "ThroneOfSune",
+      "id": 22702,
+      "region": {
+        "country": "se",
+        "name": "Kalmar",
+        "id": 137
+      },
+      "longitude": 16.353214
+    },
+    "latitude": 56.656392,
+    "currentOwner": {
+      "name": "Sol2012",
+      "id": 222227
+    },
+    "time": "2019-10-03T10:04:31+0000",
+    "type": "takeover",
+    "longitude": 16.353214
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "chacamia",
+        "id": 60439
+      },
+      "dateCreated": "2014-01-09T21:38:18+0000",
+      "dateLastTaken": "2019-10-03T10:04:31+0000",
+      "latitude": 58.420975,
+      "currentOwner": {
+        "name": "Fenrisulven",
+        "id": 14493
+      },
+      "name": "Bäckabro",
+      "id": 24810,
+      "totalTakeovers": 5089,
+      "region": {
+        "country": "se",
+        "name": "Västra Götaland",
+        "id": 132
+      },
+      "pointsPerHour": 4,
+      "longitude": 14.16862,
+      "takeoverPoints": 140
+    },
+    "latitude": 58.420975,
+    "currentOwner": {
+      "name": "Fenrisulven",
+      "id": 14493
+    },
+    "time": "2019-10-03T10:04:31+0000",
+    "type": "takeover",
+    "longitude": 14.16862
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "Cykeltanten",
+        "id": 165416
+      },
+      "dateLastTaken": "2019-10-03T10:04:24+0000",
+      "latitude": 59.637607,
+      "totalTakeovers": 9593,
+      "pointsPerHour": 7,
+      "takeoverPoints": 95,
+      "dateCreated": "2015-07-22T20:47:42+0000",
+      "currentOwner": {
+        "name": "Angelx",
+        "id": 104136
+      },
+      "name": "Fridegård",
+      "id": 55904,
+      "region": {
+        "country": "se",
+        "name": "Uppsala",
+        "id": 142
+      },
+      "longitude": 17.077896
+    },
+    "latitude": 59.637607,
+    "currentOwner": {
+      "name": "Angelx",
+      "id": 104136
+    },
+    "time": "2019-10-03T10:04:24+0000",
+    "type": "takeover",
+    "longitude": 17.077896
+  },
+  {
+    "zone": {
+      "previousOwner": {
+        "name": "Boozer",
+        "id": 70198
+      },
+      "dateCreated": "2013-12-24T15:00:00+0000",
+      "dateLastTaken": "2019-10-03T10:04:22+0000",
+      "latitude": 59.629332,
+      "currentOwner": {
+        "name": "RestlessSwen",
+        "id": 59864
+      },
+      "name": "AxArrow",
+      "id": 24165,
+      "totalTakeovers": 12139,
+      "region": {
+        "country": "se",
+        "name": "Västmanland",
+        "id": 143
+      },
+      "pointsPerHour": 7,
+      "longitude": 16.610497,
+      "takeoverPoints": 95
+    },
+    "latitude": 59.629332,
+    "currentOwner": {
+      "name": "RestlessSwen",
+      "id": 59864
+    },
+    "time": "2019-10-03T10:04:22+0000",
+    "type": "takeover",
+    "longitude": 16.610497
+  }
+]

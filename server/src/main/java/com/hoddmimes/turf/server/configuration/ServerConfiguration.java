@@ -8,6 +8,10 @@ public class ServerConfiguration
     private int mApiTimeZoneOffsetHr;
     private int mApiHistoryOffsetMin;
 
+    private String mTcpIpInterface;
+    private int mTcpIpServerPort;
+
+
     private ZoneNotifyConfiguration mZoneNotifyCfg = null;
 
 
@@ -27,6 +31,12 @@ public class ServerConfiguration
             mApiCollectIntervalSec = XmlAux.getIntAttribute( tTurfAPI, "zoneCollectIntervalSec", 30);
             mApiTimeZoneOffsetHr =  XmlAux.getIntAttribute( tTurfAPI, "timeZoneOffsetHr", 30);
             mApiHistoryOffsetMin =  XmlAux.getIntAttribute( tTurfAPI, "historyOffsetMin", 30);
+
+            Element tTcpIp= XmlAux.getElement(mRoot, "TcpIp");
+            mTcpIpInterface = XmlAux.getStringAttribute( tTcpIp, "interface", "0.0.0.0");
+            mTcpIpServerPort = XmlAux.getIntAttribute( tTcpIp, "serverPort", 9393);
+
+
         }
         catch( Exception e) {
             System.out.println("Failed to load configuration file \"" + mConfigurationFile + "\"");
@@ -51,6 +61,18 @@ public class ServerConfiguration
     public int getApiHistoryCollectOffsetMin() {
         return this.mApiHistoryOffsetMin;
     }
+
+    public int getTcpIpServerPort() {
+        return mTcpIpServerPort;
+    }
+
+    public String getTcpIpInterface() {
+        return mTcpIpInterface;
+    }
+
+
+
+
 
     public boolean startZoneNotify() {
         return (mZoneNotifyCfg == null) ? false : true;

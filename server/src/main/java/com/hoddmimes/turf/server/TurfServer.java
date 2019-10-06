@@ -3,17 +3,36 @@ package com.hoddmimes.turf.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.hoddmimes.turf.common.transport.TcpServer;
+import com.hoddmimes.turf.common.transport.TcpServerCallbackIf;
+import com.hoddmimes.turf.common.transport.TcpThread;
+import com.hoddmimes.turf.common.transport.TcpThreadCallbackIf;
 import com.hoddmimes.turf.server.common.Turf;
+import com.hoddmimes.turf.server.common.Zone;
+import com.hoddmimes.turf.server.common.ZoneDictionary;
 import com.hoddmimes.turf.server.configuration.ServerConfiguration;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+
 import java.io.File;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 
-public class TurfServer
+public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, TcpThreadCallbackIf
 {
-    ServerConfiguration mServerCfg = null;
-    ZoneNotifierService mZoneNotifierService = null;
+    private ServerConfiguration mServerCfg = null;
+    private ZoneNotifierService mZoneNotifierService = null;
+    private ZoneDictionary mZoneDictory = null;
+
+    private TcpServer mTcpIpServer;
+    private Logger mLogger = null;
+
 
     public static void main( String args[] ) {
         TurfServer tf = new TurfServer();
@@ -50,9 +69,15 @@ public class TurfServer
     }
 
     private void initialize() {
+        mLogger = LogManager.getLogger(this.getClass().getSimpleName());
+        mLogger.info("Intitializing " + this.getClass().getSimpleName()  + com.hoddmimes.turf.server.Version.build);
+        mZoneDictory = new ZoneDictionary();
+
+        declareTcpIpServer();
+
         if (mServerCfg.startZoneNotify()) {
             mZoneNotifierService = new ZoneNotifierService();
-            mZoneNotifierService.initialize( mServerCfg );
+            mZoneNotifierService.initialize( this );
         }
     }
 
@@ -73,6 +98,72 @@ public class TurfServer
         mServerCfg.parseConfiguration( args[0] );
     }
 
+    @Override
+    public void log( String pMsg ) {
+        mLogger.info( pMsg );
+    }
+    @Override
+    public void logEx( String pMsg, Throwable e) {
+        mLogger.error( pMsg, e);
+    }
+    @Override
+    public void logW( String pMsg ) {
+        mLogger.warn( pMsg );
+    }
+    @Override
+    public void logE( String pMsg ) {
+        mLogger.error( pMsg );
+    }
+    @Override
+    public void logF( String pMsg, Throwable e ) {
+        mLogger.fatal( pMsg, e );
+    }
+    @Override
+    public Logger getLogger() {
+        return mLogger;
+    }
+
+    @Override
+    public Zone getZoneById(int pId) {
+        return mZoneDictory.getZoneById( pId );
+    }
+
+    @Override
+    public Zone getZoneByName(String pName) {
+        return mZoneDictory.getZonebyName( pName );
+    }
+
+    @Override
+    public ServerConfiguration getServerConfiguration() {
+        return mServerCfg;
+    }
+
+    private void declareTcpIpServer()
+    {
+        mTcpIpServer = new TcpServer(  this );
+        try {
+            mTcpIpServer.declareServer( mServerCfg.getTcpIpServerPort(), mServerCfg.getTcpIpInterface());
+        }
+        catch( IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void tcpInboundConnection(TcpThread pThread)
+    {
+        pThread.setCallback( this );
+    }
+
+    @Override
+    public void tcpMessageRead(TcpThread pThread, byte[] pBuffer) {
+
+    }
+
+    @Override
+    public void tcpErrorEvent(TcpThread pThread, IOException pException) {
+
+    }
 }
 
 

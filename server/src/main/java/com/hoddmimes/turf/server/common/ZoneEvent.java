@@ -13,27 +13,30 @@ public class ZoneEvent
         mZoneEvent = pZoneEvent;
     }
 
-    String getZoneName() {
+    public String getZoneName() {
         JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
         return jZone.get("name").getAsString();
     }
 
-    String getCurrentOwner() {
+    public String getCurrentOwner() {
         JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
         JsonObject jCurrentOwner = jZone.get("currentOwner").getAsJsonObject();
         return jCurrentOwner.get("name").getAsString();
     }
 
-    int getZoneId() {
+    public String getPreviousOwner() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        JsonObject jCurrentOwner = jZone.get("previousOwner").getAsJsonObject();
+        return jCurrentOwner.get("name").getAsString();
+    }
+
+    public int getZoneId() {
         JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
         return jZone.get("id").getAsInt();
     }
 
-    EventFilterNewZoneTakeover getFeedMarker() {
-       return new EventFilterNewZoneTakeover( this);
-    }
 
-    long getLatestTakeOverTime() {
+    public long getLatestTakeOverTime() {
         JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
         String tTimStr = jZone.get("dateLastTaken").getAsString();
         try {

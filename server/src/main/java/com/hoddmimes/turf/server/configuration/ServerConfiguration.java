@@ -1,10 +1,13 @@
 package com.hoddmimes.turf.server.configuration;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ServerConfiguration
 {
+    private int mApiCollectIntervalSec;
+    private int mApiTimeZoneOffsetHr;
+    private int mApiHistoryOffsetMin;
+
     private ZoneNotifyConfiguration mZoneNotifyCfg = null;
 
 
@@ -14,10 +17,16 @@ public class ServerConfiguration
     public void parseConfiguration( String mConfigurationFile ) {
         try {
             mRoot = XmlAux.loadXMLFromFile(mConfigurationFile).getDocumentElement();
-            if (XmlAux.isElementPresent( mRoot, "ZoneNotify")) {
+            if (XmlAux.isElementPresent(mRoot, "ZoneNotify")) {
                 mZoneNotifyCfg = new ZoneNotifyConfiguration();
                 mZoneNotifyCfg.parse(mRoot);
             }
+
+
+            Element tTurfAPI = XmlAux.getElement(mRoot, "TurfApi");
+            mApiCollectIntervalSec = XmlAux.getIntAttribute( tTurfAPI, "zoneCollectIntervalSec", 30);
+            mApiTimeZoneOffsetHr =  XmlAux.getIntAttribute( tTurfAPI, "timeZoneOffsetHr", 30);
+            mApiHistoryOffsetMin =  XmlAux.getIntAttribute( tTurfAPI, "historyOffsetMin", 30);
         }
         catch( Exception e) {
             System.out.println("Failed to load configuration file \"" + mConfigurationFile + "\"");
@@ -26,6 +35,22 @@ public class ServerConfiguration
         }
     }
 
+
+    public int getApiZoneCollectIntervaSec() {
+        return this.mApiCollectIntervalSec;
+    }
+
+    public long getApiZoneCollectIntervalMs() {
+        return (long) (this.mApiCollectIntervalSec  * 1000L);
+    }
+
+    public int getApiTimeZoneOffetHr() {
+        return this.mApiTimeZoneOffsetHr;
+    }
+
+    public int getApiHistoryCollectOffsetMin() {
+        return this.mApiHistoryOffsetMin;
+    }
 
     public boolean startZoneNotify() {
         return (mZoneNotifyCfg == null) ? false : true;

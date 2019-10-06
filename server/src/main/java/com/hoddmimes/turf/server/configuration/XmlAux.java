@@ -112,7 +112,7 @@ public class XmlAux
         return builder.parse(tInputStream);
     }
 
-
+/*
     public static boolean isElementPresent( Element tTopElement, String pElementPath ) {
 
         Element tCurrElement = tTopElement;
@@ -154,9 +154,10 @@ public class XmlAux
         tPath = (tPath.endsWith("/")) ? tPath.substring(0,tPath.length() - 1) : tPath;
         String[] tElemntTags = tPath.split("/");
 
-        /**
-         * Check that the document element is equal with our first navigation element name
-         */
+        //
+        // Check that the document element is equal with our first navigation element name
+        //
+
         if (tCurrElement.getNodeName().compareTo( tElemntTags[0])  != 0) {
             return null;
         }
@@ -180,6 +181,7 @@ public class XmlAux
         }
         return tCurrElement;
     }
+    */
 
     public static String getElementValue( Element pElement ) {
         Node tNode = pElement.getFirstChild();
@@ -247,6 +249,22 @@ public class XmlAux
                 trimNode( tNode, (i+1));
             }
         }
+    }
+
+
+    public static boolean isElementPresent( Element pElementRoot, String pTagName ) {
+        NodeList nl = pElementRoot.getElementsByTagName( pTagName );
+        if ((nl == null) || (nl.getLength() == 0)) {
+            return false;
+        }
+        return true;
+    }
+
+    public static Element getElement( Element pElementRoot, String pTagName ) {
+        if (isElementPresent( pElementRoot, pTagName)) {
+            return (Element) pElementRoot.getElementsByTagName(pTagName).item(0);
+        }
+        return null;
     }
 
     public static String getTrimmedXML(String pXMLMessage) throws Exception {

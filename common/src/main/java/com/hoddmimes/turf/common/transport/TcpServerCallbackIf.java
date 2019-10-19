@@ -18,7 +18,6 @@
  */
 package com.hoddmimes.turf.common.transport;
 
-public interface TcpServerCallbackIf 
-{
-    public void tcpInboundConnection( TcpThread pThread );
+public interface TcpServerCallbackIf {
+    public void tcpInboundConnection(TcpThread pThread);
 }

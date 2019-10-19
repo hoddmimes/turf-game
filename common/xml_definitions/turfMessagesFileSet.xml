@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MessageFiles>
+    <MessageFactory outPath="./common/src/main/java/com/hoddmimes/turf/common/generated/" package="com.hoddmimes.turf.common.generated"/>
+    <MessageFile file="./common/xml_definitions/turfMessages.xml" outPath="./common/src/main/java/com/hoddmimes/turf/common/generated/" package="com.hoddmimes.turf.common.generated"/>
+</MessageFiles>

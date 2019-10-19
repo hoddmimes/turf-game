@@ -3,28 +3,51 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID"
          version="3.0">
     <display-name>com.hoddmimes.rest</display-name>
-    <servlet>
-        <servlet-name>Hello</servlet-name>
-        <servlet-class>com.hoddmimes.rest_test.HelloWorld</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Hello</servlet-name>
-        <url-pattern>/test/Hello</url-pattern>
-    </servlet-mapping>
+
+    <listener>
+        <listener-class>com.hoddmimes.turf.authorize.Authenticator</listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>AuthorizationFilter</filter-name>
+        <filter-class>com.hoddmimes.turf.authorize.AuthorizationFilter</filter-class>
+        <init-param>
+            <param-name>verbose</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>AuthorizationFilter</filter-name>
+        <url-pattern>/turf/app/restricted/*</url-pattern>
+    </filter-mapping>
 
     <servlet>
-        <servlet-name>RestServices</servlet-name>
+        <servlet-name>InitServletResources</servlet-name>
+        <servlet-class>com.hoddmimes.turf.servlets.ServletResources</servlet-class>
+        <init-param>
+            <param-name>turfServerHost</param-name>
+            <param-value>localhost</param-value>
+        </init-param>
+        <init-param>
+            <param-name>turfServerPort</param-name>
+            <param-value>9797</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>TurfServices</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>com.hoddmimes.rest</param-value>
+            <param-value>com.hoddmimes.turf.servlets</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>RestServices</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <servlet-name>TurfServices</servlet-name>
+        <url-pattern>/app/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

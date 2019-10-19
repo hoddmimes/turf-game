@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Messages mongoSupport="false">
+
+    <!--
+        Turf Game Service
+        General messages used by any service
+        -->
+
+    <Message name="TG_LogonRqst" rootMessage="true">
+        <Attribute name="mailAddress" type="String"/>
+        <Attribute name="password" type="String"/>
+    </Message>
+
+
+    <Message name="TG_Response" rootMessage="true">
+        <Attribute name="success" type="boolean"/>
+        <Attribute name="reason" type="String"/>
+        <Attribute name="optionPage" type="String"/>
+    </Message>
+
+    <!--
+        ZoneNotifier Service
+     -->
+
+
+    <Message name="ZN_RegisterUserRqst"  rootMessage="true">
+        <Attribute name="mailAddress" type="String"/>
+        <Attribute name="password" type="String"/>
+    </Message>
+
+    <Message name="ZN_MailConfirmation"  rootMessage="true">
+        <Attribute name="confirmationId" type="String"/>
+        <Attribute name="mailAddress" type="String"/>
+    </Message>
+
+
+    <Message name="ZN_ResetPasswordRqst"  rootMessage="true">
+        <Attribute name="mailAddress" type="String"/>
+    </Message>
+
+    <Message name="ZN_UpdatePasswordRqst"  rootMessage="true">
+        <Attribute name="mailAddress" type="String"/>
+        <Attribute name="password" type="String"/>
+        <Attribute name="confirmationId" type="String"/>
+    </Message>
+
+    <Message name="ZN_LoadZoneNamesRqst"  rootMessage="true">
+    </Message>
+
+    <Message name="ZN_ZoneNames"  rootMessage="true">
+        <Attribute name="region" type="String"/>
+        <Attribute name="names" type="String" array="[]"/>
+    </Message>
+
+    <Message name="ZN_LoadZoneNamesRsp"  rootMessage="true">
+        <Attribute name="regionNames" type="String" array="[]"/>
+        <Attribute name="regions" type="ZN_ZoneNames" array="[]"/>
+    </Message>
+
+
+    <Message name="ZN_LoadZoneSubscriptionsRqst"  rootMessage="true">
+        <Attribute name="mailAddress" type="String"/>
+    </Message>
+
+    <Message name="ZN_SubscriptionData">
+        <Attribute name="zoneName" type="String"/>
+        <Attribute name="subscrTime" type="String"/>
+        <Attribute name="notificationTime" type="String"/>
+        <Attribute name="notifications" type="int"/>
+        <Attribute name="subscrId" type="String"/>
+    </Message>
+
+    <Message name="ZN_LoadZoneSubscriptionsRsp"  rootMessage="true">
+        <Attribute name="subscriptions" type="ZN_SubscriptionData" array="[]"/>
+    </Message>
+
+    <Message name="ZN_RemoveZoneSubscriptionRqst" rootMessage="true">
+        <Attribute name="subscrId" type="String"/>
+    </Message>
+
+    <Message name="ZN_AddZoneSubscriptionRqst"  rootMessage="true">>
+        <Attribute name="zone" type="String"/>
+        <Attribute name="mailAddress" type="String"/>
+    </Message>
+</Messages>

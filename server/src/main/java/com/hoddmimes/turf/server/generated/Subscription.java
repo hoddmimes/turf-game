@@ -1,5 +1,5 @@
 
-            package com.hoddmimes.turf.server.generate;
+            package com.hoddmimes.turf.server.generated;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,7 @@ import java.io.IOException;
     import org.bson.Document;
     import org.bson.conversions.Bson;
     import com.mongodb.BasicDBObject;
+    import org.bson.types.ObjectId;
     import com.hoddmimes.jsontransform.MessageMongoInterface;
     import com.hoddmimes.jsontransform.MongoDecoder;
     import com.hoddmimes.jsontransform.MongoEncoder;
@@ -34,9 +35,13 @@ import com.google.gson.GsonBuilder;
             public class Subscription implements MessageInterface , MessageMongoInterface
             {
             
+                private String mMongoId = null;
                     private String mMailAddr;
                     private String mZoneName;
                     private Integer mZoneId;
+                    private String mCreateTime;
+                    private String mNotificationTime;
+                    private Integer mNotifications;
                public Subscription() {}
 
                public Subscription(String pJsonString ) {
@@ -44,6 +49,14 @@ import com.google.gson.GsonBuilder;
                     this.decode( tDecoder );
                }
     
+            public String getMongoId() {
+            return this.mMongoId;
+            }
+
+            public void setMongoId( String pMongoId ) {
+            this.mMongoId = pMongoId;
+            }
+        
             public Subscription setMailAddr( String pMailAddr ) {
             mMailAddr = pMailAddr;
             return this;
@@ -66,6 +79,30 @@ import com.google.gson.GsonBuilder;
             }
             public Optional<Integer> getZoneId() {
               return  Optional.ofNullable(mZoneId);
+            }
+        
+            public Subscription setCreateTime( String pCreateTime ) {
+            mCreateTime = pCreateTime;
+            return this;
+            }
+            public Optional<String> getCreateTime() {
+              return  Optional.ofNullable(mCreateTime);
+            }
+        
+            public Subscription setNotificationTime( String pNotificationTime ) {
+            mNotificationTime = pNotificationTime;
+            return this;
+            }
+            public Optional<String> getNotificationTime() {
+              return  Optional.ofNullable(mNotificationTime);
+            }
+        
+            public Subscription setNotifications( Integer pNotifications ) {
+            mNotifications = pNotifications;
+            return this;
+            }
+            public Optional<Integer> getNotifications() {
+              return  Optional.ofNullable(mNotifications);
             }
         
 
@@ -95,6 +132,15 @@ import com.google.gson.GsonBuilder;
             //Encode Attribute: mZoneId Type: int Array: false
             tEncoder.add( "zoneId", mZoneId );
         
+            //Encode Attribute: mCreateTime Type: String Array: false
+            tEncoder.add( "createTime", mCreateTime );
+        
+            //Encode Attribute: mNotificationTime Type: String Array: false
+            tEncoder.add( "notificationTime", mNotificationTime );
+        
+            //Encode Attribute: mNotifications Type: int Array: false
+            tEncoder.add( "notifications", mNotifications );
+        
         }
 
         
@@ -112,6 +158,15 @@ import com.google.gson.GsonBuilder;
             //Decode Attribute: mZoneId Type:int Array: false
             mZoneId = tDecoder.readInteger("zoneId");
         
+            //Decode Attribute: mCreateTime Type:String Array: false
+            mCreateTime = tDecoder.readString("createTime");
+        
+            //Decode Attribute: mNotificationTime Type:String Array: false
+            mNotificationTime = tDecoder.readString("notificationTime");
+        
+            //Decode Attribute: mNotifications Type:int Array: false
+            mNotifications = tDecoder.readInteger("notifications");
+        
 
         }
     
@@ -128,6 +183,9 @@ import com.google.gson.GsonBuilder;
                 tEncoder.add("mailAddr",  mMailAddr );
                 tEncoder.add("zoneName",  mZoneName );
                 tEncoder.add("zoneId",  mZoneId );
+                tEncoder.add("createTime",  mCreateTime );
+                tEncoder.add("notificationTime",  mNotificationTime );
+                tEncoder.add("notifications",  mNotifications );
             return tEncoder.getDoc();
     }
     
@@ -135,13 +193,24 @@ import com.google.gson.GsonBuilder;
             Document tDoc = null;
             List<Document> tDocLst = null;
 
+
             MongoDecoder tDecoder = new MongoDecoder( pDoc );
-        
+
+            
+            ObjectId _tId = pDoc.get("_id", ObjectId.class);
+            this.mMongoId = _tId.toString();
+            
            mMailAddr = tDecoder.readString("mailAddr");
         
            mZoneName = tDecoder.readString("zoneName");
         
            mZoneId = tDecoder.readInteger("zoneId");
+        
+           mCreateTime = tDecoder.readString("createTime");
+        
+           mNotificationTime = tDecoder.readString("notificationTime");
+        
+           mNotifications = tDecoder.readInteger("notifications");
         
         } // End decodeMongoDocument
     

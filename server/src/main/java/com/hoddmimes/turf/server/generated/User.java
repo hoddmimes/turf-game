@@ -1,5 +1,5 @@
 
-            package com.hoddmimes.turf.server.generate;
+            package com.hoddmimes.turf.server.generated;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,7 @@ import java.io.IOException;
     import org.bson.Document;
     import org.bson.conversions.Bson;
     import com.mongodb.BasicDBObject;
+    import org.bson.types.ObjectId;
     import com.hoddmimes.jsontransform.MessageMongoInterface;
     import com.hoddmimes.jsontransform.MongoDecoder;
     import com.hoddmimes.jsontransform.MongoEncoder;
@@ -34,10 +35,13 @@ import com.google.gson.GsonBuilder;
             public class User implements MessageInterface , MessageMongoInterface
             {
             
+                private String mMongoId = null;
                     private String mMailAddr;
                     private String mPassword;
                     private String mLastLogin;
                     private Integer mLoginCounts;
+                    private Boolean mConfirmed;
+                    private String mConfirmationId;
                public User() {}
 
                public User(String pJsonString ) {
@@ -45,6 +49,14 @@ import com.google.gson.GsonBuilder;
                     this.decode( tDecoder );
                }
     
+            public String getMongoId() {
+            return this.mMongoId;
+            }
+
+            public void setMongoId( String pMongoId ) {
+            this.mMongoId = pMongoId;
+            }
+        
             public User setMailAddr( String pMailAddr ) {
             mMailAddr = pMailAddr;
             return this;
@@ -77,6 +89,22 @@ import com.google.gson.GsonBuilder;
               return  Optional.ofNullable(mLoginCounts);
             }
         
+            public User setConfirmed( Boolean pConfirmed ) {
+            mConfirmed = pConfirmed;
+            return this;
+            }
+            public Optional<Boolean> getConfirmed() {
+              return  Optional.ofNullable(mConfirmed);
+            }
+        
+            public User setConfirmationId( String pConfirmationId ) {
+            mConfirmationId = pConfirmationId;
+            return this;
+            }
+            public Optional<String> getConfirmationId() {
+              return  Optional.ofNullable(mConfirmationId);
+            }
+        
 
         public String getMessageName() {
         return "User";
@@ -107,6 +135,12 @@ import com.google.gson.GsonBuilder;
             //Encode Attribute: mLoginCounts Type: int Array: false
             tEncoder.add( "loginCounts", mLoginCounts );
         
+            //Encode Attribute: mConfirmed Type: boolean Array: false
+            tEncoder.add( "confirmed", mConfirmed );
+        
+            //Encode Attribute: mConfirmationId Type: String Array: false
+            tEncoder.add( "confirmationId", mConfirmationId );
+        
         }
 
         
@@ -127,6 +161,12 @@ import com.google.gson.GsonBuilder;
             //Decode Attribute: mLoginCounts Type:int Array: false
             mLoginCounts = tDecoder.readInteger("loginCounts");
         
+            //Decode Attribute: mConfirmed Type:boolean Array: false
+            mConfirmed = tDecoder.readBoolean("confirmed");
+        
+            //Decode Attribute: mConfirmationId Type:String Array: false
+            mConfirmationId = tDecoder.readString("confirmationId");
+        
 
         }
     
@@ -144,6 +184,8 @@ import com.google.gson.GsonBuilder;
                 tEncoder.add("password",  mPassword );
                 tEncoder.add("lastLogin",  mLastLogin );
                 tEncoder.add("loginCounts",  mLoginCounts );
+                tEncoder.add("confirmed",  mConfirmed );
+                tEncoder.add("confirmationId",  mConfirmationId );
             return tEncoder.getDoc();
     }
     
@@ -151,8 +193,13 @@ import com.google.gson.GsonBuilder;
             Document tDoc = null;
             List<Document> tDocLst = null;
 
+
             MongoDecoder tDecoder = new MongoDecoder( pDoc );
-        
+
+            
+            ObjectId _tId = pDoc.get("_id", ObjectId.class);
+            this.mMongoId = _tId.toString();
+            
            mMailAddr = tDecoder.readString("mailAddr");
         
            mPassword = tDecoder.readString("password");
@@ -160,6 +207,10 @@ import com.google.gson.GsonBuilder;
            mLastLogin = tDecoder.readString("lastLogin");
         
            mLoginCounts = tDecoder.readInteger("loginCounts");
+        
+           mConfirmed = tDecoder.readBoolean("confirmed");
+        
+           mConfirmationId = tDecoder.readString("confirmationId");
         
         } // End decodeMongoDocument
     

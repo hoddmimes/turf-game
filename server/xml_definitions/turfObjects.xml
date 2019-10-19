@@ -7,12 +7,17 @@
         <Attribute name="password" type="String"/>
         <Attribute name="lastLogin" type="String"/>
         <Attribute name="loginCounts" type="int" />
+        <Attribute name="confirmed" type="boolean" />
+        <Attribute name="confirmationId" type="String" />
     </Message>
 
     <Message name="Subscription" rootMessage="true" db="true" dbCollection="Subscription">
-        <Attribute name="mailAddr" type="String" dbKey="unique"/>
+        <Attribute name="mailAddr" type="String" dbKey="not unique"/>
         <Attribute name="zoneName" type="String" dbKey="not unique"/>
         <Attribute name="zoneId" type="int" dbKey="not unique"/>
+        <Attribute name="createTime" type="String"/>
+        <Attribute name="notificationTime" type="String"/>
+        <Attribute name="notifications" type="int"/>
     </Message>
 
 

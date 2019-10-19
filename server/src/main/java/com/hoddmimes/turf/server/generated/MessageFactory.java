@@ -1,5 +1,5 @@
 
-package com.hoddmimes.turf.server.generate;
+package com.hoddmimes.turf.server.generated;
 
 import com.hoddmimes.jsontransform.*;
 import java.nio.ByteBuffer;

@@ -4,14 +4,14 @@ Embedded environment
  The access path is determined by definitions in
     - the embedded server i.e. com.hoddmimes.tomcat.Server
     - what is setup in the web.xml
-    - the annotation def in the accutal rest service class i.e. com.hoddmimes.rest.Hello
+    - the annotation def in the accutal rest service class i.e. com.hoddmimes.rest.TestService
 
     The access path for the Hello service in the embedded environment is
     http://localhost:8282/rest/rest/hello
 
     The port and first context "rest" path is defined in the actual embeded server i.e. com.hoddmimes.tomcat.Server
     The second "rest" path is defined in the file web.xml i.e the url-mapping for the classes defined for the Jersey services.
-    The final service "hello" is determined by the @Path annotation  used in the Jersey implementation class i.e. com.hoddmimes.rest.Hello
+    The final service "hello" is determined by the @Path annotation  used in the Jersey implementation class i.e. com.hoddmimes.rest.TestService
 
 
     For none Jersey implementation the emmbedded server the first part i.e. port an first context path (as above)
@@ -23,7 +23,7 @@ TOMCAT environment
 The access path is determined by the following defnitions
    - the WAR name
    - what is setup in the web.xml
-   - the annotation def in the accutal rest service class i.e. com.hoddmimes.rest.Hello
+   - the annotation def in the accutal rest service class i.e. com.hoddmimes.rest.TestService
 
     The WAR name becommes the application prefix. E.g a WAR name frotz.war will result in a sub directory frotz being created in the Tomcat webapps directory.
     The application will then be available via the URL http://localhost:8282/frotz/...

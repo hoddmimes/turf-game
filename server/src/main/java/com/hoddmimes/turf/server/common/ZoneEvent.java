@@ -41,7 +41,7 @@ public class ZoneEvent
         String tTimStr = jZone.get("dateLastTaken").getAsString();
         try {
             long tTime = Turf.TurfSDF.parse( tTimStr ).getTime();
-            System.out.println("turf-time: " + tTimStr + " local-time: " + Turf.SDF.format( tTime ));
+            //System.out.println("turf-time: " + tTimStr + " local-time: " + Turf.SDF.format( tTime ));
             return tTime;
         }
         catch(ParseException e)

@@ -1,5 +1,5 @@
 
-    package com.hoddmimes.turf.server.generate;
+    package com.hoddmimes.turf.server.generated;
 
 
     import com.mongodb.BasicDBObject;
@@ -17,6 +17,7 @@
 
     import org.bson.BsonType;
     import org.bson.Document;
+    import org.bson.types.ObjectId;
 
     import com.mongodb.client.model.Filters;
     import com.mongodb.client.result.DeleteResult;
@@ -27,7 +28,7 @@
     import java.util.stream.Collectors;
 
     
-    import com.hoddmimes.turf.server.generate.*;
+    import com.hoddmimes.turf.server.generated.*;
     
     public class MongoAux {
             private String mDbName;
@@ -146,7 +147,7 @@
         private void createSubscriptionCollection() {
             ArrayList<DbKey> tKeys = new ArrayList<>();
             
-                    tKeys.add( new DbKey("mailAddr", true));
+                tKeys.add( new DbKey("mailAddr", false));
                 tKeys.add( new DbKey("zoneName", false));
                 tKeys.add( new DbKey("zoneId", false));
 
@@ -161,6 +162,12 @@
            return tResult.getDeletedCount();
         }
 
+        public long deleteUserByMongoId( String pMongoObjectId) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            DeleteResult tResult = mUserCollection.deleteOne( tFilter );
+            return tResult.getDeletedCount();
+        }
+
         
             public long deleteUserByMailAddr( String pMailAddr ) {
                 Bson tKeyFilter= Filters.eq("mailAddr", pMailAddr);
@@ -172,18 +179,37 @@
         * CRUD INSERT methods
         */
         public void insertUser( User pUser ) {
-           mUserCollection.insertOne( pUser.getMongoDocument());
+            Document tDoc = pUser.getMongoDocument();
+            mUserCollection.insertOne( tDoc );
+            ObjectId _tId = tDoc.getObjectId("_id");
+            if (_tId != null) {
+                pUser.setMongoId( _tId.toString());
+            }
         }
 
         public void insertUser( List<User> pUserList ) {
            List<Document> tList = pUserList.stream().map( User::getMongoDocument).collect(Collectors.toList());
            mUserCollection.insertMany( tList );
+           for( int i = 0; i < tList.size(); i++ ) {
+             ObjectId _tId = tList.get(i).getObjectId("_id");
+             if (_tId != null) {
+                pUserList.get(i).setMongoId( _tId.toString());
+             }
+           }
         }
 
     
         /**
         * CRUD UPDATE (INSERT) methods
         */
+        public UpdateResult updateUserByMongoId( String pMongoObjectId, User pUser ) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            Document tDocSet = new Document("$set", pUser.getMongoDocument());
+            UpdateResult tUpdSts = mUserCollection.updateOne( tFilter, tDocSet);
+            return tUpdSts;
+        }
+
+
         public UpdateResult updateUser( String pMailAddr, User pUser, boolean pUpdateAllowInsert ) {
           UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
           Bson tFilter= Filters.and( 
@@ -205,6 +231,8 @@
         /**
         * CRUD FIND methods
         */
+
+
         public List<User> findAllUser()
         {
            List<User> tResult = new ArrayList<>();
@@ -219,6 +247,26 @@
             }
             return tResult;
         }
+
+        public User findUserByMongoId( String pMongoObjectId ) {
+        Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+
+        FindIterable<Document> tDocuments = this.mUserCollection.find( tFilter );
+        if (tDocuments == null) {
+            return null;
+        }
+
+        List<User> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        User tUser = new User();
+        tUser.decodeMongoDocument( tDoc );
+        tResult.add( tUser );
+        }
+        return (tResult.size() > 0) ? tResult.get(0) : null;
+        }
+
 
         public List<User> findUser( String pMailAddr ) {
         Bson tFilter= Filters.and( 
@@ -265,6 +313,12 @@
            return tResult.getDeletedCount();
         }
 
+        public long deleteSubscriptionByMongoId( String pMongoObjectId) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            DeleteResult tResult = mSubscriptionCollection.deleteOne( tFilter );
+            return tResult.getDeletedCount();
+        }
+
         
             public long deleteSubscription( String pMailAddr, String pZoneName, int pZoneId ) {
                 Bson tKeyFilter= Filters.and( 
@@ -298,18 +352,37 @@
         * CRUD INSERT methods
         */
         public void insertSubscription( Subscription pSubscription ) {
-           mSubscriptionCollection.insertOne( pSubscription.getMongoDocument());
+            Document tDoc = pSubscription.getMongoDocument();
+            mSubscriptionCollection.insertOne( tDoc );
+            ObjectId _tId = tDoc.getObjectId("_id");
+            if (_tId != null) {
+                pSubscription.setMongoId( _tId.toString());
+            }
         }
 
         public void insertSubscription( List<Subscription> pSubscriptionList ) {
            List<Document> tList = pSubscriptionList.stream().map( Subscription::getMongoDocument).collect(Collectors.toList());
            mSubscriptionCollection.insertMany( tList );
+           for( int i = 0; i < tList.size(); i++ ) {
+             ObjectId _tId = tList.get(i).getObjectId("_id");
+             if (_tId != null) {
+                pSubscriptionList.get(i).setMongoId( _tId.toString());
+             }
+           }
         }
 
     
         /**
         * CRUD UPDATE (INSERT) methods
         */
+        public UpdateResult updateSubscriptionByMongoId( String pMongoObjectId, Subscription pSubscription ) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            Document tDocSet = new Document("$set", pSubscription.getMongoDocument());
+            UpdateResult tUpdSts = mSubscriptionCollection.updateOne( tFilter, tDocSet);
+            return tUpdSts;
+        }
+
+
         public UpdateResult updateSubscription( String pMailAddr, String pZoneName, int pZoneId, Subscription pSubscription, boolean pUpdateAllowInsert ) {
           UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
           Bson tFilter= Filters.and( 
@@ -333,6 +406,8 @@
         /**
         * CRUD FIND methods
         */
+
+
         public List<Subscription> findAllSubscription()
         {
            List<Subscription> tResult = new ArrayList<>();
@@ -347,6 +422,26 @@
             }
             return tResult;
         }
+
+        public Subscription findSubscriptionByMongoId( String pMongoObjectId ) {
+        Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+
+        FindIterable<Document> tDocuments = this.mSubscriptionCollection.find( tFilter );
+        if (tDocuments == null) {
+            return null;
+        }
+
+        List<Subscription> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        Subscription tSubscription = new Subscription();
+        tSubscription.decodeMongoDocument( tDoc );
+        tResult.add( tSubscription );
+        }
+        return (tResult.size() > 0) ? tResult.get(0) : null;
+        }
+
 
         public List<Subscription> findSubscription( String pMailAddr, String pZoneName, int pZoneId ) {
         Bson tFilter= Filters.and( 

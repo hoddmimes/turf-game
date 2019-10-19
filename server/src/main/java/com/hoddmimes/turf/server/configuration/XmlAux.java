@@ -215,6 +215,14 @@ public class XmlAux
         }
     }
 
+    public static boolean getBooleanAttribute(Element pElement, String pAttributeName, boolean pDefaultValue ) {
+        if ((pElement.getAttribute( pAttributeName) != null) && (pElement.getAttribute( pAttributeName).length() > 0)) {
+            return  Boolean.parseBoolean(pElement.getAttribute( pAttributeName));
+        } else {
+            return pDefaultValue;
+        }
+    }
+
     public static double getDoubleAttribute(Element pElement, String pAttributeName, double pDefaultValue ) {
         if ((pElement.getAttribute( pAttributeName) != null) && (pElement.getAttribute( pAttributeName).length() > 0)) {
             return  Double.parseDouble(pElement.getAttribute( pAttributeName));

@@ -10,6 +10,9 @@ public class Zone
     private int     mTP;
     private double  mLat;
     private double  mLong;
+    private String  mRegionName;
+    private int  mRegionsId;
+    private String  mRegionCountry;
 
     public Zone( JsonObject pZone ) {
        mId = pZone.get("id").getAsInt();
@@ -18,7 +21,18 @@ public class Zone
        mTP = pZone.get("pointsPerHour").getAsInt();
        mLat = pZone.get("latitude").getAsDouble();
        mLong = pZone.get("longitude").getAsDouble();
+
+       JsonObject jRegion = pZone.get("region").getAsJsonObject();
+       mRegionName = jRegion.get("name").getAsString();
+       mRegionsId = jRegion.get("id").getAsInt();
+       mRegionCountry = (jRegion.get("country") != null) ? jRegion.get("country").getAsString() : "";
     }
+
+    public String getRegionName() { return mRegionName; }
+
+    public int getRegionid() { return mRegionsId; }
+
+    public String getRegionCountry() { return mRegionCountry; }
 
     public double geLatitude() {
         return mLat;

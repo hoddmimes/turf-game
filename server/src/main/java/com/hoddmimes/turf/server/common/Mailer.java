@@ -50,17 +50,17 @@ public class Mailer
 
 
     public static void main(String[] args) {
-        Mailer m = new  Mailer("smtp.gmail.com",
+        Mailer m = new  Mailer("smtp.hoddmimes.com",
                                 587,
-                            "par.olov.bertilsson@gmail.com",
-                            "xxxxxxxxxxxxx",
+                            "yyyyyyyyyyy",
+                            "xxxxxxxxxxx",
                             "text/html", true);
         m.sendMessage( true,
-                "par.olov.bertilsson@gmail.com",
-                "par.bertilsson@yahoo.com",
+                "turf-mailer",
+                "par.bertilsson@hoddmimes.com",
                 null,
                 "Mailer Test HTML",
-                "<!DOCTYPE html><html><body><h1>Hello World!</h1></body></html>");
+                "<!DOCTYPE html><html><body><h1>TestService World!</h1></body></html>");
         System.out.println("thats all");
     }
 

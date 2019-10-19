@@ -11,6 +11,10 @@ public class ServerConfiguration
     private String mTcpIpInterface;
     private int mTcpIpServerPort;
 
+    String mDbHost = null;
+    int    mDbPort = 0;
+    String mDbName = null;
+
 
     private ZoneNotifyConfiguration mZoneNotifyCfg = null;
 
@@ -36,6 +40,10 @@ public class ServerConfiguration
             mTcpIpInterface = XmlAux.getStringAttribute( tTcpIp, "interface", "0.0.0.0");
             mTcpIpServerPort = XmlAux.getIntAttribute( tTcpIp, "serverPort", 9393);
 
+            Element tDBElement = XmlAux.getElement( mRoot, "Database");
+            mDbHost = XmlAux.getStringAttribute(tDBElement,"host", null);
+            mDbPort = XmlAux.getIntAttribute(tDBElement,"port", 0);
+            mDbName =  XmlAux.getStringAttribute(tDBElement,"database", null);
 
         }
         catch( Exception e) {
@@ -71,7 +79,17 @@ public class ServerConfiguration
     }
 
 
+    public String getDbHost() {
+        return this.mDbHost;
+    }
 
+    public String getDbName() {
+        return this.mDbName;
+    }
+
+    public int getDbPort() {
+        return this.mDbPort;
+    }
 
 
     public boolean startZoneNotify() {

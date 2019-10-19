@@ -22,6 +22,8 @@ import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.tanukisoftware.wrapper.WrapperListener;
+import org.tanukisoftware.wrapper.WrapperManager;
 
 
 import javax.naming.NameNotFoundException;
@@ -34,8 +36,12 @@ import java.util.List;
 import java.util.Map;
 
 
-public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, TcpThreadCallbackIf
+public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, TcpThreadCallbackIf, WrapperListener
 {
+    private static boolean cDaemonMode = true;
+    static volatile boolean cServerShoulExit = false;
+    static ExecServerTasksThread cServerTaskThread = null;
+
     private ServerConfiguration mServerCfg = null;
     private ZoneNotifierService mZoneNotifierService = null;
     private ZoneDictionary mZoneDictory = null;
@@ -45,11 +51,25 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     private Logger mLogger = null;
 
 
+    private static void checkDaemonMode( String args[]  ) {
+        for( int i = 0; i < args.length; i++) {
+            if (args[i].compareToIgnoreCase("-daemon") == 0) {
+                cDaemonMode = Boolean.parseBoolean( args[i+1] );
+            }
+        }
+    }
+
     public static void main( String args[] ) {
-        TurfServer tf = new TurfServer();
-        tf.parseConfiguration( args );
-        tf.initialize();
-        tf.processZoneUpdates();
+        checkDaemonMode(args);
+        if (TurfServer.cDaemonMode) {
+            WrapperManager.start(new TurfServer(), args);
+        } else {
+            TurfServer tf = new TurfServer();
+            tf.parseConfiguration(args);
+            tf.initialize();
+            tf.execServerTasks();
+
+        }
     }
 
     private String getZoneCollectTimeOffset( int pHistoryOffsetMin, int pHistoryTimezoneOffset ) {
@@ -90,8 +110,8 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         return 0;
     }
 
-    private void processZoneUpdates() {
-        while( true ) {
+    private void execServerTasks() {
+        while(!(cServerShoulExit )) {
             JsonElement tZoneUpdateRsp = getZoneEvents();
             mLogger.debug("[zonesUpdated] zones " + countZones(tZoneUpdateRsp) + " retreived");
 
@@ -313,6 +333,53 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
         return TGStatus.createError("No " + this.getClass().getSimpleName() + " service method found for request \"" +
                 pRqstMsg.getMessageName() + "\"", null ).toJson().toString();
+    }
+
+    static class ExecServerTasksThread extends Thread
+    {
+        private TurfServer mTurfServer;
+
+        ExecServerTasksThread( TurfServer pTurfServer ) {
+            mTurfServer = pTurfServer;
+        }
+
+        public void run() {
+            setName("WrapperApplicationTask");
+            mTurfServer.execServerTasks();
+        }
+
+    }
+
+
+    @Override
+    public Integer start(String[] args) {
+        TurfServer tf = new TurfServer();
+        tf.parseConfiguration(args);
+        tf.initialize();
+
+        cServerTaskThread = new ExecServerTasksThread( tf );
+        cServerTaskThread.start();
+        tf.mLogger.info("[TurfServer] started complete (wrapper)");
+        return null;
+    }
+
+    @Override
+    public int stop(int pExitCode) {
+        cServerShoulExit = true;
+        if (cServerTaskThread != null) {
+            try {cServerTaskThread.interrupt();}
+            catch( Exception e) { e.printStackTrace();}
+        }
+        return pExitCode;
+    }
+
+    @Override
+    public void controlEvent(int pEvent) {
+        if ((pEvent == WrapperManager.WRAPPER_CTRL_LOGOFF_EVENT) && (WrapperManager.isIgnoreUserLogoffs())) {
+            // Ignore
+        } else {
+            WrapperManager.stop(0);
+        }
     }
 }
 

@@ -192,6 +192,9 @@
 	          } else {
 		          alert('Load zone data TG_response, success should never be returned');
 		      }
+		      if (msg.TG_Response.optionPage != null) {
+		          loadUrl( msg.TG_Response.optionPage );
+		      }
 		  }
 	  });
 	}

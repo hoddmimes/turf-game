@@ -4,6 +4,7 @@ import org.w3c.dom.Element;
 
 public class ServerConfiguration
 {
+    private String mBaseURL;
     private int mApiCollectIntervalSec;
     private int mApiTimeZoneOffsetHr;
     private int mApiHistoryOffsetMin;
@@ -25,6 +26,9 @@ public class ServerConfiguration
     public void parseConfiguration( String mConfigurationFile ) {
         try {
             mRoot = XmlAux.loadXMLFromFile(mConfigurationFile).getDocumentElement();
+
+            mBaseURL = mRoot.getAttribute("baseURL").toString();
+
             if (XmlAux.isElementPresent(mRoot, "ZoneNotify")) {
                 mZoneNotifyCfg = new ZoneNotifyConfiguration();
                 mZoneNotifyCfg.parse(mRoot);
@@ -53,6 +57,7 @@ public class ServerConfiguration
         }
     }
 
+    public String getBaseURL() { return this.mBaseURL; }
 
     public int getApiZoneCollectIntervaSec() {
         return this.mApiCollectIntervalSec;

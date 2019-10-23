@@ -54,7 +54,7 @@ button {
 #divZoneTable {
     table-layout:fixed;
 	margin-top:30px;
-	width:630px;
+	width:430px;
 	min-height:248px;
 	overflow-y: auto;    /* Trigger vertical scroll    */
     overflow-x: hidden;  /* Hide the horizontal scroll */

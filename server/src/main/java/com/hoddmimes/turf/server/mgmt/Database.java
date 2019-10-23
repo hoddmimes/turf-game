@@ -33,5 +33,11 @@ public abstract class Database {
             }
             i++;
         }
+        System.out.println("Create Database Parameters");
+        System.out.println("    reset: " + String.valueOf( mReset ));
+        System.out.println("    host: " + String.valueOf( mHost ));
+        System.out.println("    database: " + String.valueOf( mDatabaseName ));
+        System.out.println("    port: " + String.valueOf( mPort ));
+
     }
 }

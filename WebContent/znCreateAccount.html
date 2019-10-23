@@ -1,22 +1,22 @@
 <html>
 <head>
     <script
-            src="http://code.jquery.com/jquery-3.3.1.js"
+            src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous">
     </script>
     <script src="js/turf.js" type="text/javascript"></script>
 
-    <title>Turf Zone Notification Logon</title>
+    <title>Turf Zone Notification User Registration  </title>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
     <link rel="stylesheet" type="text/css" href="css/turf.css">
 </head>
 <body>
 <br><br>
-<h3 style="text-align:left; margin-left: 40px">Zone Notification User Logon</h3>
+<h3 style="text-align:left; margin-left: 40px">Zone Notification User Registration</h3>
 <br>
 
-<form style="text-align:left" id="zn_logon" action="/turf/app/tgUserLogon">
+<form style="text-align:left" id="zn_register" action="/turf/app/znRegisterUser">
     <table border="0" cellpadding="5">
         <tr>
             <td><label class="lblprompt"  for="uname"><b>Mail Address</b></label></td>
@@ -26,23 +26,24 @@
         <tr>
             <td><label class="lblprompt"  for="psw"><b>Password</b></label></td>
             <td width="12" />
-            <td><input class="txtin" id="password"  type="password" placeholder="Password" name="password" required></td>
+            <td><input class="txtin" id="password1"  type="password" placeholder="Password" name="password1" required></td>
+        </tr>
+        <tr>
+            <td><label class="lblprompt"  for="psw"><b>Verify Password</b></label></td>
+            <td width="12" />
+            <td><input class="txtin" id="password2" type="password" placeholder="Password" name="password2" required></td>
         </tr>
     </table>
     <br>
     <br>
     <br>
-    <button style="margin-left:120px;"  type="submit">Logon</button>
+    <button style="margin-left:120px;"  type="submit">Register</button>
 </form>
-<br>
-<div style="margin-left:90px">
-    <a href="/turf/resetPassword.html">Reset your password</a>
-</div>
 
 <script>
 
 /* attach a submit handler to the form */
-$("#zn_logon").submit(function(event) {
+$("#zn_register").submit(function(event) {
 
   /* stop form from submitting normally */
   event.preventDefault();
@@ -57,19 +58,27 @@ $("#zn_logon").submit(function(event) {
     return;
   }
 
-  if (isEmpty($('#password').val())) {
+  if (isEmpty($('#password1').val())) {
     alert("Password must not be empty!");
     return;
   }
+
+
+  if ($('#password1').val().localeCompare($('#password2').val()) != 0) {
+      alert("Passwords are not matching");
+      return;
+  }
+
+
 
   /* get the action attribute from the <form action=""> element */
   var $form = $( this ),
   url = $form.attr( 'action' );
 
 
-  var rqst = {TG_LogonRqst : {
+  var rqst = {ZN_RegisterUserRqst : {
 		            "mailAddress" : $('#mailaddress').val(),
-		            "password" : $('#password').val() }}
+		            "password" : $('#password1').val() }}
 
   //console.log( 'request-data: ' + JSON.stringify(rqst));
 

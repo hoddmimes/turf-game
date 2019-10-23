@@ -56,8 +56,8 @@ public class CreateDatabase extends Database
                 mCreateTestUser = Boolean.parseBoolean( args[i + 1] );
                 i++;
             }
+            i++;
         }
-        i++;
     }
 
 }

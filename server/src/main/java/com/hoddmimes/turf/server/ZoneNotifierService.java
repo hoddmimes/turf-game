@@ -96,7 +96,7 @@ public class ZoneNotifierService
         sb.append("Reset user password for mail address\"" + pUser.getMailAddr().get() + "\" by clicking on the reset link below");
         sb.append("<br><br>");
         sb.append("<p style=\"margin-left:30px;\">");
-        sb.append("<a  href=\"http:/192.168.42.28:8282/turf/updatePassword.html?id=" + pUser.getConfirmationId().get() +
+        sb.append("<a  href=\"" + mTurfIf.getServerConfiguration().getBaseURL() + "turf/updatePassword.html?id=" + pUser.getConfirmationId().get() +
                 "&addr=" + pUser.getMailAddr().get()+ "\">");
         sb.append("Update Password</a>");
         sb.append("</p></body></html>");
@@ -112,7 +112,7 @@ public class ZoneNotifierService
         sb.append("Otherwise please confirm your mail address by <i>clicking</i> on the link below within 24 hours.");
         sb.append("<br><br>");
         sb.append("<p style=\"margin-left:30px;\">");
-        sb.append("<a  href=\"http:/192.168.42.28:8282/turf/app/znMailConfirmation?id=" + pUser.getConfirmationId().get() +
+        sb.append("<a  href=\"" + mTurfIf.getServerConfiguration().getBaseURL() + "turf/app/znMailConfirmation?id=" + pUser.getConfirmationId().get() +
                     "&addr=" + pUser.getMailAddr().get()+ "\">");
         sb.append("Confirm mail adress</a>");
         sb.append("</p></body></html>");
@@ -237,7 +237,7 @@ public class ZoneNotifierService
         }
 
         if (tUser.getConfirmed().get()) {
-            return TGStatus.create(true,"User mail address already confirmed","/turf/logon.html").toJson().toString();
+            return TGStatus.create(true,"User mail address already confirmed","/turf/znlogon.html").toJson().toString();
         }
 
         tUser.setConfirmed( true );
@@ -245,7 +245,7 @@ public class ZoneNotifierService
 
         UpdateResult tUpdResult = mDbAux.updateUser( pRqstMsg.getMailAddress().get(), tUser, false);
         if (tUpdResult.getModifiedCount() == 1) {
-            return TGStatus.create(true,"User mail address successfully confirmed","/turf/logon.html").toJson().toString();
+            return TGStatus.create(true,"User mail address successfully confirmed","/turf/znLogon.html").toJson().toString();
         }
 
         return TGStatus.create(false,"User confirmation was not done (modify count == " + tUpdResult.getModifiedCount() + ")").toJson().toString();
@@ -272,7 +272,7 @@ public class ZoneNotifierService
 
         UpdateResult tUpdResult = mDbAux.updateUser( pRqstMsg.getMailAddress().get(), tUser, false);
         if (tUpdResult.getModifiedCount() == 1) {
-            return TGStatus.create(true,"User \"" + pRqstMsg.getMailAddress().get() + "\" is successfully updated","/turf/logon.html").toJson().toString();
+            return TGStatus.create(true,"User \"" + pRqstMsg.getMailAddress().get() + "\" is successfully updated","/turf/znLogon.html").toJson().toString();
         }
 
         return TGStatus.create(false,"Failed to update user password (mod count = " + tUpdResult.getModifiedCount() + ")").toJson().toString();
@@ -348,7 +348,7 @@ public class ZoneNotifierService
                 return TGStatus.createError("failed to register user in DB", e).toJson().toString();
             }
             mTurfIf.getLogger().info("User " + tUser.getMailAddr().get() + " successfully registered");
-            return TGStatus.create( true,"Successfully register user","/turf/logon.html").toJson().toString();
+            return TGStatus.create( true,"Successfully register user","/turf/znLogon.html").toJson().toString();
         } else {
             mTurfIf.getLogger().error("Failed to register user (sending confirmation mail)");
             return TGStatus.createError("failed to register user (confirmation mail error)", null).toJson().toString();

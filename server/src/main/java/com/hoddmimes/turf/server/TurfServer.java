@@ -42,6 +42,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     static volatile boolean cServerShoulExit = false;
     static ExecServerTasksThread cServerTaskThread = null;
 
+    private String mServerCfgFilename = null;
     private ServerConfiguration mServerCfg = null;
     private ZoneNotifierService mZoneNotifierService = null;
     private ZoneDictionary mZoneDictory = null;
@@ -122,7 +123,11 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
                 Thread.sleep( mServerCfg.getApiZoneCollectIntervalMs());
             }
             catch( InterruptedException e) {
-                e.printStackTrace();
+                if (cServerShoulExit) {
+                    mLogger.info("Execution server task (thread) is interrupted and will exit");
+                } else {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -149,19 +154,35 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
     private void parseConfiguration( String args[])
     {
-        if (args.length == 0) {
-            System.out.println("server configuration file is not provided, program will exit");
+        int i = 0;
+
+        while( i < args.length ) {
+            if (args[i].toUpperCase().startsWith("-CONFIG")) {
+                mServerCfgFilename = args[i+1];
+                i++;
+            }
+            i++;
+        }
+
+
+        if (mServerCfgFilename == null) {
+            System.out.println("server configuration file is not provided, i.e. \"-configuration <turf-server-configuration-file>\"");
             System.exit(0);
         }
 
-        File tFile = new File(args[0]);
-        if ((!tFile.exists()) || (!tFile.canRead())) {
-                System.out.println("Can not find or read configuration file \"" + args[0] + "\"");
+        File tFile = new File(mServerCfgFilename);
+        if (!tFile.exists()) {
+            System.out.println("Can not find configuration file \"" + mServerCfgFilename + "\"");
+            System.exit(0);
+        }
+
+        if (!tFile.canRead()) {
+                System.out.println("Do not have read access to configuration file \"" + mServerCfgFilename + "\"");
                 System.exit(0);
         }
 
         mServerCfg = new ServerConfiguration();
-        mServerCfg.parseConfiguration( args[0] );
+        mServerCfg.parseConfiguration( mServerCfgFilename );
     }
 
     @Override
@@ -323,7 +344,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         tUser.setLoginCounts( tUser.getLoginCounts().get() + 1);
         mDbAux.updateUser( tUser.getMailAddr().get(), tUser, false);
 
-        return TGStatus.create(true,"Successfull logon", "/turf/turfZoneNotification.html").toJson().toString();
+        return TGStatus.create(true,"Successfull logon", "/turf/zn.html").toJson().toString();
     }
 
     private String execute( MessageInterface pRqstMsg ) {

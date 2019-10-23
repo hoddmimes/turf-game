@@ -39,7 +39,7 @@ public class AuthorizationFilter implements Filter
              * No authorized session context is  found
              * Reject further processing by sending a response and cut the filter chain
              */
-            TG_Response jTgStatus = TGStatus.create( false, "Authorization failure, not logged in", "/turf/logon.html");
+            TG_Response jTgStatus = TGStatus.create( false, "Authorization failure, not logged in", "/turf/znLogon.html");
             try {
                 ServletResources.sendResponse( jTgStatus.toJson(), response );
             }

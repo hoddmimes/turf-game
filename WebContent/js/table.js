@@ -8,6 +8,46 @@
     }
 */
 
+function dblfmt( value, format) {
+    var arr = format.split(":");
+    var decimals = parseInt(arr[1],10);
+    return Number( value ).toFixed( decimals );
+}
+
+function formatTime( deltatime ) {
+    hh = Math.floor(deltatime / 3600);
+    mm = Math.floor((deltatime - (hh * 3600)) / 60);
+    sec = deltatime - (hh * 3600) - (mm * 60);
+    if (hh == 0) {
+        return ("00" + mm).slice(-2) + ":" + ("00" + sec).slice(-2);
+    } else {
+        return ("00" + hh).slice(-2)  + ":" + ("00" + mm).slice(-2) + ":" + ("00" + sec).slice(-2);
+    }
+}
+
+
+function isDeltaTime( format ) {
+    return format.startsWith("deltatime");
+}
+
+function isDouble( format ) {
+    return format.startsWith("double");
+}
+
+function formatValue( value, format )
+{
+   if (isDeltaTime( format )) {
+     return formatTime( value );
+   }
+
+   if (isDouble( format )) {
+    return dblfmt( value, format );
+   }
+
+   return value;
+}
+
+
 
 function tableClear( pTable, pTabDef ) {
    var tSize = pTable.rows.length;
@@ -91,7 +131,7 @@ function tableInsert( pTable, pTabDef, jObject )
       }
     }
 
-    if (pTabDef.onClick != 0)
+    if (pTabDef.onClick != null)
     {
       var fn = window[pTabDef.onClick];
       tRow.onmouseup = function() {fn.apply(null, [tRow]);}
@@ -101,7 +141,7 @@ function tableInsert( pTable, pTabDef, jObject )
        var k = tKeys[i];
        var v = jObject[k.jkey];
        if (v != null) {
-         tRow.cells[ k.column ].innerHTML = v;
+         tRow.cells[ k.column ].innerHTML = formatValue( v, k.type );
        }
        if (k.onClick != null) {
           var fn = window[k.onClick];

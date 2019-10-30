@@ -2,6 +2,8 @@
             package com.hoddmimes.turf.common.generated;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.jsontransform.JsonDecoder;
 import com.hoddmimes.jsontransform.JsonEncoder;
+import com.hoddmimes.jsontransform.ListFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,10 +43,9 @@ import com.google.gson.GsonBuilder;
                 return this;
               }
 
-            int tSize = pSubscriptions.size();
 
             if ( mSubscriptions == null)
-            mSubscriptions = new ArrayList<>( tSize + 1 );
+            mSubscriptions = ListFactory.getList("[]");
 
 
             mSubscriptions .addAll( pSubscriptions );
@@ -54,7 +56,7 @@ import com.google.gson.GsonBuilder;
             public ZN_LoadZoneSubscriptionsRsp addSubscriptions( List<ZN_SubscriptionData> pSubscriptions ) {
 
             if ( mSubscriptions == null)
-            mSubscriptions = new ArrayList<>();
+            mSubscriptions = ListFactory.getList("[]");
 
             mSubscriptions .addAll( pSubscriptions );
             return this;
@@ -67,7 +69,7 @@ import com.google.gson.GsonBuilder;
             }
 
             if ( mSubscriptions == null) {
-            mSubscriptions = new ArrayList<>();
+            mSubscriptions = ListFactory.getList("[]");
             }
 
             mSubscriptions.add( pSubscriptions );
@@ -81,7 +83,7 @@ import com.google.gson.GsonBuilder;
                 return  Optional.ofNullable(null);
             }
 
-            List<ZN_SubscriptionData> tList = new ArrayList<>( mSubscriptions.size() );
+            List<ZN_SubscriptionData> tList = ListFactory.getList("[]");
             tList.addAll( mSubscriptions );
             return  Optional.ofNullable(tList);
             }
@@ -105,7 +107,7 @@ import com.google.gson.GsonBuilder;
         
             JsonEncoder tEncoder = new JsonEncoder();
             pEncoder.add("ZN_LoadZoneSubscriptionsRsp", tEncoder.toJson() );
-            //Encode Attribute: mSubscriptions Type: ZN_SubscriptionData Array: true
+            //Encode Attribute: mSubscriptions Type: ZN_SubscriptionData List: true
             tEncoder.addMessageArray("subscriptions", mSubscriptions );
         
         }
@@ -116,8 +118,8 @@ import com.google.gson.GsonBuilder;
         
             JsonDecoder tDecoder = pDecoder.get("ZN_LoadZoneSubscriptionsRsp");
         
-            //Decode Attribute: mSubscriptions Type:ZN_SubscriptionData Array: true
-            mSubscriptions = (List<ZN_SubscriptionData>) tDecoder.readMessageArray( "subscriptions", ZN_SubscriptionData.class );
+            //Decode Attribute: mSubscriptions Type:ZN_SubscriptionData List: true
+            mSubscriptions = (List<ZN_SubscriptionData>) tDecoder.readMessageArray( "subscriptions", "[]", ZN_SubscriptionData.class );
         
 
         }

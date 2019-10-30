@@ -2,6 +2,8 @@
             package com.hoddmimes.turf.common.generated;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.jsontransform.JsonDecoder;
 import com.hoddmimes.jsontransform.JsonEncoder;
+import com.hoddmimes.jsontransform.ListFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -60,7 +63,7 @@ import com.google.gson.GsonBuilder;
         
             JsonEncoder tEncoder = new JsonEncoder();
             pEncoder.add("ZN_LoadZoneSubscriptionsRqst", tEncoder.toJson() );
-            //Encode Attribute: mMailAddress Type: String Array: false
+            //Encode Attribute: mMailAddress Type: String List: false
             tEncoder.add( "mailAddress", mMailAddress );
         
         }
@@ -71,7 +74,7 @@ import com.google.gson.GsonBuilder;
         
             JsonDecoder tDecoder = pDecoder.get("ZN_LoadZoneSubscriptionsRqst");
         
-            //Decode Attribute: mMailAddress Type:String Array: false
+            //Decode Attribute: mMailAddress Type:String List: false
             mMailAddress = tDecoder.readString("mailAddress");
         
 

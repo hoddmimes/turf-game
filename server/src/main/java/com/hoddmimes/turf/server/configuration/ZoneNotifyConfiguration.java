@@ -14,7 +14,7 @@ public class ZoneNotifyConfiguration
 
 
         public void parse( Element pRootElement) {
-            Element tZNElement = XmlAux.getElement( pRootElement, "ZoneNotify");
+            Element tZNElement = XmlAux.getElement( pRootElement, "ZoneNotifyService");
 
             Element tMailElement = XmlAux.getElement( tZNElement, "Mailer");
             mMailUser = XmlAux.getStringAttribute(tMailElement,"user", null);

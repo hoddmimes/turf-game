@@ -11,8 +11,9 @@ public class Zone
     private double  mLat;
     private double  mLong;
     private String  mRegionName;
-    private int  mRegionsId;
+    private int     mRegionsId;
     private String  mRegionCountry;
+    private boolean mHasRegion;
 
     public Zone( JsonObject pZone ) {
        mId = pZone.get("id").getAsInt();
@@ -22,10 +23,23 @@ public class Zone
        mLat = pZone.get("latitude").getAsDouble();
        mLong = pZone.get("longitude").getAsDouble();
 
-       JsonObject jRegion = pZone.get("region").getAsJsonObject();
-       mRegionName = jRegion.get("name").getAsString();
-       mRegionsId = jRegion.get("id").getAsInt();
-       mRegionCountry = (jRegion.get("country") != null) ? jRegion.get("country").getAsString() : "";
+       if (pZone.get("region") != null ) {
+           JsonObject jRegion = pZone.get("region").getAsJsonObject();
+           if ((jRegion.get("id") == null) || (jRegion.get("name") == null)) {
+               mHasRegion = false;
+           } else {
+               mHasRegion = true;
+               mRegionName = jRegion.get("name").getAsString();
+               mRegionsId = jRegion.get("id").getAsInt();
+               mRegionCountry = (jRegion.get("country") != null) ? jRegion.get("country").getAsString() : null;
+           }
+       } else {
+           mHasRegion = false;
+       }
+    }
+
+    public boolean hasRegion() {
+        return mHasRegion;
     }
 
     public String getRegionName() { return mRegionName; }

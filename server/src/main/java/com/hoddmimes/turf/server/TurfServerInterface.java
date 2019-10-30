@@ -14,18 +14,11 @@ public interface TurfServerInterface
 {
     public Zone getZoneById(int pId );
     public Zone getZoneByName( String pName );
-    public Map<String, List<Zone>> getZonesByRegions();
+    public Map<Integer, List<Zone>> getZonesByRegionIds();
+    public Map<String, List<Zone>> getZonesByRegionNames();
 
     public ServerConfiguration getServerConfiguration();
     public MongoAux getDbAux();
-
-
-    public void log( String pMessage );
-    public void logEx( String pMsg, Throwable e);
-    public void logW( String pMsg );
-    public void logE( String pMsg );
-    public void logF( String pMsg, Throwable e);
-    public Logger getLogger();
 
 
 }

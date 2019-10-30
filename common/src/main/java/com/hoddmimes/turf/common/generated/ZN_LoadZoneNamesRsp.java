@@ -2,6 +2,8 @@
             package com.hoddmimes.turf.common.generated;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.jsontransform.JsonDecoder;
 import com.hoddmimes.jsontransform.JsonEncoder;
+import com.hoddmimes.jsontransform.ListFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,7 +42,7 @@ import com.google.gson.GsonBuilder;
             if ( pRegionNames == null) {
             mRegionNames = null;
             } else {
-            mRegionNames = new ArrayList<>( pRegionNames.size() );
+            mRegionNames = ListFactory.getList("[]");
             mRegionNames.addAll( pRegionNames );
             }
             return this;
@@ -56,10 +59,9 @@ import com.google.gson.GsonBuilder;
                 return this;
               }
 
-            int tSize = pRegions.size();
 
             if ( mRegions == null)
-            mRegions = new ArrayList<>( tSize + 1 );
+            mRegions = ListFactory.getList("[]");
 
 
             mRegions .addAll( pRegions );
@@ -70,7 +72,7 @@ import com.google.gson.GsonBuilder;
             public ZN_LoadZoneNamesRsp addRegions( List<ZN_ZoneNames> pRegions ) {
 
             if ( mRegions == null)
-            mRegions = new ArrayList<>();
+            mRegions = ListFactory.getList("[]");
 
             mRegions .addAll( pRegions );
             return this;
@@ -83,7 +85,7 @@ import com.google.gson.GsonBuilder;
             }
 
             if ( mRegions == null) {
-            mRegions = new ArrayList<>();
+            mRegions = ListFactory.getList("[]");
             }
 
             mRegions.add( pRegions );
@@ -97,7 +99,7 @@ import com.google.gson.GsonBuilder;
                 return  Optional.ofNullable(null);
             }
 
-            List<ZN_ZoneNames> tList = new ArrayList<>( mRegions.size() );
+            List<ZN_ZoneNames> tList = ListFactory.getList("[]");
             tList.addAll( mRegions );
             return  Optional.ofNullable(tList);
             }
@@ -121,10 +123,10 @@ import com.google.gson.GsonBuilder;
         
             JsonEncoder tEncoder = new JsonEncoder();
             pEncoder.add("ZN_LoadZoneNamesRsp", tEncoder.toJson() );
-            //Encode Attribute: mRegionNames Type: String Array: true
+            //Encode Attribute: mRegionNames Type: String List: true
             tEncoder.addStringArray("regionNames", mRegionNames );
         
-            //Encode Attribute: mRegions Type: ZN_ZoneNames Array: true
+            //Encode Attribute: mRegions Type: ZN_ZoneNames List: true
             tEncoder.addMessageArray("regions", mRegions );
         
         }
@@ -135,11 +137,11 @@ import com.google.gson.GsonBuilder;
         
             JsonDecoder tDecoder = pDecoder.get("ZN_LoadZoneNamesRsp");
         
-            //Decode Attribute: mRegionNames Type:String Array: true
-            mRegionNames = tDecoder.readStringArray("regionNames");
+            //Decode Attribute: mRegionNames Type:String List: true
+            mRegionNames = tDecoder.readStringArray("regionNames", "[]");
         
-            //Decode Attribute: mRegions Type:ZN_ZoneNames Array: true
-            mRegions = (List<ZN_ZoneNames>) tDecoder.readMessageArray( "regions", ZN_ZoneNames.class );
+            //Decode Attribute: mRegions Type:ZN_ZoneNames List: true
+            mRegions = (List<ZN_ZoneNames>) tDecoder.readMessageArray( "regions", "[]", ZN_ZoneNames.class );
         
 
         }

@@ -51,6 +51,47 @@ button {
 	width:430px;
 }
 
+#divRegionStat {
+    table-layout:fixed;
+	margin-top:30px;
+	width:930px;
+	min-height:500px;
+	overflow-y: auto;    /* Trigger vertical scroll    */
+    overflow-x: hidden;  /* Hide the horizontal scroll */
+}
+
+
+.tableRegionStat {
+	background:#ffffff;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:14px;
+	color:navy;
+	margin-left:auto;
+    margin-right:auto;
+	border-collapse: separate;
+}
+
+#divRegionHourStat {
+    table-layout:fixed;
+	margin-top:30px;
+	width:930px;
+	min-height:500px;
+	overflow-y: auto;    /* Trigger vertical scroll    */
+    overflow-x: hidden;  /* Hide the horizontal scroll */
+}
+
+
+.tableRegionHourStat {
+	background:#ffffff;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:14px;
+	color:navy;
+	margin-left:auto;
+    margin-right:auto;
+	border-collapse: separate;
+}
+
+
 #divZoneTable {
     table-layout:fixed;
 	margin-top:30px;
@@ -70,6 +111,14 @@ button {
 }
 
 .tdZone {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.tdRegion {
+    text-align: right
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 2px;

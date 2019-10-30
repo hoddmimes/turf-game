@@ -1,6 +1,7 @@
 package com.hoddmimes.turf.server.mgmt;
 
 import com.hoddmimes.turf.server.configuration.PasswordRules;
+import com.hoddmimes.turf.server.generated.FirstEntry;
 import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.User;
 
@@ -32,8 +33,17 @@ public class CreateDatabase extends Database
 
         tDbAux.createDatabase();
 
+        // Create boot strap mark
+        SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        long tNow = System.currentTimeMillis();
+        FirstEntry tFirst = new FirstEntry();
+        tFirst.setTimestamp(tNow);
+        tFirst.setTime(SDF.format( tNow ));
+        tDbAux.connectToDatabase();
+        tDbAux.insertFirstEntry( tFirst );
+
+
         if (mCreateTestUser) {
-            tDbAux.connectToDatabase();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             User tUser = new User();
             tUser.setPassword(new PasswordRules().hashPassword("test"));

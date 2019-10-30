@@ -2,6 +2,8 @@
             package com.hoddmimes.turf.common.generated;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.jsontransform.JsonDecoder;
 import com.hoddmimes.jsontransform.JsonEncoder;
+import com.hoddmimes.jsontransform.ListFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -95,19 +98,19 @@ import com.google.gson.GsonBuilder;
 
         
             JsonEncoder tEncoder = pEncoder;
-            //Encode Attribute: mZoneName Type: String Array: false
+            //Encode Attribute: mZoneName Type: String List: false
             tEncoder.add( "zoneName", mZoneName );
         
-            //Encode Attribute: mSubscrTime Type: String Array: false
+            //Encode Attribute: mSubscrTime Type: String List: false
             tEncoder.add( "subscrTime", mSubscrTime );
         
-            //Encode Attribute: mNotificationTime Type: String Array: false
+            //Encode Attribute: mNotificationTime Type: String List: false
             tEncoder.add( "notificationTime", mNotificationTime );
         
-            //Encode Attribute: mNotifications Type: int Array: false
+            //Encode Attribute: mNotifications Type: int List: false
             tEncoder.add( "notifications", mNotifications );
         
-            //Encode Attribute: mSubscrId Type: String Array: false
+            //Encode Attribute: mSubscrId Type: String List: false
             tEncoder.add( "subscrId", mSubscrId );
         
         }
@@ -118,19 +121,19 @@ import com.google.gson.GsonBuilder;
         
             JsonDecoder tDecoder = pDecoder;
         
-            //Decode Attribute: mZoneName Type:String Array: false
+            //Decode Attribute: mZoneName Type:String List: false
             mZoneName = tDecoder.readString("zoneName");
         
-            //Decode Attribute: mSubscrTime Type:String Array: false
+            //Decode Attribute: mSubscrTime Type:String List: false
             mSubscrTime = tDecoder.readString("subscrTime");
         
-            //Decode Attribute: mNotificationTime Type:String Array: false
+            //Decode Attribute: mNotificationTime Type:String List: false
             mNotificationTime = tDecoder.readString("notificationTime");
         
-            //Decode Attribute: mNotifications Type:int Array: false
+            //Decode Attribute: mNotifications Type:int List: false
             mNotifications = tDecoder.readInteger("notifications");
         
-            //Decode Attribute: mSubscrId Type:String Array: false
+            //Decode Attribute: mSubscrId Type:String List: false
             mSubscrId = tDecoder.readString("subscrId");
         
 

@@ -2,6 +2,8 @@
             package com.hoddmimes.turf.server.generated;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.jsontransform.JsonDecoder;
 import com.hoddmimes.jsontransform.JsonEncoder;
+import com.hoddmimes.jsontransform.ListFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -123,22 +126,22 @@ import com.google.gson.GsonBuilder;
         
             JsonEncoder tEncoder = new JsonEncoder();
             pEncoder.add("Subscription", tEncoder.toJson() );
-            //Encode Attribute: mMailAddr Type: String Array: false
+            //Encode Attribute: mMailAddr Type: String List: false
             tEncoder.add( "mailAddr", mMailAddr );
         
-            //Encode Attribute: mZoneName Type: String Array: false
+            //Encode Attribute: mZoneName Type: String List: false
             tEncoder.add( "zoneName", mZoneName );
         
-            //Encode Attribute: mZoneId Type: int Array: false
+            //Encode Attribute: mZoneId Type: int List: false
             tEncoder.add( "zoneId", mZoneId );
         
-            //Encode Attribute: mCreateTime Type: String Array: false
+            //Encode Attribute: mCreateTime Type: String List: false
             tEncoder.add( "createTime", mCreateTime );
         
-            //Encode Attribute: mNotificationTime Type: String Array: false
+            //Encode Attribute: mNotificationTime Type: String List: false
             tEncoder.add( "notificationTime", mNotificationTime );
         
-            //Encode Attribute: mNotifications Type: int Array: false
+            //Encode Attribute: mNotifications Type: int List: false
             tEncoder.add( "notifications", mNotifications );
         
         }
@@ -149,22 +152,22 @@ import com.google.gson.GsonBuilder;
         
             JsonDecoder tDecoder = pDecoder.get("Subscription");
         
-            //Decode Attribute: mMailAddr Type:String Array: false
+            //Decode Attribute: mMailAddr Type:String List: false
             mMailAddr = tDecoder.readString("mailAddr");
         
-            //Decode Attribute: mZoneName Type:String Array: false
+            //Decode Attribute: mZoneName Type:String List: false
             mZoneName = tDecoder.readString("zoneName");
         
-            //Decode Attribute: mZoneId Type:int Array: false
+            //Decode Attribute: mZoneId Type:int List: false
             mZoneId = tDecoder.readInteger("zoneId");
         
-            //Decode Attribute: mCreateTime Type:String Array: false
+            //Decode Attribute: mCreateTime Type:String List: false
             mCreateTime = tDecoder.readString("createTime");
         
-            //Decode Attribute: mNotificationTime Type:String Array: false
+            //Decode Attribute: mNotificationTime Type:String List: false
             mNotificationTime = tDecoder.readString("notificationTime");
         
-            //Decode Attribute: mNotifications Type:int Array: false
+            //Decode Attribute: mNotifications Type:int List: false
             mNotifications = tDecoder.readInteger("notifications");
         
 

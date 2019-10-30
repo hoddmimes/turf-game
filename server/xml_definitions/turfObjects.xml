@@ -1,7 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Messages mongoSupport="true">
+    <!--
+    Region Statistics Objects
+    prefix RS
+    -->
+    <Message name="HourRegionStat" rootMessage="true" db="true" dbCollection="HourRegionStat">
+        <Attribute name="id" type="int" dbKey="notunique"/>
+        <Attribute name="createTime" type="long" dbKey="notunique"/>
+        <Attribute name="totTime" type = "long"/>
+        <Attribute name="totTakes" type = "long"/>
+        <Attribute name="totTP" type = "long"/>
+        <Attribute name="totDistance" type = "long"/>
+        <Attribute name="totOutsideZones" type = "long"/>
+        <Attribute name="totPPHTime" type = "long"/>
+        <Attribute name="totPPHTimePoints" type = "double"/>
+        <Attribute name="totPPH" type = "long"/>
+        <Attribute name="totPPHChanges" type = "long"/>
+    </Message>
 
+    <Message name="RegionStat" rootMessage="true" db="true" dbCollection="Region">
+        <Attribute name="id" type="int" dbKey="unique"/>
+        <Attribute name="Name" type = "String"/>
+        <Attribute name="totTime" type = "long"/>
+        <Attribute name="totTakes" type = "long"/>
+        <Attribute name="totTP" type = "long"/>
+        <Attribute name="totDistance" type = "long"/>
+        <Attribute name="totOutsideZones" type = "long"/>
+        <Attribute name="tracked" type = "boolean"/>
+        <Attribute name="isInDB" type = "boolean"/>
+        <Attribute name="changed" type = "boolean"/>
+        <Attribute name="totPPHTime" type = "long"/>
+        <Attribute name="totPPHTimePoints" type = "double"/>
+        <Attribute name="totPPH" type = "long"/>
+        <Attribute name="totPPHChanges" type = "long"/>
+        <Attribute name="hoursStat" type="HourRegionStat" list="linked" dbTransient="true"/>
+    </Message>
+
+    <!--
+        Zone Taken Notification Objects
+        prefix ZN
+     -->
     <Message name="User" rootMessage="true" db="true" dbCollection="User">
         <Attribute name="mailAddr" type="String" dbKey="unique"/>
         <Attribute name="password" type="String"/>
@@ -20,5 +59,9 @@
         <Attribute name="notifications" type="int"/>
     </Message>
 
+    <Message name="FirstEntry" rootMessage="true" db="true" dbCollection="FirstEntry">
+        <Attribute name="time" type="String"/>
+        <Attribute name="timestamp" type="long" dbKey="unique"/>
+    </Message>
 
 </Messages>

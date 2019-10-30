@@ -2,6 +2,8 @@
             package com.hoddmimes.turf.common.generated;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.jsontransform.JsonDecoder;
 import com.hoddmimes.jsontransform.JsonEncoder;
+import com.hoddmimes.jsontransform.ListFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -47,7 +50,7 @@ import com.google.gson.GsonBuilder;
             if ( pNames == null) {
             mNames = null;
             } else {
-            mNames = new ArrayList<>( pNames.size() );
+            mNames = ListFactory.getList("[]");
             mNames.addAll( pNames );
             }
             return this;
@@ -76,10 +79,10 @@ import com.google.gson.GsonBuilder;
         
             JsonEncoder tEncoder = new JsonEncoder();
             pEncoder.add("ZN_ZoneNames", tEncoder.toJson() );
-            //Encode Attribute: mRegion Type: String Array: false
+            //Encode Attribute: mRegion Type: String List: false
             tEncoder.add( "region", mRegion );
         
-            //Encode Attribute: mNames Type: String Array: true
+            //Encode Attribute: mNames Type: String List: true
             tEncoder.addStringArray("names", mNames );
         
         }
@@ -90,11 +93,11 @@ import com.google.gson.GsonBuilder;
         
             JsonDecoder tDecoder = pDecoder.get("ZN_ZoneNames");
         
-            //Decode Attribute: mRegion Type:String Array: false
+            //Decode Attribute: mRegion Type:String List: false
             mRegion = tDecoder.readString("region");
         
-            //Decode Attribute: mNames Type:String Array: true
-            mNames = tDecoder.readStringArray("names");
+            //Decode Attribute: mNames Type:String List: true
+            mNames = tDecoder.readStringArray("names", "[]");
         
 
         }

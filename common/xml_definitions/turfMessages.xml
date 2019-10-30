@@ -50,12 +50,12 @@
 
     <Message name="ZN_ZoneNames"  rootMessage="true">
         <Attribute name="region" type="String"/>
-        <Attribute name="names" type="String" array="[]"/>
+        <Attribute name="names" type="String" list="[]"/>
     </Message>
 
     <Message name="ZN_LoadZoneNamesRsp"  rootMessage="true">
-        <Attribute name="regionNames" type="String" array="[]"/>
-        <Attribute name="regions" type="ZN_ZoneNames" array="[]"/>
+        <Attribute name="regionNames" type="String" list="[]"/>
+        <Attribute name="regions" type="ZN_ZoneNames" list="[]"/>
     </Message>
 
 
@@ -72,7 +72,7 @@
     </Message>
 
     <Message name="ZN_LoadZoneSubscriptionsRsp"  rootMessage="true">
-        <Attribute name="subscriptions" type="ZN_SubscriptionData" array="[]"/>
+        <Attribute name="subscriptions" type="ZN_SubscriptionData" list="[]"/>
     </Message>
 
     <Message name="ZN_RemoveZoneSubscriptionRqst" rootMessage="true">
@@ -83,4 +83,35 @@
         <Attribute name="zone" type="String"/>
         <Attribute name="mailAddress" type="String"/>
     </Message>
+
+    <!--
+       Region Statistics Messages
+     -->
+
+    <Message name="RS_RegionStatisticsRqst"  rootMessage="true">
+        <Attribute name="isTotalRequest" type="boolean"/>
+    </Message>
+
+    <Message name="RegionStatistics">
+        <Attribute name="regionId" type="int"/>
+        <Attribute name="region" type="String"/>
+        <Attribute name="totTakes" type="long"/>
+        <Attribute name="totOutsideTakes" type="long"/>
+        <Attribute name="avgDistance" type="long"/>
+        <Attribute name="avgTime" type="long"/>
+        <Attribute name="avgTP" type="long"/>
+        <Attribute name="avgPPH" type="double"/>
+        <Attribute name="avgPPHHoldTime" type="long"/>
+        <Attribute name="avgAggregatedPPH" type="long"/>
+        <Attribute name="tpFactor" type="double"/>
+        <Attribute name="pphFactor" type="double"/>
+        <Attribute name="regionFactor" type="double"/>
+    </Message>
+
+    <Message name="RS_RegionStatisticsRsp"  rootMessage="true">
+        <Attribute name="regionStats" type="RegionStatistics" list="array"/>
+        <Attribute name="totalSamples" type="long"/>
+        <Attribute name="periodHH" type="long"/>
+    </Message>
+
 </Messages>

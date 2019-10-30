@@ -18,6 +18,8 @@ public class ServerConfiguration
 
 
     private ZoneNotifyConfiguration mZoneNotifyCfg = null;
+    private RegionStatConfiguration mRegionStatCfg = null;
+    private UserTraceConfiguration  mUserTraceCfg = null;
 
 
 
@@ -29,9 +31,19 @@ public class ServerConfiguration
 
             mBaseURL = mRoot.getAttribute("baseURL").toString();
 
-            if (XmlAux.isElementPresent(mRoot, "ZoneNotify")) {
+            if (XmlAux.isElementPresent(mRoot, "ZoneNotifyService")) {
                 mZoneNotifyCfg = new ZoneNotifyConfiguration();
                 mZoneNotifyCfg.parse(mRoot);
+            }
+
+            if (XmlAux.isElementPresent(mRoot, "RegionStatisticsService")) {
+                mRegionStatCfg = new RegionStatConfiguration();
+                mRegionStatCfg.parse(mRoot);
+            }
+
+            if (XmlAux.isElementPresent(mRoot, "UserTraceService")) {
+                mUserTraceCfg = new UserTraceConfiguration();
+                mUserTraceCfg.parse(mRoot);
             }
 
 
@@ -100,9 +112,17 @@ public class ServerConfiguration
     public boolean startZoneNotify() {
         return (mZoneNotifyCfg == null) ? false : true;
     }
+    public boolean startRegionStat() { return (mRegionStatCfg == null) ? false : true; }
+    public boolean startUserTrace() {
+        return (mUserTraceCfg == null) ? false : true;
+    }
 
     public ZoneNotifyConfiguration getZoneNotifyConfiguration() {
         return mZoneNotifyCfg;
     }
+    public RegionStatConfiguration getRegionStatConfiguration() {
+        return mRegionStatCfg;
+    }
+    public UserTraceConfiguration getUserTraceConfiguration() { return mUserTraceCfg; }
 
 }

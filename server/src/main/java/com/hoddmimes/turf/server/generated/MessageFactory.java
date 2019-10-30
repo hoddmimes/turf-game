@@ -34,6 +34,20 @@ public class MessageFactory implements MessageFactoryInterface
 		switch( tMessageId ) 
 		{
 
+            case "HourRegionStat":
+            {
+            	HourRegionStat tMessage = new HourRegionStat();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "RegionStat":
+            {
+            	RegionStat tMessage = new RegionStat();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
             case "User":
             {
             	User tMessage = new User();
@@ -44,6 +58,13 @@ public class MessageFactory implements MessageFactoryInterface
             case "Subscription":
             {
             	Subscription tMessage = new Subscription();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "FirstEntry":
+            {
+            	FirstEntry tMessage = new FirstEntry();
             	tMessage.decode( new JsonDecoder(pJsonMessageString));
             	return tMessage;
             }

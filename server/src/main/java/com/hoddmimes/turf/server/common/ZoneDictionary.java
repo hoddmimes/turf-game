@@ -10,16 +10,18 @@ import java.util.Map;
 
 public class ZoneDictionary extends Thread
 {
-    Map<Integer,Zone> mZoneIdMap;
-    Map<String,Zone> mZoneNameMap;
-    Map<String, List<Zone>> mRegionMap;
+    Map<Integer,Zone>           mZoneIdMap;
+    Map<String,Zone>            mZoneNameMap;
+    Map<Integer, List<Zone>>    mRegionIdMap;
+    Map<String, List<Zone>>     mRegionNameMap;
 
 
     public ZoneDictionary()
     {
         mZoneIdMap = new HashMap<>(65000);
         mZoneNameMap = new HashMap<>(65000);
-        mRegionMap = new HashMap<>(200);
+        mRegionIdMap = new HashMap<>(200);
+        mRegionNameMap = new HashMap<>(200);
         sync();
         this.start();
     }
@@ -29,8 +31,11 @@ public class ZoneDictionary extends Thread
     }
 
 
-    public synchronized Map<String,List<Zone>> getZonesByRegions() {
-        return mRegionMap;
+    public synchronized Map<Integer,List<Zone>> getZonesByRegionsId() {
+        return mRegionIdMap;
+    }
+    public synchronized Map<String,List<Zone>> getZonesByRegionsNames() {
+        return mRegionNameMap;
     }
 
 
@@ -43,10 +48,11 @@ public class ZoneDictionary extends Thread
         return mZoneIdMap.get( pId );
     }
 
-    private synchronized void sync() {
+    private synchronized int sync() {
         mZoneIdMap.clear();
         mZoneNameMap.clear();
-        mRegionMap.clear();
+        mRegionIdMap.clear();
+        mRegionNameMap.clear();
 
         JsonArray tZoneArray = Turf.turfServerGET("zones/all").getAsJsonArray();
         for( int i = 0; i < tZoneArray.size(); i++) {
@@ -54,18 +60,33 @@ public class ZoneDictionary extends Thread
             mZoneNameMap.put( z.getName(), z);
             mZoneIdMap.put( z.getId(), z );
 
-            List<Zone> tRegionZoneList = mRegionMap.get( z.getRegionName());
-            if (tRegionZoneList == null) {
-                tRegionZoneList = new ArrayList<>();
-                mRegionMap.put(z.getRegionName(), tRegionZoneList);
+            if (z.hasRegion()) {
+                {
+                    List<Zone> tRegionIdZoneList = mRegionIdMap.get(z.getRegionid());
+                    if (tRegionIdZoneList == null) {
+                        tRegionIdZoneList = new ArrayList<>();
+                        mRegionIdMap.put(z.getRegionid(), tRegionIdZoneList);
+                    }
+                    tRegionIdZoneList.add(z);
+                }
+                {
+                    List<Zone> tRegionNameZoneList = mRegionIdMap.get(z.getRegionName());
+                    if (tRegionNameZoneList == null) {
+                        tRegionNameZoneList = new ArrayList<>();
+                        mRegionNameMap.put(z.getRegionName(), tRegionNameZoneList);
+                    }
+                    tRegionNameZoneList.add(z);
+                }
+            } else {
+                System.out.println(" zone: " + z.getName() + " id: " + z.getId() + " has no region");
             }
-            tRegionZoneList.add( z );
         }
+        return mZoneIdMap.size();
     }
 
     public static void main( String args[]) {
         ZoneDictionary zd = new ZoneDictionary();
-        zd.sync();
+        System.out.println("Loaded:  " + zd.sync() + " zones");
     }
 
     public void run() {

@@ -20,6 +20,9 @@ import com.hoddmimes.turf.server.configuration.ServerConfiguration;
 
 import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.User;
+import com.hoddmimes.turf.server.services.notifier.ZoneNotifierService;
+import com.hoddmimes.turf.server.services.regionstat.RegionStatService;
+import com.hoddmimes.turf.server.services.usertrace.UserTraceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.tanukisoftware.wrapper.WrapperListener;
@@ -44,8 +47,12 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
     private String mServerCfgFilename = null;
     private ServerConfiguration mServerCfg = null;
-    private ZoneNotifierService mZoneNotifierService = null;
     private ZoneDictionary mZoneDictory = null;
+
+    private ZoneNotifierService mZoneNotifierService = null;
+    private RegionStatService mRegionStatService = null;
+    private UserTraceService mUserTraceService = null;
+
 
     private TcpServer mTcpIpServer;
     private MongoAux mDbAux;
@@ -117,8 +124,17 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
             mLogger.debug("[zonesUpdated] zones " + countZones(tZoneUpdateRsp) + " retreived");
 
             if (mZoneNotifierService != null) {
-                mZoneNotifierService.zonesUpdated( tZoneUpdateRsp );
+                mZoneNotifierService.processZoneUpdates( tZoneUpdateRsp );
             }
+
+            if (mRegionStatService != null) {
+                mRegionStatService.processZoneUpdates( tZoneUpdateRsp );
+            }
+
+            if (mUserTraceService != null) {
+                mUserTraceService.processZoneUpdates( tZoneUpdateRsp );
+            }
+
             try {
                 Thread.sleep( mServerCfg.getApiZoneCollectIntervalMs());
             }
@@ -149,6 +165,16 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         if (mServerCfg.startZoneNotify()) {
             mZoneNotifierService = new ZoneNotifierService();
             mZoneNotifierService.initialize( this );
+        }
+
+        if (mServerCfg.startRegionStat()) {
+            mRegionStatService = new RegionStatService();
+            mRegionStatService.initialize( this );
+        }
+
+        if (mServerCfg.startUserTrace()) {
+            mUserTraceService = new UserTraceService();
+            mUserTraceService.initialize( this );
         }
     }
 
@@ -187,30 +213,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
     @Override
     public MongoAux getDbAux() { return mDbAux; }
-    @Override
-    public void log( String pMsg ) {
-        mLogger.info( pMsg );
-    }
-    @Override
-    public void logEx( String pMsg, Throwable e) {
-        mLogger.error( pMsg, e);
-    }
-    @Override
-    public void logW( String pMsg ) {
-        mLogger.warn( pMsg );
-    }
-    @Override
-    public void logE( String pMsg ) {
-        mLogger.error( pMsg );
-    }
-    @Override
-    public void logF( String pMsg, Throwable e ) {
-        mLogger.fatal( pMsg, e );
-    }
-    @Override
-    public Logger getLogger() {
-        return mLogger;
-    }
+
 
     @Override
     public Zone getZoneById(int pId) {
@@ -223,10 +226,18 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     }
 
     @Override
-    public Map<String, List<Zone>> getZonesByRegions()
+    public Map<Integer, List<Zone>> getZonesByRegionIds()
     {
-        return this.mZoneDictory.getZonesByRegions();
+        return this.mZoneDictory.getZonesByRegionsId();
     }
+
+    @Override
+    public Map<String, List<Zone>> getZonesByRegionNames()
+    {
+        return this.mZoneDictory.getZonesByRegionsNames();
+    }
+
+
 
     @Override
     public ServerConfiguration getServerConfiguration() {
@@ -290,6 +301,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
             return this.mZoneNotifierService.execute( tRqstMsg );
         }
 
+        if (tRqstMsg.getMessageName().startsWith("RS_")) {
+            return this.mRegionStatService.execute( tRqstMsg );
+        }
+
         if (tRqstMsg.getMessageName().startsWith("TG_")) {
             return this.execute( tRqstMsg );
         }
@@ -318,7 +333,6 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
     @Override
     public void tcpErrorEvent(TcpThread pThread, IOException pException) {
-        mLogger.warn("tcp/ip client disconnect " + pThread.toString(), pException);
         pThread.close();
     }
 

@@ -1,0 +1,164 @@
+<html>
+<head>
+   <script
+           src="https://code.jquery.com/jquery-3.3.1.js"
+           integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+           crossorigin="anonymous">
+   </script>
+   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   <script src="js/turf.js" type="text/javascript"></script>
+   <script src="js/table.js" type="text/javascript"></script>
+
+   <title>Turf Zone Notification</title>
+   <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type" />
+   <link rel="stylesheet" type="text/css" href="css/turf.css">
+</head>
+<body onload="loadDataFromServer()"/>
+
+<body>
+   <br>
+   <h4 style="margin-left:50px;text-align:left">Region Statistics</h4>
+      <div id="divRegionStat" class="borderDiv">
+         <br>
+            <table id="tableRegionStat" class="tableRegionStat">
+               <tr>
+                  <th>Region</th>
+                  <th>Takes</th>
+                  <th>Off Takes</th>
+                  <th>Time/Take</th>
+                  <th>Dist/Take</th>
+                  <th>TP/Take</th>
+                  <th>PPH/Take</th>
+                  <th>Avg PPH</th>
+                  <th>AVG PPH Time</th>
+                  <th>TP Factor</th>
+                  <th>PPH Factor</th>
+                  <th>Region Factor</th>
+               </tr>
+            </table>
+      </div>
+   <br>
+
+   <h4 style="margin-left:50px;text-align:left">Region Hour Statistics Statistics</h4>
+   <div id="divRegionHourStat" class="borderDiv">
+      <br>
+      <table id="tableRegionHourStat" class="tableRegionStat">
+         <tr>
+            <th>Region</th>
+            <th>Takes</th>
+            <th>Off Takes</th>
+            <th>Time/Take</th>
+            <th>Dist/Take</th>
+            <th>TP/Take</th>
+            <th>PPH/Take</th>
+            <th>Avg PPH</th>
+            <th>AVG PPH Time</th>
+            <th>TP Factor</th>
+            <th>PPH Factor</th>
+            <th>Region Factor</th>
+         </tr>
+      </table>
+   </div>
+
+
+
+<script>
+     var zoneSubsrData = [];
+     var regions = [];
+     var regionNames = [];
+
+     var zoneNames = []
+
+
+    var zoneTableDef= { 'table' : 'regions',
+                        'keys' : [
+                           {'type' : 'string',    'column' : 0,  'jkey' : 'region',          'cssClass' : 'tdRegion'} ,
+                           {'type' : 'int',       'column' : 1,  'jkey' : 'totTakes',        'cssClass' : 'tdRegion'} ,
+                           {'type' : 'int',       'column' : 2,  'jkey' : 'totOutsideTakes', 'cssClass' : 'tdRegion'} ,
+                           {'type' : 'deltatime', 'column' : 3,  'jkey' : 'avgTime',         'cssClass' : 'tdRegion'},
+                           {'type' : 'int',       'column' : 4,  'jkey' : 'avgDistance',     'cssClass' : 'tdRegion'},
+                           {'type' : 'int',       'column' : 5,  'jkey' : 'avgTP',           'cssClass' : 'tdRegion'},
+                           {'type' : 'double:2',  'column' : 6,  'jkey' : 'avgPPH',          'cssClass' : 'tdRegion'},
+                           {'type' : 'deltatime', 'column' : 7,  'jkey' : 'avgPPHHoldTime',  'cssClass' : 'tdRegion'},
+                           {'type' : 'int',       'column' : 8,  'jkey' : 'avgAggregatedPPH','cssClass' : 'tdRegion'},
+                           {'type' : 'double:2',  'column' : 9,  'jkey' : 'tpFactor',        'cssClass' : 'tdRegion'},
+                           {'type' : 'double:2',  'column' : 10, 'jkey' : 'pphFactor',       'cssClass' : 'tdRegion'},
+                           {'type' : 'double:2',  'column' : 11, 'jkey' : 'regionFactor',    'cssClass' : 'tdRegion'}]};
+
+
+
+
+
+    function loadDataFromServer() {
+      loadRegionStatistics();
+    }
+
+    function loadRegionStatistics()
+ 	{
+      var rqst = {RS_RegionStatisticsRqst : { isTotalRequest : true }};
+
+      //console.log( 'request-data: ' + JSON.stringify(rqst));
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/rsLoadRegionStat', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /* Alerts the results */
+      posting.done(function( msg ) {
+          console.log( msg );
+
+          if (msg.hasOwnProperty('RS_RegionStatisticsRsp')) {
+              for( var i = 0; i < msg.RS_RegionStatisticsRsp.regionStats.length; i++ ) {
+                  tableInsert( document.getElementById('tableRegionStat'), zoneTableDef, msg.RS_RegionStatisticsRsp.regionStats[i] );
+              }
+		  } else if (msg.hasOwnProperty('TG_Response')) {
+              if (!(msg.TG_Response.success)) {
+    	          alert('Load region stat failure, reason: ' + msg.TG_Response.reason);
+	          } else {
+		          alert('Load region stat TG_response, success should never be returned');
+		      }
+		  }
+	  });
+	}
+
+   	function loadZoneSubscription()
+	{
+      var rqst = {ZN_LoadZoneSubscriptionsRqst : {}};
+
+      //console.log( 'request-data: ' + JSON.stringify(rqst));
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/restricted/znLoadZoneSubscriptions', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /* Alerts the results */
+      posting.done(function( msg ) {
+          console.log( msg );
+
+          if (msg.hasOwnProperty('ZN_LoadZoneSubscriptionsRsp')) {
+            zoneData = msg.ZN_LoadZoneSubscriptionsRsp.subscriptions;
+		    tableClear( document.getElementById('zoneTable'), zoneTableDef );
+
+            if (msg.ZN_LoadZoneSubscriptionsRsp.subscriptions != null) {
+		       for( var i = 0; i < msg.ZN_LoadZoneSubscriptionsRsp.subscriptions.length; i++ ) {
+                  tableInsert( document.getElementById('zoneTable'), zoneTableDef, msg.ZN_LoadZoneSubscriptionsRsp.subscriptions[i] );
+               }
+            }
+		  } else if (msg.hasOwnProperty('TG_Response')) {
+              if (!(msg.TG_Response.success)) {
+    	          alert('Load data failure, reason: ' + msg.TG_Response.reason);
+	          } else {
+		          alert('Load data TG_response, success should never be returned');
+		      }
+		  }
+	  });
+	}
+</script>
+</html>

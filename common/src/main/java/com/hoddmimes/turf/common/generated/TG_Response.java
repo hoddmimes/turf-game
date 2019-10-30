@@ -2,6 +2,8 @@
             package com.hoddmimes.turf.common.generated;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.jsontransform.JsonDecoder;
 import com.hoddmimes.jsontransform.JsonEncoder;
+import com.hoddmimes.jsontransform.ListFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -78,13 +81,13 @@ import com.google.gson.GsonBuilder;
         
             JsonEncoder tEncoder = new JsonEncoder();
             pEncoder.add("TG_Response", tEncoder.toJson() );
-            //Encode Attribute: mSuccess Type: boolean Array: false
+            //Encode Attribute: mSuccess Type: boolean List: false
             tEncoder.add( "success", mSuccess );
         
-            //Encode Attribute: mReason Type: String Array: false
+            //Encode Attribute: mReason Type: String List: false
             tEncoder.add( "reason", mReason );
         
-            //Encode Attribute: mOptionPage Type: String Array: false
+            //Encode Attribute: mOptionPage Type: String List: false
             tEncoder.add( "optionPage", mOptionPage );
         
         }
@@ -95,13 +98,13 @@ import com.google.gson.GsonBuilder;
         
             JsonDecoder tDecoder = pDecoder.get("TG_Response");
         
-            //Decode Attribute: mSuccess Type:boolean Array: false
+            //Decode Attribute: mSuccess Type:boolean List: false
             mSuccess = tDecoder.readBoolean("success");
         
-            //Decode Attribute: mReason Type:String Array: false
+            //Decode Attribute: mReason Type:String List: false
             mReason = tDecoder.readString("reason");
         
-            //Decode Attribute: mOptionPage Type:String Array: false
+            //Decode Attribute: mOptionPage Type:String List: false
             mOptionPage = tDecoder.readString("optionPage");
         
 

@@ -18,16 +18,41 @@ public class ZoneEvent
         return jZone.get("name").getAsString();
     }
 
+    public int getTakeoverCount() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        return jZone.get("totalTakeovers").getAsInt();
+    }
+
     public String getCurrentOwner() {
         JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
         JsonObject jCurrentOwner = jZone.get("currentOwner").getAsJsonObject();
         return jCurrentOwner.get("name").getAsString();
     }
 
+    public int getCurrentOwnerId() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        JsonObject jCurrentOwner = jZone.get("currentOwner").getAsJsonObject();
+        return jCurrentOwner.get("id").getAsInt();
+    }
+
     public String getPreviousOwner() {
         JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        if (jZone.get("previousOwner") == null) {
+            return "";
+        }
+
         JsonObject jCurrentOwner = jZone.get("previousOwner").getAsJsonObject();
         return jCurrentOwner.get("name").getAsString();
+    }
+
+    public int getPreviousOwnerId() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        if (jZone.get("previousOwner") == null) {
+            return -1;
+        }
+
+        JsonObject jCurrentOwner = jZone.get("previousOwner").getAsJsonObject();
+        return jCurrentOwner.get("id").getAsInt();
     }
 
     public int getZoneId() {
@@ -35,6 +60,17 @@ public class ZoneEvent
         return jZone.get("id").getAsInt();
     }
 
+    public int getRegionId() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        JsonObject jRegion = jZone.getAsJsonObject("region").getAsJsonObject();
+        return jRegion.get("id").getAsInt();
+    }
+
+    public String getRegionName() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        JsonObject jRegion = jZone.getAsJsonObject("region").getAsJsonObject();
+        return jRegion.get("name").getAsString();
+    }
 
     public long getLatestTakeOverTime() {
         JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
@@ -49,6 +85,24 @@ public class ZoneEvent
             e.printStackTrace();
             return -1;
         }
+    }
+
+    public int getTP() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        return jZone.get("takeoverPoints").getAsInt();
+    }
+
+    public int getPPH() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        return jZone.get("pointsPerHour").getAsInt();
+    }
+
+    public double getLong() {
+        return mZoneEvent.get("longitude").getAsDouble();
+    }
+
+    public double getLat() {
+       return mZoneEvent.get("latitude").getAsDouble();
     }
 
     public static void main( String args[]) {

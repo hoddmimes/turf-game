@@ -2,6 +2,8 @@
             package com.hoddmimes.turf.server.generated;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.jsontransform.JsonDecoder;
 import com.hoddmimes.jsontransform.JsonEncoder;
+import com.hoddmimes.jsontransform.ListFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -123,22 +126,22 @@ import com.google.gson.GsonBuilder;
         
             JsonEncoder tEncoder = new JsonEncoder();
             pEncoder.add("User", tEncoder.toJson() );
-            //Encode Attribute: mMailAddr Type: String Array: false
+            //Encode Attribute: mMailAddr Type: String List: false
             tEncoder.add( "mailAddr", mMailAddr );
         
-            //Encode Attribute: mPassword Type: String Array: false
+            //Encode Attribute: mPassword Type: String List: false
             tEncoder.add( "password", mPassword );
         
-            //Encode Attribute: mLastLogin Type: String Array: false
+            //Encode Attribute: mLastLogin Type: String List: false
             tEncoder.add( "lastLogin", mLastLogin );
         
-            //Encode Attribute: mLoginCounts Type: int Array: false
+            //Encode Attribute: mLoginCounts Type: int List: false
             tEncoder.add( "loginCounts", mLoginCounts );
         
-            //Encode Attribute: mConfirmed Type: boolean Array: false
+            //Encode Attribute: mConfirmed Type: boolean List: false
             tEncoder.add( "confirmed", mConfirmed );
         
-            //Encode Attribute: mConfirmationId Type: String Array: false
+            //Encode Attribute: mConfirmationId Type: String List: false
             tEncoder.add( "confirmationId", mConfirmationId );
         
         }
@@ -149,22 +152,22 @@ import com.google.gson.GsonBuilder;
         
             JsonDecoder tDecoder = pDecoder.get("User");
         
-            //Decode Attribute: mMailAddr Type:String Array: false
+            //Decode Attribute: mMailAddr Type:String List: false
             mMailAddr = tDecoder.readString("mailAddr");
         
-            //Decode Attribute: mPassword Type:String Array: false
+            //Decode Attribute: mPassword Type:String List: false
             mPassword = tDecoder.readString("password");
         
-            //Decode Attribute: mLastLogin Type:String Array: false
+            //Decode Attribute: mLastLogin Type:String List: false
             mLastLogin = tDecoder.readString("lastLogin");
         
-            //Decode Attribute: mLoginCounts Type:int Array: false
+            //Decode Attribute: mLoginCounts Type:int List: false
             mLoginCounts = tDecoder.readInteger("loginCounts");
         
-            //Decode Attribute: mConfirmed Type:boolean Array: false
+            //Decode Attribute: mConfirmed Type:boolean List: false
             mConfirmed = tDecoder.readBoolean("confirmed");
         
-            //Decode Attribute: mConfirmationId Type:String Array: false
+            //Decode Attribute: mConfirmationId Type:String List: false
             mConfirmationId = tDecoder.readString("confirmationId");
         
 

@@ -48,6 +48,20 @@ public class MessageFactory implements MessageFactoryInterface
             	return tMessage;
             }
 			
+            case "TG_WhenInitializedRqst":
+            {
+            	TG_WhenInitializedRqst tMessage = new TG_WhenInitializedRqst();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "TG_WhenInitializedRsp":
+            {
+            	TG_WhenInitializedRsp tMessage = new TG_WhenInitializedRsp();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
             case "ZN_RegisterUserRqst":
             {
             	ZN_RegisterUserRqst tMessage = new ZN_RegisterUserRqst();

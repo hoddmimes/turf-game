@@ -18,45 +18,45 @@
 
 <body>
    <br>
-   <h4 style="margin-left:50px;text-align:left">Region Statistics</h4>
+   <h4 id="regionStatH1" style="margin-left:50px;text-align:left">Region Statistics</h4>
       <div id="divRegionStat" class="borderDiv">
          <br>
-            <table id="tableRegionStat" class="tableRegionStat">
+            <table id="tableRegionStat" class="tableRegionStatClass">
                <tr>
-                  <th>Region</th>
-                  <th>Takes</th>
-                  <th>Off Takes</th>
-                  <th>Time/Take</th>
-                  <th>Dist/Take</th>
-                  <th>TP/Take</th>
-                  <th>PPH/Take</th>
-                  <th>Avg PPH</th>
-                  <th>AVG PPH Time</th>
-                  <th>TP Factor</th>
-                  <th>PPH Factor</th>
-                  <th>Region Factor</th>
+                  <th class="thRegion">Region</th>
+                  <th class="thRegion">Takes</th>
+                  <th class="thRegion">Off Takes</th>
+                  <th class="thRegion">Time/Take</th>
+                  <th class="thRegion">Dist/Take</th>
+                  <th class="thRegion">TP/Take</th>
+                  <th class="thRegion">PPH/Take</th>
+                  <th class="thRegion">Avg PPH</th>
+                  <th class="thRegion">Avg PPH Points</th>
+                  <th class="thRegion">TP Factor</th>
+                  <th class="thRegion">PPH Factor</th>
+                  <th class="thRegion">Region Factor</th>
                </tr>
             </table>
       </div>
    <br>
 
-   <h4 style="margin-left:50px;text-align:left">Region Hour Statistics Statistics</h4>
+   <h4 id="regionStatHourH1" style="margin-left:50px;text-align:left">Region Hour Statistics Statistics</h4>
    <div id="divRegionHourStat" class="borderDiv">
       <br>
-      <table id="tableRegionHourStat" class="tableRegionStat">
+      <table id="tableRegionHourStat" class="tableRegionStatClass">
          <tr>
-            <th>Region</th>
-            <th>Takes</th>
-            <th>Off Takes</th>
-            <th>Time/Take</th>
-            <th>Dist/Take</th>
-            <th>TP/Take</th>
-            <th>PPH/Take</th>
-            <th>Avg PPH</th>
-            <th>AVG PPH Time</th>
-            <th>TP Factor</th>
-            <th>PPH Factor</th>
-            <th>Region Factor</th>
+            <th class="thRegion">Region</th>
+            <th class="thRegion">Takes</th>
+            <th class="thRegion">Off Takes</th>
+            <th class="thRegion">Time/Take</th>
+            <th class="thRegion">Dist/Take</th>
+            <th class="thRegion">TP/Take</th>
+            <th class="thRegion">PPH/Take</th>
+            <th class="thRegion">Avg PPH</th>
+            <th class="thRegion">Avg PPH Points</th>
+            <th class="thRegion">TP Factor</th>
+            <th class="thRegion">PPH Factor</th>
+            <th class="thRegion">Region Factor</th>
          </tr>
       </table>
    </div>
@@ -64,13 +64,6 @@
 
 
 <script>
-     var zoneSubsrData = [];
-     var regions = [];
-     var regionNames = [];
-
-     var zoneNames = []
-
-
     var zoneTableDef= { 'table' : 'regions',
                         'keys' : [
                            {'type' : 'string',    'column' : 0,  'jkey' : 'region',          'cssClass' : 'tdRegion'} ,
@@ -92,7 +85,41 @@
 
     function loadDataFromServer() {
       loadRegionStatistics();
+      loadRegionHourStatistics();
+
     }
+
+    function loadSystemInitialization()
+ 	{
+      var rqst = {TG_WhenInitializedRqst : {}};
+
+      //console.log( 'request-data: ' + JSON.stringify(rqst));
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/tgWhenInitialize', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /* Alerts the results */
+      posting.done(function( msg ) {
+          console.log( msg );
+
+          if (msg.hasOwnProperty('TG_WhenInitializedRsp')) {
+            var hdr = document.getElementById('regionStatH1');
+            hdr.innerHTML = "Regional Statistics (since " + msg.TG_WhenInitializedRsp.date + ")";
+		  } else if (msg.hasOwnProperty('TG_Response')) {
+              if (!(msg.TG_Response.success)) {
+    	          alert('Load system init info failed, reason: ' + msg.TG_Response.reason);
+	          } else {
+		          alert('Load system init info  TG_response, success should never be returned');
+		      }
+		  }
+	  });
+	}
+
+
 
     function loadRegionStatistics()
  	{
@@ -115,6 +142,10 @@
               for( var i = 0; i < msg.RS_RegionStatisticsRsp.regionStats.length; i++ ) {
                   tableInsert( document.getElementById('tableRegionStat'), zoneTableDef, msg.RS_RegionStatisticsRsp.regionStats[i] );
               }
+              var hdr = document.getElementById('regionStatH1');
+              hdr.innerHTML = "Regional Statistics (since " + msg.RS_RegionStatisticsRsp.initDate + " samples " +
+                   msg.RS_RegionStatisticsRsp.totalSamples +")";
+
 		  } else if (msg.hasOwnProperty('TG_Response')) {
               if (!(msg.TG_Response.success)) {
     	          alert('Load region stat failure, reason: ' + msg.TG_Response.reason);
@@ -125,14 +156,14 @@
 	  });
 	}
 
-   	function loadZoneSubscription()
-	{
-      var rqst = {ZN_LoadZoneSubscriptionsRqst : {}};
+	 function loadRegionHourStatistics()
+ 	{
+      var rqst = {RS_RegionStatisticsRqst : { isTotalRequest : false }};
 
       //console.log( 'request-data: ' + JSON.stringify(rqst));
 
       /* Send the data using post with element id name and name2*/
-      var posting = $.ajax( { url:'/turf/app/restricted/znLoadZoneSubscriptions', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+      var posting = $.ajax( { url:'/turf/app/rsLoadRegionStat', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
 
       posting.fail(function (jqXHR, status, err) {
           turfError(jqXHR, status);
@@ -142,23 +173,23 @@
       posting.done(function( msg ) {
           console.log( msg );
 
-          if (msg.hasOwnProperty('ZN_LoadZoneSubscriptionsRsp')) {
-            zoneData = msg.ZN_LoadZoneSubscriptionsRsp.subscriptions;
-		    tableClear( document.getElementById('zoneTable'), zoneTableDef );
-
-            if (msg.ZN_LoadZoneSubscriptionsRsp.subscriptions != null) {
-		       for( var i = 0; i < msg.ZN_LoadZoneSubscriptionsRsp.subscriptions.length; i++ ) {
-                  tableInsert( document.getElementById('zoneTable'), zoneTableDef, msg.ZN_LoadZoneSubscriptionsRsp.subscriptions[i] );
-               }
-            }
+          if (msg.hasOwnProperty('RS_RegionStatisticsRsp')) {
+              for( var i = 0; i < msg.RS_RegionStatisticsRsp.regionStats.length; i++ ) {
+                  tableInsert( document.getElementById('tableRegionHourStat'), zoneTableDef, msg.RS_RegionStatisticsRsp.regionStats[i] );
+              }
+              var hdr = document.getElementById('regionStatHourH1');
+              hdr.innerHTML = "Region Statistics (for last " +  msg.RS_RegionStatisticsRsp.periodHH + " hours samples " +
+                   msg.RS_RegionStatisticsRsp.totalSamples + ")";
 		  } else if (msg.hasOwnProperty('TG_Response')) {
               if (!(msg.TG_Response.success)) {
-    	          alert('Load data failure, reason: ' + msg.TG_Response.reason);
+    	          alert('Load region hour stat failure, reason: ' + msg.TG_Response.reason);
 	          } else {
-		          alert('Load data TG_response, success should never be returned');
+		          alert('Load region hour stat TG_response, success should never be returned');
 		      }
 		  }
 	  });
 	}
+
+
 </script>
 </html>

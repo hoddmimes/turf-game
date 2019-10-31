@@ -5,6 +5,7 @@ import org.w3c.dom.Element;
 public class ServerConfiguration
 {
     private String mBaseURL;
+    private String mConfigurationFilename;
     private int mApiCollectIntervalSec;
     private int mApiTimeZoneOffsetHr;
     private int mApiHistoryOffsetMin;
@@ -25,9 +26,23 @@ public class ServerConfiguration
 
     Element mRoot = null;
 
-    public void parseConfiguration( String mConfigurationFile ) {
+    public Element getGetAndLoadCurrentConfiguration() {
         try {
-            mRoot = XmlAux.loadXMLFromFile(mConfigurationFile).getDocumentElement();
+            Element tRoot = XmlAux.loadXMLFromFile(mConfigurationFilename).getDocumentElement();
+            return tRoot;
+        }
+        catch( Exception e) {
+            System.out.println("Failed to load configuration file \"" + mConfigurationFilename + "\"");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public void parseConfiguration( String tConfigurationFile ) {
+        mConfigurationFilename = tConfigurationFile;
+        try {
+            mRoot = XmlAux.loadXMLFromFile(tConfigurationFile).getDocumentElement();
 
             mBaseURL = mRoot.getAttribute("baseURL").toString();
 
@@ -63,11 +78,14 @@ public class ServerConfiguration
 
         }
         catch( Exception e) {
-            System.out.println("Failed to load configuration file \"" + mConfigurationFile + "\"");
+            System.out.println("Failed to load configuration file \"" + tConfigurationFile + "\"");
             e.printStackTrace();
             System.exit(0);
         }
     }
+
+
+
 
     public String getBaseURL() { return this.mBaseURL; }
 

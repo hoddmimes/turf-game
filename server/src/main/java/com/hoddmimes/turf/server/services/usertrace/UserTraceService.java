@@ -7,13 +7,11 @@ import com.hoddmimes.turf.server.TurfServiceInterface;
 
 import com.hoddmimes.turf.server.common.EventFilterNewZoneTakeOver;
 import com.hoddmimes.turf.server.common.ZoneEvent;
+import com.hoddmimes.turf.server.configuration.UserTraceConfiguration;
 import com.hoddmimes.turf.server.services.regionstat.DistanceCalculator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.omg.CORBA.Any;
-import org.omg.CORBA.DataOutputStream;
-import org.omg.CORBA.Object;
-import org.omg.CORBA.TypeCode;
+import org.w3c.dom.Element;
 
 import java.io.*;
 import java.text.NumberFormat;
@@ -29,11 +27,10 @@ public class UserTraceService implements TurfServiceInterface {
     private TurfServerInterface mTurfIf;
     private Logger mLogger;
     private PrintWriter mOut = null;
-    private List<String>            mUsersToTrace;
+    private UserTraceConfiguration mConfig;
     private Map<String,TraceUser>  mUsers;
-    private long mSessionMaxInactivityMin;
     private EventFilterNewZoneTakeOver mZoneFilter = null;
-    private boolean mTraceAll;
+    private long mLatestConfigRecheck;
 
 
     @Override
@@ -41,10 +38,9 @@ public class UserTraceService implements TurfServiceInterface {
         mZoneFilter = new EventFilterNewZoneTakeOver();
         mTurfIf = pTurfServerInterface;
         mLogger = LogManager.getLogger(this.getClass().getSimpleName());
-        mUsersToTrace = mTurfIf.getServerConfiguration().getUserTraceConfiguration().getUsers();
-        mSessionMaxInactivityMin = mTurfIf.getServerConfiguration().getUserTraceConfiguration().getSessionInactivityMin();
-        mTraceAll = mTurfIf.getServerConfiguration().getUserTraceConfiguration().traceAll();
+        mConfig = mTurfIf.getServerConfiguration().getUserTraceConfiguration();
         mUsers = new HashMap<>();
+        mLatestConfigRecheck = System.currentTimeMillis();
 
         try {
             String tFilename = mTurfIf.getServerConfiguration().getUserTraceConfiguration().getLogfilename();
@@ -60,17 +56,17 @@ public class UserTraceService implements TurfServiceInterface {
         if (mOut != null) {
             mOut.println( SDF.format( System.currentTimeMillis()) + " " + pMsg );
         }
-        if (mTraceAll) {
+        if (mConfig.traceAll()) {
             System.out.println( SDF.format( System.currentTimeMillis()) + " " + pMsg );
         }
     }
 
     private boolean userOfInterest( String pUser ) {
-        if (mTraceAll) {
+        if (mConfig.traceAll()) {
             return true;
         }
 
-        for( String u : mUsersToTrace) {
+        for( String u : mConfig.getUsers()) {
             if (u.compareToIgnoreCase(pUser) == 0) {
                 return true;
             }
@@ -78,8 +74,19 @@ public class UserTraceService implements TurfServiceInterface {
         return false;
     }
 
+    private void recheckConfiguration() {
+        if ((mLatestConfigRecheck + 180000L) < System.currentTimeMillis()) {
+            Element tRoot = this.mTurfIf.getGetAndLoadCurrentConfiguration();
+            mConfig.parse( tRoot );
+            mLatestConfigRecheck = System.currentTimeMillis();
+        }
+    }
+
     @Override
     public void processZoneUpdates(JsonElement pZoneUpdates) {
+        recheckConfiguration();
+
+
         long tStartTime = System.currentTimeMillis();
         List<ZoneEvent> tTakeOverEvents = mZoneFilter.getNewTakeover(pZoneUpdates.getAsJsonArray());
         for( ZoneEvent toe: tTakeOverEvents) {
@@ -101,7 +108,7 @@ public class UserTraceService implements TurfServiceInterface {
         long tNow = System.currentTimeMillis();
         ArrayList tRmLst = new ArrayList();
         for( TraceUser tu : mUsers.values()) {
-            if ((tNow - tu.mLatestZone.getLatestTakeOverTime()) > (mSessionMaxInactivityMin * 60000L)) {
+            if ((tNow - tu.mLatestZone.getLatestTakeOverTime()) > (mConfig.getSessionInactivityMin() * 60000L)) {
                 log( tu.getEndSessionMessage());
                 tRmLst.add( tu );
             }

@@ -53,22 +53,23 @@ button {
 
 #divRegionStat {
     table-layout:fixed;
-	margin-top:30px;
-	width:930px;
+	margin-top:20px;
+	width:940px;
 	min-height:500px;
 	overflow-y: auto;    /* Trigger vertical scroll    */
     overflow-x: hidden;  /* Hide the horizontal scroll */
 }
 
 
-.tableRegionStat {
+.tableRegionStatClass {
 	background:#ffffff;
 	font-family:Arial, Helvetica, sans-serif;
 	font-size:14px;
 	color:navy;
 	margin-left:auto;
     margin-right:auto;
-	border-collapse: separate;
+    border-collapse: collapse;
+    margin-bottom:20px;
 }
 
 #divRegionHourStat {
@@ -80,16 +81,6 @@ button {
     overflow-x: hidden;  /* Hide the horizontal scroll */
 }
 
-
-.tableRegionHourStat {
-	background:#ffffff;
-	font-family:Arial, Helvetica, sans-serif;
-	font-size:14px;
-	color:navy;
-	margin-left:auto;
-    margin-right:auto;
-	border-collapse: separate;
-}
 
 
 #divZoneTable {
@@ -117,12 +108,24 @@ button {
     padding-bottom: 2px;
 }
 
-.tdRegion {
-    text-align: right
+.thRegion {
+    text-align: center;
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 2px;
     padding-bottom: 2px;
+    border-collapse: collapse;
+    border: 2px solid lightgray;
+}
+
+.tdRegion {
+    text-align: right;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-collapse: collapse;
+    border: 1px solid lightgray;
 }
 /*
    =========================================

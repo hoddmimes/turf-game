@@ -30,6 +30,10 @@ public class UserTraceConfiguration
         }
     }
 
+
+
+
+
     public boolean traceAll() {
         return mTraceAll;
     }

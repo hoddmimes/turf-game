@@ -23,6 +23,7 @@ import com.hoddmimes.turf.server.common.EventFilterNewZoneTakeOver;
 import com.hoddmimes.turf.server.common.Turf;
 import com.hoddmimes.turf.server.common.ZoneEvent;
 import com.hoddmimes.turf.server.configuration.RegionStatConfiguration;
+import com.hoddmimes.turf.server.generated.FirstEntry;
 import com.hoddmimes.turf.server.generated.HourRegionStat;
 import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.RegionStat;
@@ -94,7 +95,8 @@ public class RegionStatService implements TurfServiceInterface
         }
         calculateRatingFactors( tReginRsponseList );
 
-        long tTotalSamples = this.mRegions.values().stream().mapToLong( r -> r.getTotTakes().orElse(0L)).sum();
+        long tTotalSamples = this.mRegions.values().stream().mapToLong( rs -> { return rs.getHoursStat().orElse( new LinkedList<HourRegionStat>()).stream().mapToLong(hs -> hs.getTotTakes().orElse(0L)).sum(); }).sum();
+
         tResponse.addRegionStats( tReginRsponseList );
         tResponse.setPeriodHH(mConfig.getPeriodMS() / (3600L * 1000L));
         tResponse.setTotalSamples( tTotalSamples );
@@ -119,6 +121,14 @@ public class RegionStatService implements TurfServiceInterface
         tResponse.addRegionStats( tReginRsponseList );
         tResponse.setPeriodHH(0L);
         tResponse.setTotalSamples( tTotalSamples );
+
+        List<FirstEntry> tFirstEntryList = mDbAux.findAllFirstEntry();
+        if ((tFirstEntryList != null) && (tFirstEntryList.size() > 0)) {
+            FirstEntry fe = tFirstEntryList.get(0);
+            tResponse.setInitDate( fe.getTime().get().split(" ")[0]);
+        }
+
+
         return tResponse.toJson().toString();
     }
 
@@ -320,6 +330,7 @@ public class RegionStatService implements TurfServiceInterface
 
     private HourRegionStat getCurentHourStat( RegionStat pRegionStat ) {
         HourRegionStat tHHStat = null;
+        long tNow = System.currentTimeMillis();
 
         if (!pRegionStat.getHoursStat().isPresent()) {
             pRegionStat.setHoursStat( new LinkedList<HourRegionStat>());
@@ -328,12 +339,16 @@ public class RegionStatService implements TurfServiceInterface
         LinkedList<HourRegionStat> tList = (LinkedList<HourRegionStat>) pRegionStat.getHoursStat().get();
 
 
-        if ((tList.size() == 0) || (tList.getLast().getCreateTime().get() + 3600000L < System.currentTimeMillis())) {
+        if ((tList.size() == 0) || ((tList.getLast().getCreateTime().get() + 3600000L) < tNow)) {
             tHHStat = new HourRegionStat();
             tHHStat.setId( pRegionStat.getId().get());
             tHHStat.setCreateTime( System.currentTimeMillis());
             pRegionStat.addHoursStat( tHHStat );
             mDbAux.insertHourRegionStat( tHHStat );
+            if (mConfig.getDebugContext().ifDebug( DebugContext.HOUR_STATISTICS)) {
+                mLogger.debug("Create-Hour-Stat region: " + pRegionStat.getName().get() + " (" + pRegionStat.getId().get() +
+                        ") time: " + Turf.SDF.format( tHHStat.getCreateTime().get()));
+            }
         } else {
             tHHStat = tList.getLast();
         }
@@ -353,9 +368,7 @@ public class RegionStatService implements TurfServiceInterface
                 pRegionStat.setTotTP( pRegionStat.getTotTP().orElse(0L) + toe.getTP() );
                 pRegionStat.setTotPPH( pRegionStat.getTotPPH().orElse(0L) + toe.getPPH());
             } else {
-
                 pRegionStat.setTotOutsideZones( pRegionStat.getTotOutsideZones().orElse(0L) + 1 );
-                pRegionStat.setChanged( true );
             }
         }
 
@@ -363,25 +376,29 @@ public class RegionStatService implements TurfServiceInterface
          * Update hour statistics, remove hour statistics that expires outside period
          */
         if (pRegionStat.getHoursStat().isPresent()) {
-            List<HourRegionStat> tLst = pRegionStat.getHoursStat().get();
-            while ((tLst.size() > 0) && (tLst.get(0).getCreateTime().get() + mConfig.getPeriodMS() < System.currentTimeMillis())) {
-                HourRegionStat hrs = tLst.remove(0);
+            LinkedList<HourRegionStat> tLst = (LinkedList<HourRegionStat>) pRegionStat.getHoursStat().get();
+            while ((tLst.size() > 0) && ((tLst.getFirst().getCreateTime().get() + mConfig.getPeriodMS()) < System.currentTimeMillis())) {
+                HourRegionStat hrs = tLst.removeFirst();
                 mDbAux.deleteHourRegionStatByMongoId(hrs.getMongoId());
+                if (mConfig.getDebugContext().ifDebug( DebugContext.HOUR_STATISTICS)) {
+                    mLogger.debug("Delete-Hour-Stat region: " + pRegionStat.getName().get() + " (" + pRegionStat.getId().get() +
+                            ") time: " + Turf.SDF.format( hrs.getCreateTime().get()));
+                }
             }
         }
 
-        HourRegionStat ttHHStat = getCurentHourStat(pRegionStat);
+        HourRegionStat tHHStat = getCurentHourStat(pRegionStat);
 
         if (tTimeDiffSec < (30 * 60)) {
             if (tTimeDiffSec <= (12 * 60)) { // If less or equal to 12 min
                 long tDistance = Math.round(DistanceCalculator.distance(z.getLat(), z.getLong(), toe.getLat(), toe.getLong()));
-                ttHHStat.setTotDistance( ttHHStat.getTotDistance().orElse(0L) +  tDistance );
-                ttHHStat.setTotTakes( ttHHStat.getTotTakes().orElse(0L) + 1);
-                ttHHStat.setTotTime( ttHHStat.getTotTime().orElse(0L) + tTimeDiffSec );
-                ttHHStat.setTotTP( ttHHStat.getTotTP().orElse(0L) + toe.getTP());
-                ttHHStat.setTotPPH( ttHHStat.getTotPPH().orElse(0L) + toe.getPPH());
+                tHHStat.setTotDistance( tHHStat.getTotDistance().orElse(0L) +  tDistance );
+                tHHStat.setTotTakes( tHHStat.getTotTakes().orElse(0L) + 1);
+                tHHStat.setTotTime( tHHStat.getTotTime().orElse(0L) + tTimeDiffSec );
+                tHHStat.setTotTP( tHHStat.getTotTP().orElse(0L) + toe.getTP());
+                tHHStat.setTotPPH( tHHStat.getTotPPH().orElse(0L) + toe.getPPH());
             } else {
-                ttHHStat.setTotOutsideZones( ttHHStat.getTotOutsideZones().orElse(0L) + 1);
+                tHHStat.setTotOutsideZones( tHHStat.getTotOutsideZones().orElse(0L) + 1);
             }
         }
     }

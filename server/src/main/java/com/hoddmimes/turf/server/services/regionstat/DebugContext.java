@@ -10,6 +10,7 @@ public class DebugContext
 	public static final int TAKE_OVER_FEED_VERBOSE = 4;
 	public static final int MEMORY = 8;
 	public static final int STATISTICS = 16;
+	public static final int HOUR_STATISTICS = 32;
 
 		
 		

@@ -8,6 +8,8 @@ import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.MessageFactory;
 import com.hoddmimes.turf.common.generated.TG_LogonRqst;
+import com.hoddmimes.turf.common.generated.TG_WhenInitializedRqst;
+import com.hoddmimes.turf.common.generated.TG_WhenInitializedRsp;
 import com.hoddmimes.turf.common.transport.TcpServer;
 import com.hoddmimes.turf.common.transport.TcpServerCallbackIf;
 import com.hoddmimes.turf.common.transport.TcpThread;
@@ -18,6 +20,7 @@ import com.hoddmimes.turf.server.common.ZoneDictionary;
 import com.hoddmimes.turf.server.configuration.PasswordRules;
 import com.hoddmimes.turf.server.configuration.ServerConfiguration;
 
+import com.hoddmimes.turf.server.generated.FirstEntry;
 import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.User;
 import com.hoddmimes.turf.server.services.notifier.ZoneNotifierService;
@@ -27,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
+import org.w3c.dom.Element;
 
 
 import javax.naming.NameNotFoundException;
@@ -214,6 +218,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     @Override
     public MongoAux getDbAux() { return mDbAux; }
 
+    @Override
+    public Element getGetAndLoadCurrentConfiguration() {
+        return this.mServerCfg.getGetAndLoadCurrentConfiguration();
+    }
 
     @Override
     public Zone getZoneById(int pId) {
@@ -361,9 +369,28 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         return TGStatus.create(true,"Successfull logon", "/turf/zn.html").toJson().toString();
     }
 
+    private String executeWhenInitialized( TG_WhenInitializedRqst pRqstMsg )
+    {
+        List<FirstEntry> tFirstEntryList = mDbAux.findAllFirstEntry();
+        if ((tFirstEntryList == null) || (tFirstEntryList.size() == 0)) {
+            return TGStatus.create(false,"System initialization info not found", null).toJson().toString();
+        }
+
+        FirstEntry fe = tFirstEntryList.get(0);
+
+        TG_WhenInitializedRsp jRsp = new TG_WhenInitializedRsp();
+        jRsp.setDateTime( fe.getTime().get());
+        String arr[] = fe.getTime().get().split(" ");
+        jRsp.setDate( arr[0]);
+        return jRsp.toJson().toString();
+    }
     private String execute( MessageInterface pRqstMsg ) {
         if (pRqstMsg instanceof TG_LogonRqst) {
             return executeUserLogon((TG_LogonRqst) pRqstMsg);
+        }
+
+        if (pRqstMsg instanceof TG_WhenInitializedRqst) {
+            return executeWhenInitialized((TG_WhenInitializedRqst) pRqstMsg);
         }
 
         return TGStatus.createError("No " + this.getClass().getSimpleName() + " service method found for request \"" +

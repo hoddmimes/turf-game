@@ -30,6 +30,9 @@ public class RegionStatConfiguration
         if (XmlAux.getBooleanAttribute(tDbgElement,"memory", false)) {
             mDbgCtx.addDebugFlag( DebugContext.MEMORY );
         }
+        if (XmlAux.getBooleanAttribute(tDbgElement,"hourStat", false)) {
+            mDbgCtx.addDebugFlag( DebugContext.HOUR_STATISTICS );
+        }
         if (XmlAux.getBooleanAttribute(tDbgElement,"takeOver", false)) {
             mDbgCtx.addDebugFlag( DebugContext.TAKE_OVER_FEED );
         }
@@ -46,7 +49,7 @@ public class RegionStatConfiguration
             NodeList tRegionList = tExtraRegionsElement.getElementsByTagName("ExtraRegion");
             if (tRegionList != null) {
                 for (int i = 0; i < tRegionList.getLength(); i++) {
-                    if (tRegionList.item(i).getNodeType() == Node.ATTRIBUTE_NODE) {
+                    if (tRegionList.item(i).getNodeType() == Node.ELEMENT_NODE) {
                         Element tExtraRegion = (Element) tRegionList.item(i);
                         int tId = XmlAux.getIntAttribute( tExtraRegion,"id", 0);
                         String tName = XmlAux.getStringAttribute( tExtraRegion,"name", null);
@@ -81,8 +84,8 @@ public class RegionStatConfiguration
             mName = pName;
         }
 
-        public boolean isExtraRegion( int pInt, String pName) {
-            if (pInt == mId) {
+        public boolean isExtraRegion( int pId, String pName) {
+            if (pId == mId) {
                 return true;
             }
             if ((mName != null) && (pName != null) && (pName.compareTo(mName) == 0)) {

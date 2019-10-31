@@ -19,6 +19,14 @@
         <Attribute name="optionPage" type="String"/>
     </Message>
 
+    <Message name="TG_WhenInitializedRqst" rootMessage="true">
+    </Message>
+
+    <Message name="TG_WhenInitializedRsp" rootMessage="true">
+        <Attribute name="date" type="String"/>
+        <Attribute name="dateTime" type="String"/>
+    </Message>
+
     <!--
         ZoneNotifier Service
      -->
@@ -112,6 +120,7 @@
         <Attribute name="regionStats" type="RegionStatistics" list="array"/>
         <Attribute name="totalSamples" type="long"/>
         <Attribute name="periodHH" type="long"/>
+        <Attribute name="initDate" type="String"/>
     </Message>
 
 </Messages>

@@ -18,10 +18,10 @@ public class ZoneDictionary extends Thread
 
     public ZoneDictionary()
     {
-        mZoneIdMap = new HashMap<>(65000);
-        mZoneNameMap = new HashMap<>(65000);
-        mRegionIdMap = new HashMap<>(200);
-        mRegionNameMap = new HashMap<>(200);
+        mZoneIdMap = new HashMap<>(65000); // Zones by zone-id
+        mZoneNameMap = new HashMap<>(65000); // Zones by zone-name
+        mRegionIdMap = new HashMap<>(200); // Regions by region-id
+        mRegionNameMap = new HashMap<>(200); // Regions by region-name
         sync();
         this.start();
     }
@@ -70,7 +70,7 @@ public class ZoneDictionary extends Thread
                     tRegionIdZoneList.add(z);
                 }
                 {
-                    List<Zone> tRegionNameZoneList = mRegionIdMap.get(z.getRegionName());
+                    List<Zone> tRegionNameZoneList = mRegionNameMap.get(z.getRegionName());
                     if (tRegionNameZoneList == null) {
                         tRegionNameZoneList = new ArrayList<>();
                         mRegionNameMap.put(z.getRegionName(), tRegionNameZoneList);

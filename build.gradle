@@ -95,6 +95,15 @@ task createTurfServerVersion() {
 }
 
 
+task copyToHoddmimes() {
+    doLast {
+        ant.scp( file : "./build/libs/turfServer-1.0.jar", trust : 'yes', keyfile : '${user.home}/.ssh/id_rsa', port : 11721,  todir : "bertilsson@www.hoddmimes.com:/usr/local/turf/libs/");
+        ant.scp( file : "./build/libs/turf-1.0.war", trust : 'yes', keyfile : '${user.home}/.ssh/id_rsa', port : 11721,  todir : "bertilsson@www.hoddmimes.com:/var/lib/tomcat/webapps/turf.war");
+        println("Copy Production");
+    }
+}
+
+
 task(generateTurfObjects, type: JavaExec ) {
     main = 'JsonTransform'
     classpath = files('./libs/pojojson-generate-1.0.jar')
@@ -121,8 +130,7 @@ task buildServerJar( type : Jar ) {
         include 'com/hoddmimes/turf/common/**/*','com/hoddmimes/turf/server/**/*'
     }
     doLast {
-        println "copy turfServer to Hoddmimes"
-        ant.scp( file : "./build/libs/turfServer-1.0.jar", trust : 'yes', keyfile : '${user.home}/.ssh/id_rsa', port : 11721,  todir : "bertilsson@www.hoddmimes.com:/usr/local/turf/libs/")
+        println "turfServer JAR successfully built"
     }
 }
 

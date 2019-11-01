@@ -1,0 +1,114 @@
+<html>
+<head>
+   <title>Turf Region Statistics Help</title>
+   <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type" />
+   <style>
+
+
+.borderDiv {
+    border-radius:8px;
+    border-style:dotted;
+    border-color:black;
+    border-width:2px;
+}
+       
+table { 
+             margin-left:30px;
+             margin-right:10px;
+             margin-bottom:10px;
+             border: 1px solid black;
+             border-collapse: collapse;
+       }
+       
+       
+.attrStyle {
+    text-align: left;
+    Font-Size : 12pt;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    family : Arial,sans-serif; 
+    font-weight: bold; color:darkblue; 
+    border-collapse: collapse;
+    border: 1px solid lightgray;
+}
+
+
+
+
+.attrDesc {
+   text-align: left;
+   family : Arial,sans-serif; 
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-top: 2px;
+   padding-bottom: 2px;
+   color:darkblue; 
+   border-collapse: collapse;
+   border: 1px solid lightgray;
+}
+       
+   </style>
+</head>
+
+
+<body>
+   <br>
+   <h4 id="regionStatH1" style="margin-left:50px;text-align:left">Region Statistics Help</h4>
+      <div class="borderDiv">
+         <br>
+            <table class="tableStyle">
+               <tr>
+                 <td class="attrStyle">Region</td>
+                 <td class="attrDesc">Regionen för vilken statistiken är för.</td>
+              </tr>
+              <tr>
+               <td class="attrStyle">Takes</td>
+               <td class="attrDesc">Total antal registrerade <i>take over events.</i> </td>
+              </tr>
+              <tr>
+               <td class="attrStyle">Off Takes</td>
+                <td class="attrDesc">Är antalet observation där tiden mellan två efterföljade <i>take over events.</i> gjorda av samma användare som överstigit 12 minuter.</td>
+              </tr>
+              <tr>
+               <td class="attrStyle">Time/Take</td>
+                <td class="attrDesc">Genomsnittlig tid mellan två efterföljande <i>take over event</i> gjorda av samma användare.</td>
+              </tr>
+              <tr>
+               <td class="attrStyle">Dist/Take</td>
+               <td class="attrDesc">Genomsnittlig distans mellan två efterföljande <i>take over event</i> gjorda av samma användare</td>
+              </tr>
+              <tr>
+               <td class="attrStyle">TP/Take</td>
+                <td class="attrDesc">Genomsnittlig <i>TP (take points)</> per zon som tagits-</td>
+              </tr>
+              <tr>
+               <td class="attrStyle">PPH/Take</td>
+                <td class="attrDesc">Genomsnittlig <i>PPH (points per hour)</i> som erhållits för varje zon som tagits.</td>
+              </tr>
+              <tr>
+               <td  class="attrStyle">Avg PPH</td>
+                <td class="attrDesc">Genomsnittlig tid som en zon ägs av användare in den övertagits av någon annan.</td>
+              </tr>
+              <tr>
+               <td class="attrStyle">Avg PPH Points</td>
+                <td class="attrDesc">Genomsnittlig poäng insamlad under den tid en zon ägts av en användare.</td>
+              </tr>
+              <tr>
+               <td class="attrStyle">TP Factor</td>
+                <td class="attrDesc">Är relationen mellan genomssnittlig tid per take dividerat med genomsnittlig take poäng. Detta reflekterar hur hur mycket tid som åtgår för få take poäng. Ju lägre värde ju bättre utväxling på använd tid. Tid som åtgår för att ta en zon avspeglar inte bara distansen och koditionen/farten av utövaren utan också hinder som höjdskillander, att det inte alltid går att ta rakaste vägen, traffik etc. <i>TP Factor</i> värdena är normaliserade. Den <i>bästa</i> region erhåller värdet &quot;1&quot; andra region erhåller ett relativt värde &gt; 1 i förhållande till den bästa/förmånligaste regionen.</td>
+              </tr>
+              <tr>
+               <td class="attrStyle">PPH Factor</td>
+                <td class="attrDesc">Är relationen genomsnittlig PPH poäng insamlad. Detta reflekterar hur effektiv PPH insamladet i regionen är. Det optimala utfallet är att zoner i genomsnitt har en hög PPH poäng samt att zonerna skiftar ägare sällan. I zonetätta hög traffikerade områden så är detta en utopi. <i>PPH Factor</i> värdet är normaliserat på samma sätt som <i>TP Factor</i> attributet ovan, dvs. den <i>bästa</i>regionen erhåller värdet &quot;1&quot; och överiga i relation till den <i>bästa</i> </td>
+              </tr>
+              <tr>
+               <td  class="attrStyle">Region FactorFactor</td>
+                <td class="attrDesc">Är en <i>vägd</i> faktor baserad på <i>TP Factor</i> och <i>PPH Factor</i>, där <i>TP Factor</i> har en 60% signifikans och <i>PPH Factor</i>  har en 40% signifikans. 60/40 relationen är baserad på historisk data. Denna data är i.o.f något föråldras, ca. 3 år. En ny analys och uppdatering av relationen TP/PPH bör/ska göras. </td>
+              </tr>          
+            </table>
+      </div>
+   <br>
+</body>
+</html>

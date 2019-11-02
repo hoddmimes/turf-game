@@ -15,7 +15,7 @@ import com.hoddmimes.turf.common.transport.TcpServerCallbackIf;
 import com.hoddmimes.turf.common.transport.TcpThread;
 import com.hoddmimes.turf.common.transport.TcpThreadCallbackIf;
 import com.hoddmimes.turf.server.common.Turf;
-import com.hoddmimes.turf.server.common.Zone;
+import com.hoddmimes.turf.server.common.TurfZone;
 import com.hoddmimes.turf.server.common.ZoneDictionary;
 import com.hoddmimes.turf.server.configuration.PasswordRules;
 import com.hoddmimes.turf.server.configuration.ServerConfiguration;
@@ -23,6 +23,7 @@ import com.hoddmimes.turf.server.configuration.ServerConfiguration;
 import com.hoddmimes.turf.server.generated.FirstEntry;
 import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.User;
+import com.hoddmimes.turf.server.services.dayranking.DayRankingService;
 import com.hoddmimes.turf.server.services.notifier.ZoneNotifierService;
 import com.hoddmimes.turf.server.services.regionstat.RegionStatService;
 import com.hoddmimes.turf.server.services.usertrace.UserTraceService;
@@ -56,6 +57,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     private ZoneNotifierService mZoneNotifierService = null;
     private RegionStatService mRegionStatService = null;
     private UserTraceService mUserTraceService = null;
+    private DayRankingService mDayRankingService = null;
 
 
     private TcpServer mTcpIpServer;
@@ -139,6 +141,8 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
                 mUserTraceService.processZoneUpdates( tZoneUpdateRsp );
             }
 
+
+
             try {
                 Thread.sleep( mServerCfg.getApiZoneCollectIntervalMs());
             }
@@ -179,6 +183,11 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         if (mServerCfg.startUserTrace()) {
             mUserTraceService = new UserTraceService();
             mUserTraceService.initialize( this );
+        }
+
+        if (mServerCfg.startDayRanking()) {
+            mDayRankingService = new DayRankingService();
+            mDayRankingService.initialize( this );
         }
     }
 
@@ -224,23 +233,23 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     }
 
     @Override
-    public Zone getZoneById(int pId) {
+    public TurfZone getZoneById(int pId) {
         return mZoneDictory.getZoneById( pId );
     }
 
     @Override
-    public Zone getZoneByName(String pName) {
+    public TurfZone getZoneByName(String pName) {
         return mZoneDictory.getZonebyName( pName );
     }
 
     @Override
-    public Map<Integer, List<Zone>> getZonesByRegionIds()
+    public Map<Integer, List<TurfZone>> getZonesByRegionIds()
     {
         return this.mZoneDictory.getZonesByRegionsId();
     }
 
     @Override
-    public Map<String, List<Zone>> getZonesByRegionNames()
+    public Map<String, List<TurfZone>> getZonesByRegionNames()
     {
         return this.mZoneDictory.getZonesByRegionsNames();
     }

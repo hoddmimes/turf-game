@@ -21,6 +21,7 @@ public class ServerConfiguration
     private ZoneNotifyConfiguration mZoneNotifyCfg = null;
     private RegionStatConfiguration mRegionStatCfg = null;
     private UserTraceConfiguration  mUserTraceCfg = null;
+    private DayRankingConfiguration  mDayRankCfg = null;
 
 
 
@@ -49,6 +50,11 @@ public class ServerConfiguration
             if (XmlAux.isElementPresent(mRoot, "ZoneNotifyService")) {
                 mZoneNotifyCfg = new ZoneNotifyConfiguration();
                 mZoneNotifyCfg.parse(mRoot);
+            }
+
+            if (XmlAux.isElementPresent(mRoot, "DayRankingService")) {
+                mDayRankCfg = new DayRankingConfiguration();
+                mDayRankCfg.parse(mRoot);
             }
 
             if (XmlAux.isElementPresent(mRoot, "RegionStatisticsService")) {
@@ -134,6 +140,9 @@ public class ServerConfiguration
     public boolean startUserTrace() {
         return (mUserTraceCfg == null) ? false : true;
     }
+    public boolean startDayRanking() {
+        return (mDayRankCfg == null) ? false : true;
+    }
 
     public ZoneNotifyConfiguration getZoneNotifyConfiguration() {
         return mZoneNotifyCfg;
@@ -142,5 +151,6 @@ public class ServerConfiguration
         return mRegionStatCfg;
     }
     public UserTraceConfiguration getUserTraceConfiguration() { return mUserTraceCfg; }
+    public DayRankingConfiguration getDayRankingConfiguration() { return mDayRankCfg; }
 
 }

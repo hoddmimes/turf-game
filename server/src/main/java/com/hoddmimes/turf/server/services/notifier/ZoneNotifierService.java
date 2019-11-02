@@ -158,7 +158,7 @@ public class ZoneNotifierService implements TurfServiceInterface
         String jResponseString = null;
 
         ZN_LoadZoneNamesRsp jZoneNameRsp = new ZN_LoadZoneNamesRsp();
-        Map<String, List<Zone>> tRegionMap = mTurfIf.getZonesByRegionNames();
+        Map<String, List<TurfZone>> tRegionMap = mTurfIf.getZonesByRegionNames();
 
         List<String> tRegionNames = tRegionMap.keySet().stream().collect(Collectors.toList());
         jZoneNameRsp.setRegionNames( tRegionNames );
@@ -213,7 +213,7 @@ public class ZoneNotifierService implements TurfServiceInterface
         try {
             Subscription tSubscr = new Subscription();
             tSubscr.setMailAddr( pAddZoneSubscr.getMailAddress().get());
-            Zone tZone = this.mTurfIf.getZoneByName( pAddZoneSubscr.getZone().get());
+            TurfZone tZone = this.mTurfIf.getZoneByName( pAddZoneSubscr.getZone().get());
             if (tZone == null) {
                 return TGStatus.createError("Zone \"" + pAddZoneSubscr.getZone().get() + "\" is not found", null).toJson().toString();
             }

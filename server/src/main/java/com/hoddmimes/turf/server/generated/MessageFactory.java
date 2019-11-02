@@ -48,6 +48,27 @@ public class MessageFactory implements MessageFactoryInterface
             	return tMessage;
             }
 			
+            case "DayRankingUserStart":
+            {
+            	DayRankingUserStart tMessage = new DayRankingUserStart();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "DayRankingUser":
+            {
+            	DayRankingUser tMessage = new DayRankingUser();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "DayRankingRegion":
+            {
+            	DayRankingRegion tMessage = new DayRankingRegion();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
             case "User":
             {
             	User tMessage = new User();

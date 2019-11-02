@@ -1,7 +1,6 @@
 package com.hoddmimes.turf.server.common;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,10 +9,10 @@ import java.util.Map;
 
 public class ZoneDictionary extends Thread
 {
-    Map<Integer,Zone>           mZoneIdMap;
-    Map<String,Zone>            mZoneNameMap;
-    Map<Integer, List<Zone>>    mRegionIdMap;
-    Map<String, List<Zone>>     mRegionNameMap;
+    Map<Integer, TurfZone>           mZoneIdMap;
+    Map<String, TurfZone>            mZoneNameMap;
+    Map<Integer, List<TurfZone>>    mRegionIdMap;
+    Map<String, List<TurfZone>>     mRegionNameMap;
 
 
     public ZoneDictionary()
@@ -31,20 +30,20 @@ public class ZoneDictionary extends Thread
     }
 
 
-    public synchronized Map<Integer,List<Zone>> getZonesByRegionsId() {
+    public synchronized Map<Integer,List<TurfZone>> getZonesByRegionsId() {
         return mRegionIdMap;
     }
-    public synchronized Map<String,List<Zone>> getZonesByRegionsNames() {
+    public synchronized Map<String,List<TurfZone>> getZonesByRegionsNames() {
         return mRegionNameMap;
     }
 
 
 
-    public synchronized Zone  getZonebyName( String pName ) {
+    public synchronized TurfZone getZonebyName(String pName ) {
         return mZoneNameMap.get( pName );
     }
 
-    public synchronized Zone getZoneById( int pId ) {
+    public synchronized TurfZone getZoneById(int pId ) {
         return mZoneIdMap.get( pId );
     }
 
@@ -56,13 +55,13 @@ public class ZoneDictionary extends Thread
 
         JsonArray tZoneArray = Turf.turfServerGET("zones/all").getAsJsonArray();
         for( int i = 0; i < tZoneArray.size(); i++) {
-            Zone z = new Zone( tZoneArray.get(i).getAsJsonObject());
+            TurfZone z = new TurfZone( tZoneArray.get(i).getAsJsonObject());
             mZoneNameMap.put( z.getName(), z);
             mZoneIdMap.put( z.getId(), z );
 
             if (z.hasRegion()) {
                 {
-                    List<Zone> tRegionIdZoneList = mRegionIdMap.get(z.getRegionid());
+                    List<TurfZone> tRegionIdZoneList = mRegionIdMap.get(z.getRegionid());
                     if (tRegionIdZoneList == null) {
                         tRegionIdZoneList = new ArrayList<>();
                         mRegionIdMap.put(z.getRegionid(), tRegionIdZoneList);
@@ -70,7 +69,7 @@ public class ZoneDictionary extends Thread
                     tRegionIdZoneList.add(z);
                 }
                 {
-                    List<Zone> tRegionNameZoneList = mRegionNameMap.get(z.getRegionName());
+                    List<TurfZone> tRegionNameZoneList = mRegionNameMap.get(z.getRegionName());
                     if (tRegionNameZoneList == null) {
                         tRegionNameZoneList = new ArrayList<>();
                         mRegionNameMap.put(z.getRegionName(), tRegionNameZoneList);

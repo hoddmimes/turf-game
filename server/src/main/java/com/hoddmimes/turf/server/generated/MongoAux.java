@@ -40,6 +40,9 @@
             
            private MongoCollection mHourRegionStatCollection;
            private MongoCollection mRegionCollection;
+           private MongoCollection mDayRankingUserStartCollection;
+           private MongoCollection mDayRankingUserCollection;
+           private MongoCollection mDayRankingRegionCollection;
            private MongoCollection mUserCollection;
            private MongoCollection mSubscriptionCollection;
            private MongoCollection mFirstEntryCollection;
@@ -58,6 +61,12 @@
                  mHourRegionStatCollection = mDb.getCollection("HourRegionStat");
               
                  mRegionCollection = mDb.getCollection("Region");
+              
+                 mDayRankingUserStartCollection = mDb.getCollection("DayRankingUserStart");
+              
+                 mDayRankingUserCollection = mDb.getCollection("DayRankingUser");
+              
+                 mDayRankingRegionCollection = mDb.getCollection("DayRankingRegion");
               
                  mUserCollection = mDb.getCollection("User");
               
@@ -93,6 +102,12 @@
                 
                     mRegionCollection = null;
                 
+                    mDayRankingUserStartCollection = null;
+                
+                    mDayRankingUserCollection = null;
+                
+                    mDayRankingRegionCollection = null;
+                
                     mUserCollection = null;
                 
                     mSubscriptionCollection = null;
@@ -111,6 +126,12 @@
                     mHourRegionStatCollection = null;
                 
                     mRegionCollection = null;
+                
+                    mDayRankingUserStartCollection = null;
+                
+                    mDayRankingUserCollection = null;
+                
+                    mDayRankingRegionCollection = null;
                 
                     mUserCollection = null;
                 
@@ -153,6 +174,12 @@
                    
                         createRegionCollection();
                    
+                        createDayRankingUserStartCollection();
+                   
+                        createDayRankingUserCollection();
+                   
+                        createDayRankingRegionCollection();
+                   
                         createUserCollection();
                    
                         createSubscriptionCollection();
@@ -178,6 +205,33 @@
                     tKeys.add( new DbKey("id", true));
 
             createCollection("Region", tKeys, null );
+        }
+    
+        private void createDayRankingUserStartCollection() {
+            ArrayList<DbKey> tKeys = new ArrayList<>();
+            
+                tKeys.add( new DbKey("date", false));
+                tKeys.add( new DbKey("userId", false));
+
+            createCollection("DayRankingUserStart", tKeys, null );
+        }
+    
+        private void createDayRankingUserCollection() {
+            ArrayList<DbKey> tKeys = new ArrayList<>();
+            
+                tKeys.add( new DbKey("date", false));
+                tKeys.add( new DbKey("userId", false));
+
+            createCollection("DayRankingUser", tKeys, null );
+        }
+    
+        private void createDayRankingRegionCollection() {
+            ArrayList<DbKey> tKeys = new ArrayList<>();
+            
+                tKeys.add( new DbKey("date", false));
+                tKeys.add( new DbKey("regionId", false));
+
+            createCollection("DayRankingRegion", tKeys, null );
         }
     
         private void createUserCollection() {
@@ -274,6 +328,16 @@
             Document tDocSet = new Document("$set", pHourRegionStat.getMongoDocument());
             UpdateResult tUpdSts = mHourRegionStatCollection.updateOne( tFilter, tDocSet, new UpdateOptions());
             return tUpdSts;
+        }
+
+        public UpdateResult updateHourRegionStat(HourRegionStat pHourRegionStat, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        Bson tFilter= Filters.and( 
+        Filters.eq("id", pHourRegionStat.getId()),
+        Filters.eq("createTime", pHourRegionStat.getCreateTime()));
+        Document tDocSet = new Document("$set", pHourRegionStat.getMongoDocument());
+        UpdateResult tUpdSts = mHourRegionStatCollection.updateOne( tFilter, tDocSet, tOptions);
+        return tUpdSts;
         }
 
 
@@ -470,6 +534,15 @@
             return tUpdSts;
         }
 
+        public UpdateResult updateRegionStat(RegionStat pRegionStat, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        Bson tFilter= Filters.and( 
+        Filters.eq("id", pRegionStat.getId()));
+        Document tDocSet = new Document("$set", pRegionStat.getMongoDocument());
+        UpdateResult tUpdSts = mRegionCollection.updateOne( tFilter, tDocSet, tOptions);
+        return tUpdSts;
+        }
+
 
         public UpdateResult updateRegionStat( int pId, RegionStat pRegionStat, boolean pUpdateAllowInsert ) {
           UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
@@ -595,6 +668,663 @@
         /**
         * CRUD DELETE methods
         */
+        public long deleteDayRankingUserStart( Bson pFilter) {
+           DeleteResult tResult = mDayRankingUserStartCollection.deleteMany( pFilter );
+           return tResult.getDeletedCount();
+        }
+
+        public long deleteDayRankingUserStartByMongoId( String pMongoObjectId) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            DeleteResult tResult = mDayRankingUserStartCollection.deleteOne( tFilter );
+            return tResult.getDeletedCount();
+        }
+
+        
+            public long deleteDayRankingUserStart( String pDate, int pUserId ) {
+                Bson tKeyFilter= Filters.and( 
+                    Filters.eq("date", pDate),
+                    Filters.eq("userId", pUserId));
+
+             DeleteResult tResult =  mDayRankingUserStartCollection.deleteMany(tKeyFilter);
+             return tResult.getDeletedCount();
+            }
+        
+            public long deleteDayRankingUserStartByDate( String pDate ) {
+                Bson tKeyFilter= Filters.eq("date", pDate);
+                DeleteResult tResult =  mDayRankingUserStartCollection.deleteMany(tKeyFilter);
+                return tResult.getDeletedCount();
+            }
+        
+            public long deleteDayRankingUserStartByUserId( int pUserId ) {
+                Bson tKeyFilter= Filters.eq("userId", pUserId);
+                DeleteResult tResult =  mDayRankingUserStartCollection.deleteMany(tKeyFilter);
+                return tResult.getDeletedCount();
+            }
+        
+        /**
+        * CRUD INSERT methods
+        */
+        public void insertDayRankingUserStart( DayRankingUserStart pDayRankingUserStart ) {
+            Document tDoc = pDayRankingUserStart.getMongoDocument();
+            mDayRankingUserStartCollection.insertOne( tDoc );
+            ObjectId _tId = tDoc.getObjectId("_id");
+            if (_tId != null) {
+                pDayRankingUserStart.setMongoId( _tId.toString());
+            }
+        }
+
+        public void insertDayRankingUserStart( List<DayRankingUserStart> pDayRankingUserStartList ) {
+           List<Document> tList = pDayRankingUserStartList.stream().map( DayRankingUserStart::getMongoDocument).collect(Collectors.toList());
+           mDayRankingUserStartCollection.insertMany( tList );
+           for( int i = 0; i < tList.size(); i++ ) {
+             ObjectId _tId = tList.get(i).getObjectId("_id");
+             if (_tId != null) {
+                pDayRankingUserStartList.get(i).setMongoId( _tId.toString());
+             }
+           }
+        }
+
+    
+        /**
+        * CRUD UPDATE (INSERT) methods
+        */
+        public UpdateResult updateDayRankingUserStartByMongoId( String pMongoObjectId, DayRankingUserStart pDayRankingUserStart ) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            Document tDocSet = new Document("$set", pDayRankingUserStart.getMongoDocument());
+            UpdateResult tUpdSts = mDayRankingUserStartCollection.updateOne( tFilter, tDocSet, new UpdateOptions());
+            return tUpdSts;
+        }
+
+        public UpdateResult updateDayRankingUserStart(DayRankingUserStart pDayRankingUserStart, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        Bson tFilter= Filters.and( 
+        Filters.eq("date", pDayRankingUserStart.getDate()),
+        Filters.eq("userId", pDayRankingUserStart.getUserId()));
+        Document tDocSet = new Document("$set", pDayRankingUserStart.getMongoDocument());
+        UpdateResult tUpdSts = mDayRankingUserStartCollection.updateOne( tFilter, tDocSet, tOptions);
+        return tUpdSts;
+        }
+
+
+        public UpdateResult updateDayRankingUserStart( String pDate, int pUserId, DayRankingUserStart pDayRankingUserStart, boolean pUpdateAllowInsert ) {
+          UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+          Bson tFilter= Filters.and( 
+             Filters.eq("date", pDate),
+             Filters.eq("userId", pUserId));
+
+           Document tDocSet = new Document("$set", pDayRankingUserStart.getMongoDocument());
+
+           UpdateResult tUpdSts = mDayRankingUserStartCollection.updateOne( tFilter, tDocSet, tOptions);
+           return tUpdSts;
+        }
+
+        public UpdateResult updateDayRankingUserStart( Bson pFilter, DayRankingUserStart pDayRankingUserStart, boolean pUpdateAllowInsert ) {
+           UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+           Document tDocSet = new Document("$set", pDayRankingUserStart.getMongoDocument());
+           UpdateResult tUpdSts = mDayRankingUserStartCollection.updateOne( pFilter, tDocSet, tOptions);
+           return tUpdSts;
+        }
+    
+        /**
+        * CRUD FIND methods
+        */
+
+        public List<DayRankingUserStart> findDayRankingUserStart( Bson pFilter  ) {
+         return findDayRankingUserStart( pFilter, null );
+        }
+
+        public List<DayRankingUserStart> findDayRankingUserStart( Bson pFilter, Document pSortDoc  ) {
+
+        FindIterable<Document> tDocuments = (pSortDoc == null) ? this.mDayRankingUserStartCollection.find( pFilter ) :
+        this.mDayRankingUserStartCollection.find( pFilter ).sort( pSortDoc );
+
+
+        if (tDocuments == null) {
+        return null;
+        }
+
+        List<DayRankingUserStart> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        DayRankingUserStart tDayRankingUserStart = new DayRankingUserStart();
+        tDayRankingUserStart.decodeMongoDocument( tDoc );
+        tResult.add( tDayRankingUserStart );
+        }
+        return tResult;
+        }
+
+
+
+        public List<DayRankingUserStart> findAllDayRankingUserStart()
+        {
+           List<DayRankingUserStart> tResult = new ArrayList<>();
+
+           FindIterable<Document> tDocuments  = this.mDayRankingUserStartCollection.find();
+           MongoCursor<Document> tIter = tDocuments.iterator();
+           while( tIter.hasNext()) {
+               Document tDoc = tIter.next();
+               DayRankingUserStart tDayRankingUserStart = new DayRankingUserStart();
+               tDayRankingUserStart.decodeMongoDocument( tDoc );
+               tResult.add(tDayRankingUserStart);
+            }
+            return tResult;
+        }
+
+        public DayRankingUserStart findDayRankingUserStartByMongoId( String pMongoObjectId ) {
+        Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+
+        FindIterable<Document> tDocuments = this.mDayRankingUserStartCollection.find( tFilter );
+        if (tDocuments == null) {
+            return null;
+        }
+
+        List<DayRankingUserStart> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        DayRankingUserStart tDayRankingUserStart = new DayRankingUserStart();
+        tDayRankingUserStart.decodeMongoDocument( tDoc );
+        tResult.add( tDayRankingUserStart );
+        }
+        return (tResult.size() > 0) ? tResult.get(0) : null;
+        }
+
+
+        public List<DayRankingUserStart> findDayRankingUserStart( String pDate, int pUserId ) {
+        Bson tFilter= Filters.and( 
+        Filters.eq("date", pDate),
+        Filters.eq("userId", pUserId));
+
+
+        FindIterable<Document> tDocuments = this.mDayRankingUserStartCollection.find( tFilter );
+        if (tDocuments == null) {
+           return null;
+        }
+
+        List<DayRankingUserStart> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+           Document tDoc = tIter.next();
+           DayRankingUserStart tDayRankingUserStart = new DayRankingUserStart();
+           tDayRankingUserStart.decodeMongoDocument( tDoc );
+           tResult.add( tDayRankingUserStart );
+        }
+        return tResult;
+        }
+
+        
+            public List<DayRankingUserStart> findDayRankingUserStartByDate( String pDate ) {
+            List<DayRankingUserStart> tResult = new ArrayList<>();
+            Bson tFilter= Filters.eq("date", pDate);
+
+            FindIterable<Document> tDocuments  = this.mDayRankingUserStartCollection.find( tFilter );
+            MongoCursor<Document> tIter = tDocuments.iterator();
+            while( tIter.hasNext()) {
+            Document tDoc = tIter.next();
+            DayRankingUserStart tDayRankingUserStart = new DayRankingUserStart();
+            tDayRankingUserStart.decodeMongoDocument( tDoc );
+            tResult.add(tDayRankingUserStart);
+            }
+            return tResult;
+            }
+        
+            public List<DayRankingUserStart> findDayRankingUserStartByUserId( int pUserId ) {
+            List<DayRankingUserStart> tResult = new ArrayList<>();
+            Bson tFilter= Filters.eq("userId", pUserId);
+
+            FindIterable<Document> tDocuments  = this.mDayRankingUserStartCollection.find( tFilter );
+            MongoCursor<Document> tIter = tDocuments.iterator();
+            while( tIter.hasNext()) {
+            Document tDoc = tIter.next();
+            DayRankingUserStart tDayRankingUserStart = new DayRankingUserStart();
+            tDayRankingUserStart.decodeMongoDocument( tDoc );
+            tResult.add(tDayRankingUserStart);
+            }
+            return tResult;
+            }
+        
+        /**
+        * CRUD DELETE methods
+        */
+        public long deleteDayRankingUser( Bson pFilter) {
+           DeleteResult tResult = mDayRankingUserCollection.deleteMany( pFilter );
+           return tResult.getDeletedCount();
+        }
+
+        public long deleteDayRankingUserByMongoId( String pMongoObjectId) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            DeleteResult tResult = mDayRankingUserCollection.deleteOne( tFilter );
+            return tResult.getDeletedCount();
+        }
+
+        
+            public long deleteDayRankingUser( String pDate, int pUserId ) {
+                Bson tKeyFilter= Filters.and( 
+                    Filters.eq("date", pDate),
+                    Filters.eq("userId", pUserId));
+
+             DeleteResult tResult =  mDayRankingUserCollection.deleteMany(tKeyFilter);
+             return tResult.getDeletedCount();
+            }
+        
+            public long deleteDayRankingUserByDate( String pDate ) {
+                Bson tKeyFilter= Filters.eq("date", pDate);
+                DeleteResult tResult =  mDayRankingUserCollection.deleteMany(tKeyFilter);
+                return tResult.getDeletedCount();
+            }
+        
+            public long deleteDayRankingUserByUserId( int pUserId ) {
+                Bson tKeyFilter= Filters.eq("userId", pUserId);
+                DeleteResult tResult =  mDayRankingUserCollection.deleteMany(tKeyFilter);
+                return tResult.getDeletedCount();
+            }
+        
+        /**
+        * CRUD INSERT methods
+        */
+        public void insertDayRankingUser( DayRankingUser pDayRankingUser ) {
+            Document tDoc = pDayRankingUser.getMongoDocument();
+            mDayRankingUserCollection.insertOne( tDoc );
+            ObjectId _tId = tDoc.getObjectId("_id");
+            if (_tId != null) {
+                pDayRankingUser.setMongoId( _tId.toString());
+            }
+        }
+
+        public void insertDayRankingUser( List<DayRankingUser> pDayRankingUserList ) {
+           List<Document> tList = pDayRankingUserList.stream().map( DayRankingUser::getMongoDocument).collect(Collectors.toList());
+           mDayRankingUserCollection.insertMany( tList );
+           for( int i = 0; i < tList.size(); i++ ) {
+             ObjectId _tId = tList.get(i).getObjectId("_id");
+             if (_tId != null) {
+                pDayRankingUserList.get(i).setMongoId( _tId.toString());
+             }
+           }
+        }
+
+    
+        /**
+        * CRUD UPDATE (INSERT) methods
+        */
+        public UpdateResult updateDayRankingUserByMongoId( String pMongoObjectId, DayRankingUser pDayRankingUser ) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            Document tDocSet = new Document("$set", pDayRankingUser.getMongoDocument());
+            UpdateResult tUpdSts = mDayRankingUserCollection.updateOne( tFilter, tDocSet, new UpdateOptions());
+            return tUpdSts;
+        }
+
+        public UpdateResult updateDayRankingUser(DayRankingUser pDayRankingUser, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        Bson tFilter= Filters.and( 
+        Filters.eq("date", pDayRankingUser.getDate()),
+        Filters.eq("userId", pDayRankingUser.getUserId()));
+        Document tDocSet = new Document("$set", pDayRankingUser.getMongoDocument());
+        UpdateResult tUpdSts = mDayRankingUserCollection.updateOne( tFilter, tDocSet, tOptions);
+        return tUpdSts;
+        }
+
+
+        public UpdateResult updateDayRankingUser( String pDate, int pUserId, DayRankingUser pDayRankingUser, boolean pUpdateAllowInsert ) {
+          UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+          Bson tFilter= Filters.and( 
+             Filters.eq("date", pDate),
+             Filters.eq("userId", pUserId));
+
+           Document tDocSet = new Document("$set", pDayRankingUser.getMongoDocument());
+
+           UpdateResult tUpdSts = mDayRankingUserCollection.updateOne( tFilter, tDocSet, tOptions);
+           return tUpdSts;
+        }
+
+        public UpdateResult updateDayRankingUser( Bson pFilter, DayRankingUser pDayRankingUser, boolean pUpdateAllowInsert ) {
+           UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+           Document tDocSet = new Document("$set", pDayRankingUser.getMongoDocument());
+           UpdateResult tUpdSts = mDayRankingUserCollection.updateOne( pFilter, tDocSet, tOptions);
+           return tUpdSts;
+        }
+    
+        /**
+        * CRUD FIND methods
+        */
+
+        public List<DayRankingUser> findDayRankingUser( Bson pFilter  ) {
+         return findDayRankingUser( pFilter, null );
+        }
+
+        public List<DayRankingUser> findDayRankingUser( Bson pFilter, Document pSortDoc  ) {
+
+        FindIterable<Document> tDocuments = (pSortDoc == null) ? this.mDayRankingUserCollection.find( pFilter ) :
+        this.mDayRankingUserCollection.find( pFilter ).sort( pSortDoc );
+
+
+        if (tDocuments == null) {
+        return null;
+        }
+
+        List<DayRankingUser> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        DayRankingUser tDayRankingUser = new DayRankingUser();
+        tDayRankingUser.decodeMongoDocument( tDoc );
+        tResult.add( tDayRankingUser );
+        }
+        return tResult;
+        }
+
+
+
+        public List<DayRankingUser> findAllDayRankingUser()
+        {
+           List<DayRankingUser> tResult = new ArrayList<>();
+
+           FindIterable<Document> tDocuments  = this.mDayRankingUserCollection.find();
+           MongoCursor<Document> tIter = tDocuments.iterator();
+           while( tIter.hasNext()) {
+               Document tDoc = tIter.next();
+               DayRankingUser tDayRankingUser = new DayRankingUser();
+               tDayRankingUser.decodeMongoDocument( tDoc );
+               tResult.add(tDayRankingUser);
+            }
+            return tResult;
+        }
+
+        public DayRankingUser findDayRankingUserByMongoId( String pMongoObjectId ) {
+        Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+
+        FindIterable<Document> tDocuments = this.mDayRankingUserCollection.find( tFilter );
+        if (tDocuments == null) {
+            return null;
+        }
+
+        List<DayRankingUser> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        DayRankingUser tDayRankingUser = new DayRankingUser();
+        tDayRankingUser.decodeMongoDocument( tDoc );
+        tResult.add( tDayRankingUser );
+        }
+        return (tResult.size() > 0) ? tResult.get(0) : null;
+        }
+
+
+        public List<DayRankingUser> findDayRankingUser( String pDate, int pUserId ) {
+        Bson tFilter= Filters.and( 
+        Filters.eq("date", pDate),
+        Filters.eq("userId", pUserId));
+
+
+        FindIterable<Document> tDocuments = this.mDayRankingUserCollection.find( tFilter );
+        if (tDocuments == null) {
+           return null;
+        }
+
+        List<DayRankingUser> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+           Document tDoc = tIter.next();
+           DayRankingUser tDayRankingUser = new DayRankingUser();
+           tDayRankingUser.decodeMongoDocument( tDoc );
+           tResult.add( tDayRankingUser );
+        }
+        return tResult;
+        }
+
+        
+            public List<DayRankingUser> findDayRankingUserByDate( String pDate ) {
+            List<DayRankingUser> tResult = new ArrayList<>();
+            Bson tFilter= Filters.eq("date", pDate);
+
+            FindIterable<Document> tDocuments  = this.mDayRankingUserCollection.find( tFilter );
+            MongoCursor<Document> tIter = tDocuments.iterator();
+            while( tIter.hasNext()) {
+            Document tDoc = tIter.next();
+            DayRankingUser tDayRankingUser = new DayRankingUser();
+            tDayRankingUser.decodeMongoDocument( tDoc );
+            tResult.add(tDayRankingUser);
+            }
+            return tResult;
+            }
+        
+            public List<DayRankingUser> findDayRankingUserByUserId( int pUserId ) {
+            List<DayRankingUser> tResult = new ArrayList<>();
+            Bson tFilter= Filters.eq("userId", pUserId);
+
+            FindIterable<Document> tDocuments  = this.mDayRankingUserCollection.find( tFilter );
+            MongoCursor<Document> tIter = tDocuments.iterator();
+            while( tIter.hasNext()) {
+            Document tDoc = tIter.next();
+            DayRankingUser tDayRankingUser = new DayRankingUser();
+            tDayRankingUser.decodeMongoDocument( tDoc );
+            tResult.add(tDayRankingUser);
+            }
+            return tResult;
+            }
+        
+        /**
+        * CRUD DELETE methods
+        */
+        public long deleteDayRankingRegion( Bson pFilter) {
+           DeleteResult tResult = mDayRankingRegionCollection.deleteMany( pFilter );
+           return tResult.getDeletedCount();
+        }
+
+        public long deleteDayRankingRegionByMongoId( String pMongoObjectId) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            DeleteResult tResult = mDayRankingRegionCollection.deleteOne( tFilter );
+            return tResult.getDeletedCount();
+        }
+
+        
+            public long deleteDayRankingRegion( String pDate, int pRegionId ) {
+                Bson tKeyFilter= Filters.and( 
+                    Filters.eq("date", pDate),
+                    Filters.eq("regionId", pRegionId));
+
+             DeleteResult tResult =  mDayRankingRegionCollection.deleteMany(tKeyFilter);
+             return tResult.getDeletedCount();
+            }
+        
+            public long deleteDayRankingRegionByDate( String pDate ) {
+                Bson tKeyFilter= Filters.eq("date", pDate);
+                DeleteResult tResult =  mDayRankingRegionCollection.deleteMany(tKeyFilter);
+                return tResult.getDeletedCount();
+            }
+        
+            public long deleteDayRankingRegionByRegionId( int pRegionId ) {
+                Bson tKeyFilter= Filters.eq("regionId", pRegionId);
+                DeleteResult tResult =  mDayRankingRegionCollection.deleteMany(tKeyFilter);
+                return tResult.getDeletedCount();
+            }
+        
+        /**
+        * CRUD INSERT methods
+        */
+        public void insertDayRankingRegion( DayRankingRegion pDayRankingRegion ) {
+            Document tDoc = pDayRankingRegion.getMongoDocument();
+            mDayRankingRegionCollection.insertOne( tDoc );
+            ObjectId _tId = tDoc.getObjectId("_id");
+            if (_tId != null) {
+                pDayRankingRegion.setMongoId( _tId.toString());
+            }
+        }
+
+        public void insertDayRankingRegion( List<DayRankingRegion> pDayRankingRegionList ) {
+           List<Document> tList = pDayRankingRegionList.stream().map( DayRankingRegion::getMongoDocument).collect(Collectors.toList());
+           mDayRankingRegionCollection.insertMany( tList );
+           for( int i = 0; i < tList.size(); i++ ) {
+             ObjectId _tId = tList.get(i).getObjectId("_id");
+             if (_tId != null) {
+                pDayRankingRegionList.get(i).setMongoId( _tId.toString());
+             }
+           }
+        }
+
+    
+        /**
+        * CRUD UPDATE (INSERT) methods
+        */
+        public UpdateResult updateDayRankingRegionByMongoId( String pMongoObjectId, DayRankingRegion pDayRankingRegion ) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            Document tDocSet = new Document("$set", pDayRankingRegion.getMongoDocument());
+            UpdateResult tUpdSts = mDayRankingRegionCollection.updateOne( tFilter, tDocSet, new UpdateOptions());
+            return tUpdSts;
+        }
+
+        public UpdateResult updateDayRankingRegion(DayRankingRegion pDayRankingRegion, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        Bson tFilter= Filters.and( 
+        Filters.eq("date", pDayRankingRegion.getDate()),
+        Filters.eq("regionId", pDayRankingRegion.getRegionId()));
+        Document tDocSet = new Document("$set", pDayRankingRegion.getMongoDocument());
+        UpdateResult tUpdSts = mDayRankingRegionCollection.updateOne( tFilter, tDocSet, tOptions);
+        return tUpdSts;
+        }
+
+
+        public UpdateResult updateDayRankingRegion( String pDate, int pRegionId, DayRankingRegion pDayRankingRegion, boolean pUpdateAllowInsert ) {
+          UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+          Bson tFilter= Filters.and( 
+             Filters.eq("date", pDate),
+             Filters.eq("regionId", pRegionId));
+
+           Document tDocSet = new Document("$set", pDayRankingRegion.getMongoDocument());
+
+           UpdateResult tUpdSts = mDayRankingRegionCollection.updateOne( tFilter, tDocSet, tOptions);
+           return tUpdSts;
+        }
+
+        public UpdateResult updateDayRankingRegion( Bson pFilter, DayRankingRegion pDayRankingRegion, boolean pUpdateAllowInsert ) {
+           UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+           Document tDocSet = new Document("$set", pDayRankingRegion.getMongoDocument());
+           UpdateResult tUpdSts = mDayRankingRegionCollection.updateOne( pFilter, tDocSet, tOptions);
+           return tUpdSts;
+        }
+    
+        /**
+        * CRUD FIND methods
+        */
+
+        public List<DayRankingRegion> findDayRankingRegion( Bson pFilter  ) {
+         return findDayRankingRegion( pFilter, null );
+        }
+
+        public List<DayRankingRegion> findDayRankingRegion( Bson pFilter, Document pSortDoc  ) {
+
+        FindIterable<Document> tDocuments = (pSortDoc == null) ? this.mDayRankingRegionCollection.find( pFilter ) :
+        this.mDayRankingRegionCollection.find( pFilter ).sort( pSortDoc );
+
+
+        if (tDocuments == null) {
+        return null;
+        }
+
+        List<DayRankingRegion> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        DayRankingRegion tDayRankingRegion = new DayRankingRegion();
+        tDayRankingRegion.decodeMongoDocument( tDoc );
+        tResult.add( tDayRankingRegion );
+        }
+        return tResult;
+        }
+
+
+
+        public List<DayRankingRegion> findAllDayRankingRegion()
+        {
+           List<DayRankingRegion> tResult = new ArrayList<>();
+
+           FindIterable<Document> tDocuments  = this.mDayRankingRegionCollection.find();
+           MongoCursor<Document> tIter = tDocuments.iterator();
+           while( tIter.hasNext()) {
+               Document tDoc = tIter.next();
+               DayRankingRegion tDayRankingRegion = new DayRankingRegion();
+               tDayRankingRegion.decodeMongoDocument( tDoc );
+               tResult.add(tDayRankingRegion);
+            }
+            return tResult;
+        }
+
+        public DayRankingRegion findDayRankingRegionByMongoId( String pMongoObjectId ) {
+        Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+
+        FindIterable<Document> tDocuments = this.mDayRankingRegionCollection.find( tFilter );
+        if (tDocuments == null) {
+            return null;
+        }
+
+        List<DayRankingRegion> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        DayRankingRegion tDayRankingRegion = new DayRankingRegion();
+        tDayRankingRegion.decodeMongoDocument( tDoc );
+        tResult.add( tDayRankingRegion );
+        }
+        return (tResult.size() > 0) ? tResult.get(0) : null;
+        }
+
+
+        public List<DayRankingRegion> findDayRankingRegion( String pDate, int pRegionId ) {
+        Bson tFilter= Filters.and( 
+        Filters.eq("date", pDate),
+        Filters.eq("regionId", pRegionId));
+
+
+        FindIterable<Document> tDocuments = this.mDayRankingRegionCollection.find( tFilter );
+        if (tDocuments == null) {
+           return null;
+        }
+
+        List<DayRankingRegion> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+           Document tDoc = tIter.next();
+           DayRankingRegion tDayRankingRegion = new DayRankingRegion();
+           tDayRankingRegion.decodeMongoDocument( tDoc );
+           tResult.add( tDayRankingRegion );
+        }
+        return tResult;
+        }
+
+        
+            public List<DayRankingRegion> findDayRankingRegionByDate( String pDate ) {
+            List<DayRankingRegion> tResult = new ArrayList<>();
+            Bson tFilter= Filters.eq("date", pDate);
+
+            FindIterable<Document> tDocuments  = this.mDayRankingRegionCollection.find( tFilter );
+            MongoCursor<Document> tIter = tDocuments.iterator();
+            while( tIter.hasNext()) {
+            Document tDoc = tIter.next();
+            DayRankingRegion tDayRankingRegion = new DayRankingRegion();
+            tDayRankingRegion.decodeMongoDocument( tDoc );
+            tResult.add(tDayRankingRegion);
+            }
+            return tResult;
+            }
+        
+            public List<DayRankingRegion> findDayRankingRegionByRegionId( int pRegionId ) {
+            List<DayRankingRegion> tResult = new ArrayList<>();
+            Bson tFilter= Filters.eq("regionId", pRegionId);
+
+            FindIterable<Document> tDocuments  = this.mDayRankingRegionCollection.find( tFilter );
+            MongoCursor<Document> tIter = tDocuments.iterator();
+            while( tIter.hasNext()) {
+            Document tDoc = tIter.next();
+            DayRankingRegion tDayRankingRegion = new DayRankingRegion();
+            tDayRankingRegion.decodeMongoDocument( tDoc );
+            tResult.add(tDayRankingRegion);
+            }
+            return tResult;
+            }
+        
+        /**
+        * CRUD DELETE methods
+        */
         public long deleteUser( Bson pFilter) {
            DeleteResult tResult = mUserCollection.deleteMany( pFilter );
            return tResult.getDeletedCount();
@@ -645,6 +1375,15 @@
             Document tDocSet = new Document("$set", pUser.getMongoDocument());
             UpdateResult tUpdSts = mUserCollection.updateOne( tFilter, tDocSet, new UpdateOptions());
             return tUpdSts;
+        }
+
+        public UpdateResult updateUser(User pUser, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        Bson tFilter= Filters.and( 
+        Filters.eq("mailAddr", pUser.getMailAddr()));
+        Document tDocSet = new Document("$set", pUser.getMongoDocument());
+        UpdateResult tUpdSts = mUserCollection.updateOne( tFilter, tDocSet, tOptions);
+        return tUpdSts;
         }
 
 
@@ -844,6 +1583,17 @@
             Document tDocSet = new Document("$set", pSubscription.getMongoDocument());
             UpdateResult tUpdSts = mSubscriptionCollection.updateOne( tFilter, tDocSet, new UpdateOptions());
             return tUpdSts;
+        }
+
+        public UpdateResult updateSubscription(Subscription pSubscription, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        Bson tFilter= Filters.and( 
+        Filters.eq("mailAddr", pSubscription.getMailAddr()),
+        Filters.eq("zoneName", pSubscription.getZoneName()),
+        Filters.eq("zoneId", pSubscription.getZoneId()));
+        Document tDocSet = new Document("$set", pSubscription.getMongoDocument());
+        UpdateResult tUpdSts = mSubscriptionCollection.updateOne( tFilter, tDocSet, tOptions);
+        return tUpdSts;
         }
 
 
@@ -1055,6 +1805,15 @@
             Document tDocSet = new Document("$set", pFirstEntry.getMongoDocument());
             UpdateResult tUpdSts = mFirstEntryCollection.updateOne( tFilter, tDocSet, new UpdateOptions());
             return tUpdSts;
+        }
+
+        public UpdateResult updateFirstEntry(FirstEntry pFirstEntry, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        Bson tFilter= Filters.and( 
+        Filters.eq("timestamp", pFirstEntry.getTimestamp()));
+        Document tDocSet = new Document("$set", pFirstEntry.getMongoDocument());
+        UpdateResult tUpdSts = mFirstEntryCollection.updateOne( tFilter, tDocSet, tOptions);
+        return tUpdSts;
         }
 
 

@@ -37,6 +37,42 @@
         <Attribute name="hoursStat" type="HourRegionStat" list="linked" dbTransient="true"/>
     </Message>
 
+
+    <!--
+       User Ranking Service Objects
+       prefix DR
+    -->
+    <Message name="DayRankingUserStart" rootMessage="true" db="true" dbCollection="DayRankingUserStart">
+        <Attribute name="date" type="String" dbKey="not-unique"/>
+        <Attribute name="userId" type="int" dbKey="not-unique"/>
+        <Attribute name="user" type="String"/>
+        <Attribute name="points" type="int"/>
+        <Attribute name="taken" type="int"/>
+    </Message>
+
+
+    <Message name="DayRankingUser" rootMessage="true" db="true" dbCollection="DayRankingUser">
+        <Attribute name="date" type="String" dbKey="not-unique"/>
+        <Attribute name="userId" type="int" dbKey="not-unique"/>
+        <Attribute name="regionId" type="int"/>
+        <Attribute name="user" type="String"/>
+        <Attribute name="points" type="int"/>
+        <Attribute name="taken" type="int"/>
+        <Attribute name="place" type="int"/>
+        <Attribute name="PPH" type="int" dbTransient="true"/>
+        <Attribute name="activeZones" type="int" dbTransient="true"/>
+        <Attribute name="latestTakeTime" type="long" dbTransient="true"/>
+        <Attribute name="finalized" type="boolean"/>
+    </Message>
+
+    <Message name="DayRankingRegion" rootMessage="true" db="true" dbCollection="DayRankingRegion">
+        <Attribute name="date" type="String" dbKey="not-unique"/>
+        <Attribute name="regionId" type="int" dbKey="not-unique"/>
+        <Attribute name="regionName" type="String"/>
+        <Attribute name="startTime" type="long"/>
+        <Attribute name="finalized" type="boolean"/>
+    </Message>
+
     <!--
         Zone Taken Notification Objects
         prefix ZN

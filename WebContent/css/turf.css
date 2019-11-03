@@ -29,6 +29,7 @@ button {
     font-size: 14px;
     font-family: "Arial";
 }
+optgroup { font-size:14px; }
 
 .txtin {
     font-family: "Arial";

@@ -14,10 +14,16 @@ import com.hoddmimes.turf.server.common.ZoneEvent;
 import com.hoddmimes.turf.server.configuration.DayRankingConfiguration;
 import com.hoddmimes.turf.server.generated.*;
 import com.hoddmimes.turf.server.generated.DayRankingUser;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -116,7 +122,9 @@ public class DayRankingService implements TurfServiceInterface {
 
         }
         Collections.sort(drUsers, new DayRankingUsertSorter());
-
+        for( int i = 0; i < dbUserList.size(); i++) {
+            drUsers.get(i).setPlace((i+1));
+        }
 
         DayRankingRegion dr = tRegionLst.get(0);
 
@@ -137,10 +145,33 @@ public class DayRankingService implements TurfServiceInterface {
             dr.setRegionId( r.getId());
             tRegionList.add( dr );
         }
+        if (mConfig.getDefaultRegionName() != null) {
+            tResponse.setDefaultRegion( mConfig.getDefaultRegionName());
+            tResponse.setDefaultRegionId( mConfig.getDefaultRegionId());
+        }
+        tResponse.setFirstDateInDB( getFirstDateInDB());
         tResponse.addRegions(tRegionList);
         return tResponse.toJson().toString();
 
     }
+
+    private String getFirstDateInDB() {
+        MongoCollection tDayRankUsersColl = mDbAux.getDayRankingUserCollection();
+        Bson tFilter =  Filters.eq("finalized", true);
+
+        FindIterable<Document> tItrDoc = tDayRankUsersColl.find( tFilter).sort(new BasicDBObject("date",1)).limit(1);
+        if (tItrDoc == null) {
+            return mCurrentDate;
+        }
+        MongoCursor<Document> tIter = tItrDoc.iterator();
+        if (tIter.hasNext()) {
+             Document tDoc = tIter.next();
+             String tDateStr = tDoc.get("date").toString();
+             return (tDateStr == null) ? mCurrentDate : tDateStr;
+        }
+        return mCurrentDate;
+    }
+
 
     private void loadStartRankingFromDB() {
 

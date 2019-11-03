@@ -136,7 +136,9 @@
     </Message>
 
     <Message name="DR_RegionRsp"  rootMessage="true">
-        <Sttribute name="startTime" type="String"/>
+        <Attribute name="firstDateInDB" type="String"/>
+        <Attribute name="defaultRegion" type="String"/>
+        <Attribute name="defaultRegionId" type="int"/>
         <Attribute name="regions" type="DR_Region" list="array"/>
     </Message>
 
@@ -147,9 +149,10 @@
     </Message>
 
     <Message name="DR_User">
+        <Attribute name="place" type="int"/>
         <Attribute name="user" type="String"/>
-        <Attribute name="points" type="int"/>
         <Attribute name="takes" type="int"/>
+        <Attribute name="points" type="int"/>
         <Attribute name="activeZones" type="int"/>
         <Attribute name="pph" type="int"/>
     </Message>

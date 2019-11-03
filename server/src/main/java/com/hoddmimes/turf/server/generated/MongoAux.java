@@ -1031,7 +1031,7 @@
         }
 
         public DayRankingUser findDayRankingUserByMongoId( String pMongoObjectId ) {
-        Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+        Bson tFilter =  Filters.eq("_id", new ObjectId(pMongoObjectId));
 
         FindIterable<Document> tDocuments = this.mDayRankingUserCollection.find( tFilter );
         if (tDocuments == null) {

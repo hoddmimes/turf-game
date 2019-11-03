@@ -350,7 +350,7 @@ public class RegionStatService implements TurfServiceInterface
             mDbAux.insertHourRegionStat( tHHStat );
             if (mConfig.getDebugContext().ifDebug( DebugContext.HOUR_STATISTICS)) {
                 mLogger.debug("Create-Hour-Stat region: " + pRegionStat.getName().get() + " (" + pRegionStat.getId().get() +
-                        ") time: " + Turf.SDF.format( tHHStat.getCreateTime().get()));
+                        ") list-length: " + (tList.size() + 1) + " time: " + Turf.SDF.format( tHHStat.getCreateTime().get()));
             }
         } else {
             tHHStat = tList.getLast();
@@ -385,7 +385,7 @@ public class RegionStatService implements TurfServiceInterface
                 mDbAux.deleteHourRegionStatByMongoId(hrs.getMongoId());
                 if (mConfig.getDebugContext().ifDebug( DebugContext.HOUR_STATISTICS)) {
                     mLogger.debug("Delete-Hour-Stat region: " + pRegionStat.getName().get() + " (" + pRegionStat.getId().get() +
-                            ") time: " + Turf.SDF.format( hrs.getCreateTime().get()));
+                            ") list-length: " + tLst.size() + " time: " + Turf.SDF.format( hrs.getCreateTime().get()));
                 }
             }
         }

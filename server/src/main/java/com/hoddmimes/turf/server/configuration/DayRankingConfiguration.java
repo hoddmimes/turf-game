@@ -15,6 +15,9 @@ public class DayRankingConfiguration
     private long         mSaveToDBIntervalMS;
     private int          mMaxUsers;
     private int          mDisplayUsers;
+    private String       mDefaultRegion;
+    private int          mDefaultRegionId;
+
 
 
 
@@ -24,9 +27,16 @@ public class DayRankingConfiguration
         mRefreshUserIntervalMS = XmlAux.getIntAttribute(tCfg,"refreshIntervalSec", 10 );
         mSaveToDBIntervalMS = XmlAux.getIntAttribute(tCfg,"saveIntervaSec", 10 );
         mMaxUsers = XmlAux.getIntAttribute(tCfg,"maxUsers", 300);
+        mDisplayUsers = XmlAux.getIntAttribute(tCfg,"maxUsers", 50);
 
         mRefreshUserIntervalMS = mRefreshUserIntervalMS * 1000L;
         mSaveToDBIntervalMS = mSaveToDBIntervalMS * 1000L;
+
+        Element tDefaultRegionElement = XmlAux.getElement( pRoot, "DefaultRegion");
+        if (tDefaultRegionElement != null) {
+            mDefaultRegion = XmlAux.getStringAttribute( tDefaultRegionElement,"name", null);
+            mDefaultRegionId = XmlAux.getIntAttribute( tDefaultRegionElement,"id", 0);
+        }
 
 
         mRegions = new ArrayList<>();
@@ -51,6 +61,14 @@ public class DayRankingConfiguration
     }
     public int getMaxUsers() { return mMaxUsers;}
     public int getMaxDisplayUsers() { return mDisplayUsers; }
+
+    public String getDefaultRegionName() {
+        return mDefaultRegion;
+    }
+
+    public int getDefaultRegionId() {
+        return mDefaultRegionId;
+    }
 
     public List<Region> getRegions() {
         return mRegions;

@@ -1,0 +1,175 @@
+<html>
+<head>
+   <script
+           src="https://code.jquery.com/jquery-3.3.1.js"
+           integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+           crossorigin="anonymous">
+   </script>
+   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   <script src="js/turf.js" type="text/javascript"></script>
+   <script src="js/table.js" type="text/javascript"></script>
+
+   <title>Turf Daily Ranking</title>
+   <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type" />
+   <link rel="stylesheet" type="text/css" href="css/turf.css">
+</head>
+<!--body onload="loadDataFromServer()"/ -->
+
+<body>
+   <br>
+   <h4 id="dayRankingH1" style="margin-left:50px;text-align:left">Day Ranking</h4>
+      <div id="divDayRanking" class="borderDiv">
+         <p style="family : Arial,sans-serif; font-size: 16px;">
+            Regions <select  id="drRegion">
+            <optgroup>
+                        <option style="font-family:'Arial';font-size: 14px;" value="foo">Foo</option>
+                        <option style="font-family:'Arial';font-size: 14px;" value="bar">Bar</option>
+            </optgroup>
+                     </select>
+            Date <input class="txtin" id="drDate" type="date" placeholder="yyyy-MM-dd" name="drDate" required>
+         </p>
+         <br>
+            <table id="dayRankingTable" class="dayRankingTableClass">
+               <tr>
+                  <th class="thDayRanking">Place</th>
+                  <th class="thDayRanking">User</th>
+                  <th class="thDayRanking">Takes</th>
+                  <th class="thDayRanking">Zones</th>
+                  <th class="thDayRanking">PPH</th>
+                  <th class="thDayRanking">Points</th>
+               </tr>
+            </table>
+      </div>
+   <br>
+
+
+
+
+
+<script>
+     var regionData = [];
+     var startTime = '';
+
+     var zoneTableDef= { 'table' : 'dayRanking',
+                        'keys' : [
+                           {'type' : 'int',    'column' : 0,  'jkey' : 'place',        'cssClass' : 'tdDayRanking'} ,
+                           {'type' : 'string', 'column' : 1,  'jkey' : 'user',         'cssClass' : 'tdDayRanking'} ,
+                           {'type' : 'int',    'column' : 2,  'jkey' : 'takes',        'cssClass' : 'tdDayRanking'} ,
+                           {'type' : 'int',    'column' : 3,  'jkey' : 'activeZones',  'cssClass' : 'tdDayRanking'},
+                           {'type' : 'int',    'column' : 5,  'jkey' : 'pph',          'cssClass' : 'tdDayRanking'},
+                           {'type' : 'int',    'column' : 6,  'jkey' : 'points',       'cssClass' : 'tdDayRanking'}  ]};
+
+
+
+
+
+    function loadDataFromServer() {
+      loadDayRankingRegions();
+    }
+
+    function loadDayRankingRegions()
+ 	{
+      var rqst = {DR_RegionRqst : {}};
+
+      //console.log( 'request-data: ' + JSON.stringify(rqst));
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/drLoadRegions', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /* Alerts the results */
+      posting.done(function( msg ) {
+          console.log( msg );
+
+          if (msg.hasOwnProperty('DR_RegionRsp')) {
+            regionData = msg.DR_regionRsp.regions;
+            startTime = msg.DR_RegionRsp.startTime;
+		  } else if (msg.hasOwnProperty('TG_Response')) {
+              if (!(msg.TG_Response.success)) {
+    	          alert('Load day ranking init failed, reason: ' + msg.TG_Response.reason);
+	          } else {
+		          alert('Load day ranking init info  TG_response, success should never be returned');
+		      }
+		  }
+	  });
+	}
+
+
+
+    function loadRegionStatistics()
+ 	{
+      var rqst = {RS_RegionStatisticsRqst : { isTotalRequest : true }};
+
+      //console.log( 'request-data: ' + JSON.stringify(rqst));
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/rsLoadRegionStat', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /* Alerts the results */
+      posting.done(function( msg ) {
+          console.log( msg );
+
+          if (msg.hasOwnProperty('RS_RegionStatisticsRsp')) {
+              for( var i = 0; i < msg.RS_RegionStatisticsRsp.regionStats.length; i++ ) {
+                  tableInsert( document.getElementById('tableRegionStat'), zoneTableDef, msg.RS_RegionStatisticsRsp.regionStats[i] );
+              }
+              var hdr = document.getElementById('regionStatH1');
+              hdr.innerHTML = "Regional Statistics (since " + msg.RS_RegionStatisticsRsp.initDate + " samples " +
+                   msg.RS_RegionStatisticsRsp.totalSamples +")";
+
+		  } else if (msg.hasOwnProperty('TG_Response')) {
+              if (!(msg.TG_Response.success)) {
+    	          alert('Load region stat failure, reason: ' + msg.TG_Response.reason);
+	          } else {
+		          alert('Load region stat TG_response, success should never be returned');
+		      }
+		  }
+	  });
+	}
+
+	 function loadRegionHourStatistics()
+ 	{
+      var rqst = {RS_RegionStatisticsRqst : { isTotalRequest : false }};
+
+      //console.log( 'request-data: ' + JSON.stringify(rqst));
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/rsLoadRegionStat', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /* Alerts the results */
+      posting.done(function( msg ) {
+          console.log( msg );
+
+          if (msg.hasOwnProperty('RS_RegionStatisticsRsp')) {
+              for( var i = 0; i < msg.RS_RegionStatisticsRsp.regionStats.length; i++ ) {
+                  tableInsert( document.getElementById('tableRegionHourStat'), zoneTableDef, msg.RS_RegionStatisticsRsp.regionStats[i] );
+              }
+              var hdr = document.getElementById('regionStatHourH1');
+              hdr.innerHTML = "Region Statistics (for last " +  msg.RS_RegionStatisticsRsp.periodHH + " hours samples " +
+                   msg.RS_RegionStatisticsRsp.totalSamples + ")";
+		  } else if (msg.hasOwnProperty('TG_Response')) {
+              if (!(msg.TG_Response.success)) {
+    	          alert('Load region hour stat failure, reason: ' + msg.TG_Response.reason);
+	          } else {
+		          alert('Load region hour stat TG_response, success should never be returned');
+		      }
+		  }
+	  });
+	}
+
+
+</script>
+</body>
+</html>

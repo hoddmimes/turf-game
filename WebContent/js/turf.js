@@ -18,6 +18,12 @@ function validateEmail(email)
     return re.test(email);
 }
 
+function validateDate(pDate)
+{
+    var re = /^\d{4}-\d{1,2}-\d{1,2}$/;
+    re.test( pDate );
+}
+
 function loadUrl(newLocation)
 {
   window.location = newLocation;

@@ -89,13 +89,16 @@ public class RegionStatService implements TurfServiceInterface
         RS_RegionStatisticsRsp tResponse = new RS_RegionStatisticsRsp();
         ArrayList<RegionStatistics> tReginRsponseList = new ArrayList<>();
 
+        long tTotalSamples = 0;
         for( RegionStat rs : this.mRegions.values()) {
             RegionStatistics rsRsp = buildHourStatisticResponse( rs );
             tReginRsponseList.add( rsRsp );
+            List<HourRegionStat> tHHList = rs.getHoursStat().orElse(new LinkedList<>());
+            for(HourRegionStat hhs : tHHList ) {
+                tTotalSamples += hhs.getTotTakes().orElse(0L);
+            }
         }
         calculateRatingFactors( tReginRsponseList );
-
-        long tTotalSamples = this.mRegions.values().stream().mapToLong( rs -> { return rs.getHoursStat().orElse( new LinkedList<HourRegionStat>()).stream().mapToLong(hs -> hs.getTotTakes().orElse(0L)).sum(); }).sum();
 
         tResponse.addRegionStats( tReginRsponseList );
         tResponse.setPeriodHH(mConfig.getPeriodMS() / (3600L * 1000L));

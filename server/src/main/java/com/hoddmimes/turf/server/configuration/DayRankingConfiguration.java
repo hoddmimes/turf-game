@@ -11,13 +11,23 @@ public class DayRankingConfiguration
 {
 
     private List<Region> mRegions;
-    private long         mRefreshIntervalMS;
+    private long         mRefreshUserIntervalMS;
+    private long         mSaveToDBIntervalMS;
+    private int          mMaxUsers;
+    private int          mDisplayUsers;
+
 
 
 
     public void parse( Element pRoot ){
         Element tCfg = XmlAux.getElement( pRoot, "DayRankingService");
-        mRefreshIntervalMS = Long.parseLong(tCfg.getAttribute("refreshInterval")) * 1000L;
+        mRefreshUserIntervalMS = XmlAux.getIntAttribute(tCfg,"refreshIntervalSec", 10 );
+        mSaveToDBIntervalMS = XmlAux.getIntAttribute(tCfg,"saveIntervaSec", 10 );
+        mMaxUsers = XmlAux.getIntAttribute(tCfg,"maxUsers", 300);
+
+        mRefreshUserIntervalMS = mRefreshUserIntervalMS * 1000L;
+        mSaveToDBIntervalMS = mSaveToDBIntervalMS * 1000L;
+
 
         mRegions = new ArrayList<>();
         NodeList tNodeList = tCfg.getElementsByTagName("Region");
@@ -33,9 +43,14 @@ public class DayRankingConfiguration
 
 
 
-    public long getmRefreshIntervalMS() {
-        return mRefreshIntervalMS;
+    public long getRefreshUserIntervalMS() {
+        return mRefreshUserIntervalMS;
     }
+    public long getSaveIntervalMS() {
+        return mSaveToDBIntervalMS;
+    }
+    public int getMaxUsers() { return mMaxUsers;}
+    public int getMaxDisplayUsers() { return mDisplayUsers; }
 
     public List<Region> getRegions() {
         return mRegions;

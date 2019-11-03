@@ -123,4 +123,42 @@
         <Attribute name="initDate" type="String"/>
     </Message>
 
+
+    <!--
+      Day Ranking messages
+     -->
+    <Message name="DR_Region">
+        <Attribute name="regionId" type="int"/>
+        <Attribute name="region" type="String"/>
+    </Message>
+
+    <Message name="DR_RegionRqst"  rootMessage="true">
+    </Message>
+
+    <Message name="DR_RegionRsp"  rootMessage="true">
+        <Sttribute name="startTime" type="String"/>
+        <Attribute name="regions" type="DR_Region" list="array"/>
+    </Message>
+
+    <Message name="DR_RankingRqst"  rootMessage="true">
+        <Attribute name="regionId" type="int"/>
+        <Attribute name="region" type="String"/>
+        <Attribute name="date" type="String"/>
+    </Message>
+
+    <Message name="DR_User">
+        <Attribute name="user" type="String"/>
+        <Attribute name="points" type="int"/>
+        <Attribute name="takes" type="int"/>
+        <Attribute name="activeZones" type="int"/>
+        <Attribute name="pph" type="int"/>
+    </Message>
+
+    <Message name="DR_RankingRsp"  rootMessage="true">
+        <Attribute name="regionId" type="int"/>
+        <Attribute name="region" type="String"/>
+        <Attribute name="startTime" type="String"/>
+        <Attribute name="users" type="DR_User" list="array"/>
+    </Message>
+
 </Messages>

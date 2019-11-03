@@ -314,6 +314,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
             return TGStatus.createError( "Unknown Turf Rqst \"" + tJsonRqstMsgName + "\"", null).toJson().toString();
         }
 
+        if (tRqstMsg.getMessageName().startsWith("DR_")) {
+            return this.mDayRankingService.execute( tRqstMsg );
+        }
+
         if (tRqstMsg.getMessageName().startsWith("ZN_")) {
             return this.mZoneNotifierService.execute( tRqstMsg );
         }

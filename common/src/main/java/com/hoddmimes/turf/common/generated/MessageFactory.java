@@ -153,6 +153,34 @@ public class MessageFactory implements MessageFactoryInterface
             	return tMessage;
             }
 			
+            case "DR_RegionRqst":
+            {
+            	DR_RegionRqst tMessage = new DR_RegionRqst();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "DR_RegionRsp":
+            {
+            	DR_RegionRsp tMessage = new DR_RegionRsp();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "DR_RankingRqst":
+            {
+            	DR_RankingRqst tMessage = new DR_RankingRqst();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "DR_RankingRsp":
+            {
+            	DR_RankingRsp tMessage = new DR_RankingRsp();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
             default:
               return null;
 		}	

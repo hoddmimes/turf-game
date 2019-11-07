@@ -42,26 +42,26 @@
        User Ranking Service Objects
        prefix DR
     -->
-    <Message name="DayRankingUserInit" rootMessage="true" db="true" dbCollection="DayRankingUserInit">
+    <Message name="DayRankingInitUser" rootMessage="true" db="true" dbCollection="DayRankingUserInit">
         <Attribute name="date" type="String" dbKey="not-unique"/>
         <Attribute name="userId" type="int" dbKey="not-unique"/>
         <Attribute name="user" type="String"/>
         <Attribute name="initPoints" type="int"/>
-        <Attribute name="initTaken" type="int"/>
+        <Attribute name="initTakes" type="int"/>
     </Message>
 
 
     <Message name="DayRankingUser" rootMessage="true" db="true" dbCollection="DayRankingUser">
         <Attribute name="date" type="String" dbKey="not-unique"/>
-        <Attribute name="userId" type="int"/>
+        <Attribute name="userId" type="int" dbKey="not-unique"/>
         <Attribute name="regionId" type="int"  dbKey="not-unique"/>
         <Attribute name="user" type="String"/>
         <Attribute name="points" type="int"/>
         <Attribute name="takes" type="int"/>
-        <Attribute name="place" type="int"/>
+        <Attribute name="place" type="int" dbTransient="true"/>/>
         <Attribute name="PPH" type="int" dbTransient="true"/>
         <Attribute name="activeZones" type="int" dbTransient="true"/>
-        <Attribute name="latestTakeTime" type="long" dbTransient="true"/>
+        <Attribute name="latestTakeTime" type="long"/>
         <Attribute name="finalized" type="boolean"/>
     </Message>
 

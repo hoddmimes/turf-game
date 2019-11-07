@@ -427,6 +427,45 @@ public class RegionStatService implements TurfServiceInterface
         return false;
     }
 
+    private String formatRegionStat( RegionStat r ) {
+        NumberFormat nbf = NumberFormat.getInstance();
+        nbf.setMinimumFractionDigits(1);
+        nbf.setMaximumFractionDigits(1);
+        nbf.setGroupingUsed(false);
+
+        String hhStat = null;
+        double  distTakes = 0d, tpTakes = 0d, pphTakes = 0d;
+        long timeTakes = 0L;
+
+        if ((r.getTotTakes().isPresent()) && (r.getTotTakes().get() > 0)) {
+            distTakes = (double) r.getTotDistance().orElse(0L) / r.getTotTakes().get();
+            timeTakes =  r.getTotTime().orElse(0L) / r.getTotTakes().get();
+            tpTakes = (double) r.getTotTP().orElse(0L) / r.getTotTakes().get();
+        }
+        if ((r.getTotPPHChanges().isPresent()) && (r.getTotPPHChanges().get() > 0)) {
+            pphTakes = r.getTotPPH().orElse(0L) / r.getTotPPHChanges().get();
+        }
+
+        if (r.getHoursStat().isPresent()) {
+            LinkedList<HourRegionStat> hhList = (LinkedList<HourRegionStat>) r.getHoursStat().get();
+            if (hhList.size() >= 2) {
+                hhStat = " hh-stat-size: " + hhList.size() +
+                        " hh-first: " + Turf.SDFSimpleDateFormat.format(hhList.getFirst().getCreateTime().get()) +
+                        " hh-last: " + Turf.SDFSimpleDateFormat.format(hhList.getLast().getCreateTime().get());
+            } else {
+                hhStat = " hh-stat-size: " + hhList.size();
+            }
+        }
+        return r.getName().get() +
+                " time/take: " + Turf.formatTimeDiff( (timeTakes * 1000L)) +
+                " dist/take: " + nbf.format( distTakes ) +
+                " TP/take: " + nbf.format( tpTakes ) +
+                " PPH/take: " + nbf.format( pphTakes ) +
+                " totTakes: " + r.getTotTakes().orElse(0L) +
+                " totPPHChngs: " + r.getTotPPHChanges().orElse(0L) +
+                hhStat;
+    }
+
         private int changedRegionsToDatabase() {
         int tUpdates = 0;
         try {
@@ -441,7 +480,7 @@ public class RegionStatService implements TurfServiceInterface
                     }
 
                     if (mDbgCtx.ifDebug(DebugContext.STATISTICS)) {
-                        mLogger.debug( "region-updated: " + r.toJson().toString() );
+                        mLogger.debug( "region-updated: " + formatRegionStat( r ));
                     }
 
                 }

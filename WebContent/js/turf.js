@@ -21,7 +21,7 @@ function validateEmail(email)
 function validateDate(pDate)
 {
     var re = /^\d{4}-\d{1,2}-\d{1,2}$/;
-    re.test( pDate );
+    return re.test( pDate );
 }
 
 function loadUrl(newLocation)

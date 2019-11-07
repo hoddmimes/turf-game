@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipException;
 
 import org.w3c.dom.Element;
 
@@ -92,29 +93,43 @@ public class Turf
 	{
 		JsonElement tElement = null;
 		boolean tGotAnswer = false;
+		boolean tConnectSuccess = false;
 
 		while (!tGotAnswer) {
 			try {
+				tConnectSuccess = false;
 				URLConnection tConn = new URL(URL_PATH + pPath ).openConnection();
+				tConnectSuccess = true;
+
 				tConn.setRequestProperty("Accept-Encoding", "gzip, deflate");
 				InputStream tInStream = new GZIPInputStream(tConn.getInputStream());
 
-				BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "UTF-8"), 8);		
+
+				BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "utf-8"), 8);
 				tElement  =  new JsonParser().parse(tReader);
 				tGotAnswer = true;
 			} catch (MalformedURLException e) {
-				e.printStackTrace();
-				if (!pRecovery) {
-					return null;
-				} else {
-					try { Thread.currentThread().sleep(DEFAULT_ERROR_WAIT_MS); }
-					catch( InterruptedException ie) {}
-				}
+                e.printStackTrace();
+                if (!pRecovery) {
+                    return null;
+                } else {
+                    try {
+                        Thread.currentThread().sleep(DEFAULT_ERROR_WAIT_MS);
+                    } catch (InterruptedException ie) {
+                    }
+                }
+            } catch( ZipException ze) {
+                    if (tConnectSuccess) {
+                        return null;
+                    }
 			} catch (IOException e) {
 				System.out.println( e.getMessage());
 				if (!pRecovery) {
 					return null;
 				} else {
+					if (tConnectSuccess) {
+						return null;
+					}
 					try { Thread.currentThread().sleep(DEFAULT_ERROR_WAIT_MS); }
 					catch( InterruptedException ie) {}
 				}
@@ -132,26 +147,29 @@ public class Turf
 	{
 		JsonElement tElement = null;
 		boolean tGotAnswer = false;
+		boolean tConnectSuccess = false;
 
 		while (!tGotAnswer) {
 			try {
+				tConnectSuccess = false;
 				HttpURLConnection tConn = (HttpURLConnection) new URL(URL_PATH + pPath).openConnection();
 				tConn.setRequestProperty("Accept-Encoding", "gzip, deflate");
 				tConn.setRequestMethod("POST");
-				tConn.setRequestProperty("Content-Type", "application/json"); 	
+				tConn.setRequestProperty("Content-Type", "application/json;charset=iso-8859-1");
 				tConn.setDoOutput(true);
 				tConn.setDoInput(true);
 				tConn.setRequestProperty("Content-Length", "" + Integer.toString(pRequestData.getBytes().length));
 				tConn.setUseCaches (false);
 
 				DataOutputStream tOut = new DataOutputStream(tConn.getOutputStream ());
-				tOut.writeBytes(pRequestData);
+				tOut.write(pRequestData.getBytes("iso-8859-1"));
 				tOut.flush();
 				tOut.close();
+				tConnectSuccess = true;
 
 
-				InputStream tInStream = new GZIPInputStream(tConn.getInputStream());
-				BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "UTF-8"), 8);		
+				InputStream tInStream = new GZIPInputStream( tConn.getInputStream());
+				BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "utf-8"), 8);
 				tElement  =  new JsonParser().parse(tReader);
 				tGotAnswer = true;
 
@@ -163,7 +181,13 @@ public class Turf
 					try { Thread.currentThread().sleep(DEFAULT_ERROR_WAIT_MS); }
 					catch( InterruptedException ie) {}
 				}
-			} catch (IOException e) {
+			}
+			catch( ZipException ze) {
+			    if (tConnectSuccess) {
+			        return null;
+                }
+            }
+			catch (IOException e) {
 				e.printStackTrace();
 				if (!pRecovery) {
 					return null;

@@ -18,17 +18,19 @@
 
 <body>
    <br>
-   <h4 id="dayRankingHdr" style="margin-left:50px;text-align:left">Day Ranking</h4>
-      <div id="divDayRanking" class="borderDiv">
-         <p style="family : Arial,sans-serif; font-size: 16px;">
+   <h4 style="margin-left:145px;text-align:left;font-family:Arial,sans-serif;">Day Ranking</h4>
+      <p style="margin-left:50px;text-align:left;font-family:Arial,sans-serif;"id="drFirstEntryInDB"></p>
+      <p style="margin-left:50px;text-align:left;font-family:Arial,sans-serif;font-style: italic;"id="drRegionInfo"></p>
+         <p style="font-family : Arial,sans-serif; font-size: 16px;">
             Regions <select  id="drRegion">
             <optgroup id="drRegionOptionGroup">
 
             </optgroup>
                      </select>
-            Date <input class="txtin" id="drDate" type="date" placeholder="yyyy-MM-dd" name="drDate" required>
+            Date <input class="txtin" id="drDate"  placeholder="yyyy-MM-dd" name="drDate" required>
          </p>
          <br>
+      <div class="drBorderDiv">
             <table id="dayRankingTable" class="dayRankingTableClass">
                <tr>
                   <th class="thDayRanking">Place</th>
@@ -42,7 +44,7 @@
       </div>
    <br>
 
-
+   <body onload="loadDataFromServer()"/>
 
 
 
@@ -56,8 +58,8 @@
                            {'type' : 'string', 'column' : 1,  'jkey' : 'user',         'cssClass' : 'tdDayRanking'} ,
                            {'type' : 'int',    'column' : 2,  'jkey' : 'takes',        'cssClass' : 'tdDayRanking'} ,
                            {'type' : 'int',    'column' : 3,  'jkey' : 'activeZones',  'cssClass' : 'tdDayRanking'},
-                           {'type' : 'int',    'column' : 5,  'jkey' : 'pph',          'cssClass' : 'tdDayRanking'},
-                           {'type' : 'int',    'column' : 6,  'jkey' : 'points',       'cssClass' : 'tdDayRanking'}  ]};
+                           {'type' : 'int',    'column' : 4,  'jkey' : 'pph',          'cssClass' : 'tdDayRanking'},
+                           {'type' : 'int',    'column' : 5,  'jkey' : 'points',       'cssClass' : 'tdDayRanking'}  ]};
 
 
 
@@ -73,37 +75,43 @@
 
     function getSelectedRegion() {
        var select =  document.getElementById('drRegion');
-       var idx = select.options[ select.selectedIndex ].value;
-       return regionData[ idx ];
+       return regionData[ select.selectedIndex ];
     }
 
+    function getCurrentDate() {
+         var today = new Date();
+         var dd = String(today.getDate()).padStart(2, '0');
+         var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+         var yyyy = today.getFullYear();
+         return yyyy + '-' + mm + '-' + dd;
+     }
+
+
+
     function getSelectedDate() {
-       var tDate = Document.getElementById('drDate').innerHTML;
-       if ( (!isEmpty( tDate )) && (!validDate( tDate )) } {
+       var drDate = document.getElementById('drDate');
+
+       if ( (drDate.onchange != null) && ((isEmpty( drDate.value )) || (!validateDate( drDate.value ))))  {
           alert("Invalid date format, must be yyyy-MM-dd");
           return undefined;
        }
-       return tDate;
+       if (drDate.value == '') {
+          drDate.value = getCurrentDate();
+       }
+       return drDate.value;
     }
 
 
-    function selectRegion( pRegion ) {
+    function setSelectRegion( pRegion ) {
        var select =  document.getElementById('drRegion');
        for( var i = 0; i < regionData.length; i++ ) {
           if (regionData[i].region == pRegion) {
-             select.value = i;
+             select.selectedIndex = i;
              return;
           }
        }
      }
 
-     for( var i = 0; i < pRegionArray.length; i++ ) {
-        var opt = document.createElement('option');
-        opt.i = i;
-        opt.innerHTML = pRegionArray[i].region;
-        optionGroup.appendChild(opt);
-     }
-   }
 
     function loadDataFromServer() {
       loadDayRankingRegions();
@@ -127,14 +135,20 @@
           console.log( msg );
 
           if (msg.hasOwnProperty('DR_RegionRsp')) {
-            regionData = msg.DR_regionRsp.regions;
+            regionData = msg.DR_RegionRsp.regions;
             addRegionOptions( regionData );
-            document.getElementById('dayRankingHdr').innerHTML = "Day Ranking (first entry in DB " + msg.DR_RegionRsp.firstDateInDB + ")";
+            document.getElementById('drFirstEntryInDB').innerHTML = "Day Ranking,first entry in DB " + msg.DR_RegionRsp.firstDateInDB;
             firstEntryInDb = msg.DR_RegionRsp.firstDateInDB;
-            if (msg.hasOwnProperty('DR_RegionRsp.defaultRegion')
+            if (msg.DR_RegionRsp.hasOwnProperty('defaultRegion'))
             {
-               selectRegion( DR_RegionRsp.defaultRegion );
+               document.getElementById('drDate').value = getCurrentDate();
+               setSelectRegion( msg.DR_RegionRsp.defaultRegion );
+               loadDayRanking();
+            } else {
+               document.getElementById('drDate').onchange   = loadDayRanking();
+               document.getElementById('drRegion').onchange = loadDayRanking();
             }
+
 		  } else if (msg.hasOwnProperty('TG_Response')) {
               if (!(msg.TG_Response.success)) {
     	          alert('Load day ranking init failed, reason: ' + msg.TG_Response.reason);
@@ -149,11 +163,12 @@
 
     function loadDayRanking()
  	{
- 	     var selectRegion = getSelectedRegion();
+ 	     var selectedRegion = getSelectedRegion();
  	     var selectedDate = getSelectedDate();
- 	     if (date === "undefined") {
+ 	     if (selectedDate == 'undefined') {
  	       return;
  	     }
+
          var rqst = {DR_RankingRqst : { "regionId" : selectedRegion.regionId,
                                         "region" : selectedRegion.region,
                                         "date" : selectedDate }};
@@ -171,10 +186,23 @@
       posting.done(function( msg ) {
           console.log( msg );
 
-          if (msg.hasOwnProperty('DR_RankingRsp.users')) {
+          if (msg.hasOwnProperty('DR_RankingRsp')) {
+
+             var drRegionSelect = document.getElementById('drRegion');
+             if (drRegionSelect.onchange == null) {
+                drRegionSelect.onchange = loadDayRanking;
+             }
+             var drDate = document.getElementById('drDate');
+             if (drDate.onchange == null) {
+                drDate.onchange = loadDayRanking;
+             }
+
+              document.getElementById('drRegionInfo').innerHTML = msg.DR_RankingRsp.region + " from " + msg.DR_RankingRsp.startTime;
               tableClear( document.getElementById('dayRankingTable'), dayRankingTableDef );
-              for( var i = 0; i < msg.DR_RankingRsp.users.length; i++ ) {
-                  tableInsert( document.getElementById('dayRankingTable'), dayRankingTableDef, msg.DR_RankingRsp.users[i] );
+              if (msg.DR_RankingRsp.hasOwnProperty('users')) {
+                  for( var i = 0; i < msg.DR_RankingRsp.users.length; i++ ) {
+                     tableInsert( document.getElementById('dayRankingTable'), dayRankingTableDef, msg.DR_RankingRsp.users[i] );
+                  }
               }
 		  } else if (msg.hasOwnProperty('TG_Response')) {
               if (!(msg.TG_Response.success)) {

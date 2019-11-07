@@ -128,6 +128,55 @@ optgroup { font-size:14px; }
     border-collapse: collapse;
     border: 1px solid lightgray;
 }
+
+
+
+.drBorderDiv {
+    border-radius:8px;
+    border-style:dotted;
+    border-color:black;
+    border-width:2px;
+    margin-bottom:20px;
+    width:465px;
+}
+
+.dayRankingTableClass {
+    font-family: Arial;
+     margin-left:30px;
+     margin-right:10px;
+     margin-top:10px;
+     margin-bottom:10px;
+     border: 1px solid black;
+     border-collapse: collapse;
+}
+
+.thDayRanking {
+    text-align: left;
+    font-family: Arial;
+    Font-Size : 12pt;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-weight: bold;
+    color:darkblue;
+    border-collapse: collapse;
+    border: 1px solid lightgray;
+}
+
+.tdDayRanking {
+    text-align: center;
+    font-family: Arial;
+    Font-Size : 12pt;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    family : Arial,sans-serif;
+    font-weight: bold; color:gray;
+    border-collapse: collapse;
+    border: 1px solid lightgray;
+}
 /*
    =========================================
    ============= Turf CSS End ==============

@@ -17,6 +17,7 @@ public class DayRankingConfiguration
     private int          mDisplayUsers;
     private String       mDefaultRegion;
     private int          mDefaultRegionId;
+    private boolean      mDebug ;
 
 
 
@@ -25,14 +26,16 @@ public class DayRankingConfiguration
     public void parse( Element pRoot ){
         Element tCfg = XmlAux.getElement( pRoot, "DayRankingService");
         mRefreshUserIntervalMS = XmlAux.getIntAttribute(tCfg,"refreshIntervalSec", 10 );
-        mSaveToDBIntervalMS = XmlAux.getIntAttribute(tCfg,"saveIntervaSec", 10 );
-        mMaxUsers = XmlAux.getIntAttribute(tCfg,"maxUsers", 300);
-        mDisplayUsers = XmlAux.getIntAttribute(tCfg,"maxUsers", 50);
+        mSaveToDBIntervalMS = XmlAux.getIntAttribute(tCfg,"dbSaveIntervalSec", 10 );
+        mMaxUsers = XmlAux.getIntAttribute(tCfg,"maxUsers", 200);
+        mDisplayUsers = XmlAux.getIntAttribute(tCfg,"maxViewUsers", 50);
+        mDebug = XmlAux.getBooleanAttribute( tCfg, "debug", false );
 
         mRefreshUserIntervalMS = mRefreshUserIntervalMS * 1000L;
         mSaveToDBIntervalMS = mSaveToDBIntervalMS * 1000L;
 
-        Element tDefaultRegionElement = XmlAux.getElement( pRoot, "DefaultRegion");
+
+        Element tDefaultRegionElement = XmlAux.getElement( tCfg, "DefaultRegion");
         if (tDefaultRegionElement != null) {
             mDefaultRegion = XmlAux.getStringAttribute( tDefaultRegionElement,"name", null);
             mDefaultRegionId = XmlAux.getIntAttribute( tDefaultRegionElement,"id", 0);
@@ -61,6 +64,7 @@ public class DayRankingConfiguration
     }
     public int getMaxUsers() { return mMaxUsers;}
     public int getMaxDisplayUsers() { return mDisplayUsers; }
+    public boolean getDebug() { return mDebug; }
 
     public String getDefaultRegionName() {
         return mDefaultRegion;
@@ -79,10 +83,12 @@ public class DayRankingConfiguration
     {
         private String  mName;
         private int     mId;
+        public  long    mDBSaveTimestamp;
 
         public Region( String pName, int pId )  {
             mId = pId;
             mName = pName;
+            mDBSaveTimestamp = 0;
         }
 
         public String getName() { return mName; }

@@ -38,6 +38,8 @@ public class TurfZone
        }
     }
 
+
+
     public boolean hasRegion() {
         return mHasRegion;
     }

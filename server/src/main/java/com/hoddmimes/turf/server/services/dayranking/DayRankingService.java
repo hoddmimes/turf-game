@@ -2,6 +2,7 @@ package com.hoddmimes.turf.server.services.dayranking;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.*;
@@ -23,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -39,13 +39,12 @@ public class DayRankingService implements TurfServiceInterface {
     private MongoAux                        mDbAux;
     private DayRankingConfiguration         mConfig;
     private String                          mCurrentDate;
-    private RefreshRankingThread            mRefreshThread;
+    private volatile RefreshRankingThread   mRefreshThread;
     private EventFilterNewZoneTakeOver      mZoneFilter = null;
-    private long                            mDBSaveTimestamp;
 
-    private Map<Integer, DayRankingUser>           mRankingUsers;
-    private Map<Integer, DayRankingUserInit>       mRankingUsersInit;
-    private Map<Integer, DayRankingRegion>         mRankingRegions;
+    private volatile Map<Integer, DayRankingUser>           mRankingUsers;
+    private volatile Map<Integer, DayRankingInitUser>       mRankingInitUsers;
+    private volatile Map<Integer, DayRankingRegion>         mRankingRegions;
 
 
 
@@ -54,14 +53,13 @@ public class DayRankingService implements TurfServiceInterface {
     public void initialize(TurfServerInterface pTurfServerInterface) {
         mCurrentDate = DATE_FORMAT.format( System.currentTimeMillis()) ;
         mZoneFilter = new EventFilterNewZoneTakeOver();
-        mDBSaveTimestamp = 0;
 
         mTurfIf = pTurfServerInterface;
         mDbAux = mTurfIf.getDbAux();
         mLogger = LogManager.getLogger(this.getClass().getSimpleName());
         mConfig = mTurfIf.getServerConfiguration().getDayRankingConfiguration();;
         mRankingUsers = new HashMap<>();
-        mRankingUsersInit = new HashMap<>();
+        mRankingInitUsers = new HashMap<>();
         mRankingRegions = new HashMap<>();
         mLogger.info("Initialize " + this.getClass().getSimpleName());
 
@@ -97,21 +95,32 @@ public class DayRankingService implements TurfServiceInterface {
 
     }
 
+    private List<DayRankingUser> getCurrentRankingUsers( int pRegionId ) {
+        ArrayList<DayRankingUser> tList = new ArrayList<>();
+        for( DayRankingUser ru : this.mRankingUsers.values()) {
+            if (ru.getRegionId().get() == pRegionId) {
+                tList.add(ru);
+            }
+        }
+        return tList;
+    }
+
     private String executeGetDayRanking( DR_RankingRqst pRqst  ) {
         DR_RankingRsp tResponse = new DR_RankingRsp();
         String tDate = pRqst.getDate().orElse( mCurrentDate );
         int tRegionId = pRqst.getRegionId().orElse(141);
-        List<DayRankingRegion> tRegionLst = mDbAux.findDayRankingRegion(  pRqst.getDate().get(), pRqst.getRegionId().get() );
+        List<DayRankingRegion> tRegionLst = mDbAux.findDayRankingRegion(  tDate, tRegionId );
         if ((tRegionLst == null) || (tRegionLst.size() == 0)) {
-            return TGStatus.create(false,"No day ranking exists for region \"" + pRqst.getMessageName() + "\" and date \"" + tDate + "\"").toJson().toString();
+            return TGStatus.create(false,"No day ranking exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson().toString();
         }
 
-        List<DayRankingUser> dbUserList = mDbAux.findDayRankingUser( tDate, tRegionId );
-        if ((dbUserList == null) || (dbUserList.size() == 0)) {
-            return TGStatus.create(false,"No day ranking users exists for region \"" + pRqst.getMessageName() + "\" and date \"" + tDate + "\"").toJson().toString();
+        List<DayRankingUser> tUserList = getCurrentRankingUsers( pRqst.getRegionId().get() );
+
+        if ((tUserList == null) || (tUserList.size() == 0)) {
+            return TGStatus.create(false,"No day ranking users exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson().toString();
         }
         ArrayList<DR_User> drUsers = new ArrayList<>();
-        for ( DayRankingUser dru : dbUserList) {
+        for ( DayRankingUser dru : tUserList) {
             DR_User u = new DR_User();
             u.setActiveZones( dru.getActiveZones().orElse(0));
             u.setPoints( dru.getPoints().orElse(0));
@@ -122,7 +131,7 @@ public class DayRankingService implements TurfServiceInterface {
 
         }
         Collections.sort(drUsers, new DayRankingUsertSorter());
-        for( int i = 0; i < dbUserList.size(); i++) {
+        for( int i = 0; i < drUsers.size(); i++) {
             drUsers.get(i).setPlace((i+1));
         }
 
@@ -132,7 +141,7 @@ public class DayRankingService implements TurfServiceInterface {
         tResponse.setRegion( dr.getRegionName().get());
         tResponse.setRegionId( dr.getRegionId().get());
         tResponse.setStartTime( HH_MM_SS_FORMAT.format( dr.getStartTime().get()));
-        tResponse.setUsers( drUsers.subList(0, mConfig.getMaxDisplayUsers()));
+        tResponse.setUsers( drUsers.subList(0, Math.min(drUsers.size(), mConfig.getMaxDisplayUsers())));
         return tResponse.toJson().toString();
     }
 
@@ -187,11 +196,21 @@ public class DayRankingService implements TurfServiceInterface {
         }
 
 
-        // Load user start datat for current date
+        // Load user start data for current date
         Bson tFilter= Filters.eq("date", mCurrentDate);
-        List<DayRankingUserInit> tDbUserList = mDbAux.findDayRankingUserInit( tFilter );
+        List<DayRankingInitUser> tDbInitUserList = mDbAux.findDayRankingInitUser( tFilter );
+        if ((tDbInitUserList != null) && (tDbInitUserList.size() > 0)) {
+            tDbInitUserList.stream().forEach( u -> mRankingInitUsers.put( u.getUserId().get(), u));
+            mLogger.info("Loaded User Init Ranking Data from DB (" + mCurrentDate + "), users loaded: " + tDbInitUserList.size());
+        } else {
+            mLogger.info("No Start Init Ranking User Data for  (" + mCurrentDate + ") was found in database");
+        }
+
+        // Load last known user data for current date
+        tFilter= Filters.eq("date", mCurrentDate);
+        List<DayRankingUser> tDbUserList = mDbAux.findDayRankingUser( tFilter );
         if ((tDbUserList != null) && (tDbUserList.size() > 0)) {
-            tDbUserList.stream().forEach( u -> mRankingUsersInit.put( u.getUserId().get(), u));
+            tDbUserList.stream().forEach( u -> mRankingUsers.put( u.getUserId().get(), u));
             mLogger.info("Loaded User Ranking Data from DB (" + mCurrentDate + "), users loaded: " + tDbUserList.size());
         } else {
             mLogger.info("No Start Ranking User Data for  (" + mCurrentDate + ") was found in database");
@@ -211,6 +230,15 @@ public class DayRankingService implements TurfServiceInterface {
         }
     }
 
+
+    /**
+     * =====================================================================================
+     *
+     *                  RefreshRankingThread
+     *
+     * =====================================================================================
+     */
+
     class RefreshRankingThread extends Thread {
         DayRankingService mService;
 
@@ -219,29 +247,48 @@ public class DayRankingService implements TurfServiceInterface {
 
         }
 
-        JsonArray getUserRanking( DayRankingConfiguration.Region pRegion ) {
-            String tPostRqst = "{\"region\": \"" + pRegion.getName() + "\", \"from\":1, \"to\": 300 }";
+        List<JsonObject> getUserRanking(DayRankingConfiguration.Region pRegion ) {
+            ArrayList<JsonObject> jUsers = new ArrayList<>();
+
+
+            int tX = 1, tY = mService.mConfig.getMaxUsers();
+            boolean tNoMore = false;
             try {
-                JsonElement jElement = Turf.turfServerPOST("users/top", tPostRqst);
-                if (jElement == null) {
-                    return null;
+                while( (!tNoMore) && (tX < tY)) {
+                    String tPostRqst = "{\"region\": \"" + pRegion.getName() + "\", \"from\":" + tX + " , \"to\": " + tY + " }";
+
+
+                    JsonElement jElement = Turf.turfServerPOST("users/top", tPostRqst);
+                    if (jElement == null) {
+                        return jUsers;
+                    }
+
+                    JsonArray jArr = jElement.getAsJsonArray();
+                    for (int i = 0; i < jArr.size(); i++) {
+                        TurfUser tu = new TurfUser( jArr.get(i).getAsJsonObject());
+                        jUsers.add(jArr.get(i).getAsJsonObject());
+                    }
+                    tX = jUsers.size() + 1;
+                    if (jArr.size() == 0) {
+                        tNoMore = true;
+                    }
                 }
-                return jElement.getAsJsonArray();
+                return jUsers;
             }
             catch( Throwable e) {
                 mService.mLogger.error("Failed to retreive user day ranking from Turf service", e);
-                return null;
+                return jUsers;
             }
         }
 
-        private DayRankingUserInit createRankingUserStart( TurfUser pUser ) {
-            DayRankingUserInit rus = new DayRankingUserInit();
-            rus.setDate( mCurrentDate );
-            rus.setInitPoints( pUser.getPoints());
-            rus.setInitTaken( pUser.getTaken());
-            rus.setUser( pUser.getUserName());
-            rus.setUserId( pUser.getUserId());
-            return rus;
+        private DayRankingInitUser createRankingInitUser(TurfUser pUser) {
+            DayRankingInitUser rusi = new DayRankingInitUser();
+            rusi.setDate( mService.mCurrentDate );
+            rusi.setInitPoints( pUser.getPoints());
+            rusi.setInitTakes( pUser.getTaken());
+            rusi.setUser( pUser.getUserName());
+            rusi.setUserId( pUser.getUserId());
+            return rusi;
         }
         private DayRankingUser createRankingUser( TurfUser pUser ) {
             DayRankingUser ru = new DayRankingUser();
@@ -254,78 +301,134 @@ public class DayRankingService implements TurfServiceInterface {
             ru.setUser( pUser.getUserName());
             ru.setUserId( pUser.getUserId());
             ru.setFinalized(false);
-            ru.setDate( mCurrentDate );
+            ru.setDate( mService.mCurrentDate );
             return ru;
         }
-        private void setStartDayRankingData( DayRankingConfiguration.Region pRegion, JsonArray jUserArray ) {
-            DayRankingRegion drr = new DayRankingRegion();
-            drr.setDate(mCurrentDate);
-            drr.setRegionId(pRegion.getId());
-            drr.setRegionName(pRegion.getName());
-            drr.setFinalized(false);
-            drr.setStartTime(System.currentTimeMillis());
-            mDbAux.insertDayRankingRegion(drr);
+        private void setStartDayRankingData( DayRankingConfiguration.Region pRegion, List<JsonObject> tUserArray ) {
+                DayRankingRegion drr = new DayRankingRegion();
+                drr.setDate(mService.mCurrentDate);
+                drr.setRegionId(pRegion.getId());
+                drr.setRegionName(pRegion.getName());
+                drr.setFinalized(false);
+                drr.setStartTime(System.currentTimeMillis());
+                mService.mRankingRegions.put(pRegion.getId(), drr);
+                mService.mDbAux.insertDayRankingRegion(drr);
 
 
-            List<DayRankingUserInit> tUserStartList = new ArrayList<>();
-            for (int i = 0; i < jUserArray.size(); i++) {
-                TurfUser tUser = new TurfUser(jUserArray.get(i).getAsJsonObject());
-                DayRankingUserInit rus = createRankingUserStart(tUser);
-                mRankingUsersInit.put(rus.getUserId().get(), rus);
-                mDbAux.insertDayRankingUserInit(rus);
-            }
+                for (int i = 0; i < tUserArray.size(); i++) {
+                    TurfUser tUser = new TurfUser(tUserArray.get(i));
+                    DayRankingInitUser rusi = createRankingInitUser(tUser);
+                    if (!mService.mRankingInitUsers.containsKey(rusi.getUserId().get())) {
+                        mService.mRankingInitUsers.put(rusi.getUserId().get(), rusi);
+                        mService.mDbAux.insertDayRankingInitUser(rusi);
+                    }
+                }
         }
 
         private boolean newDay() {
-            String tDate = DATE_FORMAT.format( System.currentTimeMillis());
-            if (mCurrentDate.compareTo(tDate) == 0) {
+            String tDate = mService.DATE_FORMAT.format( System.currentTimeMillis());
+            if (mService.mCurrentDate.compareTo(tDate) == 0) {
                return false;
             }
             return true;
         }
 
         private void finalizeDay() {
-            for( DayRankingRegion drr : mRankingRegions.values()) {
-                mDbAux.updateDayRankingRegion( drr, true);
+            for( DayRankingRegion drr : mService.mRankingRegions.values()) {
+                mService.mDbAux.updateDayRankingRegion( drr, true);
             }
-            for(DayRankingUser ru : mRankingUsers.values()) {
+            for(DayRankingUser ru : mService.mRankingUsers.values()) {
                 ru.setFinalized( true );
-                mDbAux.updateDayRankingUser( ru, true );
+                mService.mDbAux.updateDayRankingUser( ru, true );
 
             }
-            mRankingUsers.clear();
-            mRankingUsersInit.clear();
-            mRankingRegions.clear();
-            mLogger.info(" FINALIZED Date: " + mCurrentDate );
-            mCurrentDate = DATE_FORMAT.format( System.currentTimeMillis());
+            mService.mRankingUsers.clear();
+            mService.mRankingInitUsers.clear();
+            mService.mRankingRegions.clear();
+            mService.mLogger.info(" FINALIZED Date: " + mService.mCurrentDate );
+            mService.mCurrentDate = mService.DATE_FORMAT.format( System.currentTimeMillis());
         }
 
-        private void updateRankingData(DayRankingConfiguration.Region pRegion, JsonArray jUserArray ) {
+        private DayRankingUser createDayRankingUser( TurfUser pTurfUser) {
+            DayRankingUser ru = new DayRankingUser();
+            ru.setFinalized( false );
+            ru.setLatestTakeTime(0L);
+            ru.setDate( mCurrentDate );
+            ru.setUser(pTurfUser.getUserName());
+            ru.setUserId( pTurfUser.getUserId());
+            ru.setRegionId( pTurfUser.getRegionId());
+            ru.setPlace(0);
+            return ru;
+        }
+
+        private void updateRankingData(DayRankingConfiguration.Region pRegion, List<JsonObject> tUserArray ) {
+            int tUpd = 0, tIns = 0, tFnd = 0;
+            boolean tUserChanged;
             long tNow = System.currentTimeMillis();
             boolean tDBSave = false;
-            if ((mDBSaveTimestamp + mConfig.getSaveIntervalMS()) < tNow) {
+            if ((pRegion.mDBSaveTimestamp + mService.mConfig.getSaveIntervalMS()) < tNow) {
                 tDBSave = true;
-                mDBSaveTimestamp = tNow;
+                pRegion.mDBSaveTimestamp = tNow;
             }
 
-            for (int i = 0; i < jUserArray.size(); i++) {
-                TurfUser tu = new TurfUser(jUserArray.get(i).getAsJsonObject());
 
-                DayRankingUserInit rus = mRankingUsersInit.get(tu.getUserId());
-                if (rus != null) {
-                    DayRankingUser ru = mRankingUsers.get(tu.getUserId());
+            for (int i = 0; i < tUserArray.size(); i++) {
+                TurfUser tu = new TurfUser(tUserArray.get(i));
+
+                DayRankingInitUser rusi = mService.mRankingInitUsers.get(tu.getUserId());
+                if (rusi != null) {
+                    tFnd++;
+                    DayRankingUser ru = mService.mRankingUsers.get(tu.getUserId());
+                    if (ru == null) {
+                        ru = createDayRankingUser(tu);
+                        mService.mRankingUsers.put(tu.getUserId(), ru);
+                        tIns++;
+                    }
+
+                    tUserChanged = isUserChanged(ru, tu, rusi);
                     ru.setActiveZones(tu.getActiveZones());
-                    ru.setPoints(tu.getPoints() - rus.getInitPoints().get());
+                    ru.setRegionId(tu.getRegionId());
+                    ru.setPoints(tu.getPoints() - rusi.getInitPoints().get());
                     ru.setPPH(tu.getPPH());
-                    ru.setTakes(tu.getTaken() - rus.getInitTaken().get());
-                    if (tDBSave) {
-                        mDbAux.updateDayRankingUser(ru.getDate().get(), ru.getUserId().get(), ru, true);
+                    ru.setTakes(tu.getTaken() - rusi.getInitTakes().get());
+                    if (tUserChanged) {
+                        tUpd++;
+                        if ((tDBSave) && (tUserChanged)) {
+                            mDbAux.updateDayRankingUser(ru, true);
+                        }
                     }
                 }
             }
+            long tExecTime = System.currentTimeMillis() - tNow;
+            if (mConfig.getDebug()) {
+                mService.mLogger.debug("<updateRankingData> region: " + pRegion.getName() + " int-found: " + tFnd + " updates: " + tUpd + " insert: " + tIns +
+                        " dbSave: " + tDBSave + " exec-time: " + tExecTime + " ms. (turf-usr-arr: " + tUserArray.size() + ")");
+            }
         }
 
-        void refresh() {
+
+        private boolean isUserChanged( DayRankingUser ru, TurfUser tu, DayRankingInitUser rusi) {
+            int tPoints = tu.getPoints() - rusi.getInitPoints().get();
+            if (tPoints != ru.getPoints().orElse(0)) {
+                return true;
+            }
+
+            int tTakes = tu.getTaken() - rusi.getInitTakes().get();
+            if (tTakes != ru.getTakes().orElse(0)) {
+                return true;
+            }
+
+            if (tu.getPPH() != ru.getPPH().orElse(0)){
+                return true;
+            }
+
+            if (tu.getActiveZones() != ru.getActiveZones().orElse(0)){
+                return true;
+            }
+            return false;
+        }
+
+        void refresh() { //Frotz
             // Check if we passed date boundary, if so finalize date and initialize for a new day
             if (newDay()) {
                 finalizeDay();
@@ -336,16 +439,16 @@ public class DayRankingService implements TurfServiceInterface {
 
             for( DayRankingConfiguration.Region r : mRegions ) {
                 // Get current user ranking for the region
-                JsonArray jUserRanking = getUserRanking( r );
-                if (jUserRanking != null) {
+                List<JsonObject> tUserRanking = getUserRanking( r );
+                if (tUserRanking != null) {
                     // Check if Ranking Start Data exists
                     if (!mRankingRegions.containsKey( r.getId())) {
-                        setStartDayRankingData( r, jUserRanking );
+                        setStartDayRankingData( r, tUserRanking );
                     } else {
-                        updateRankingData( r, jUserRanking);
+                        updateRankingData(r, tUserRanking);
                     }
                 } else {
-                    mLogger.info("No ranking data found for region: " + r.getName() );
+                    mService.mLogger.info("No ranking data found for region: " + r.getName() );
                 }
             }
         }
@@ -360,13 +463,16 @@ public class DayRankingService implements TurfServiceInterface {
 
         @Override
         public void run() {
-            mLogger.info("Start DayRankingService refresh thread");
-            refresh();
-            try {
-                long tDismissTime = calcDismissTime( mService.mConfig.getRefreshUserIntervalMS() );
-                Thread.sleep( tDismissTime );
+            mService.mLogger.info("Start DayRankingService refresh thread");
+            while( true ) {
+                refresh();
+                try {
+                    long tDismissTime = calcDismissTime(mService.mConfig.getRefreshUserIntervalMS());
+                    Thread.sleep(tDismissTime);
+                } catch (InterruptedException e) {
+                    return;
+                }
             }
-            catch( InterruptedException e) {}
         }
 
     }

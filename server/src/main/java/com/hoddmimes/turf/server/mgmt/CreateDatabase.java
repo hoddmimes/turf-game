@@ -31,7 +31,7 @@ public class CreateDatabase extends Database
             System.out.println("Database " + mDatabaseName + " on " + mHost + " is dropped");
         }
 
-        tDbAux.createDatabase();
+        tDbAux.createDatabase(mReset);
 
         // Create boot strap mark
         SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -64,6 +64,10 @@ public class CreateDatabase extends Database
         while( i < args.length) {
             if (args[i].compareToIgnoreCase("-testUser") == 0) {
                 mCreateTestUser = Boolean.parseBoolean( args[i + 1] );
+                i++;
+            }
+            if (args[i].compareToIgnoreCase("-reset") == 0) {
+                mReset = Boolean.parseBoolean( args[i + 1] );
                 i++;
             }
             i++;

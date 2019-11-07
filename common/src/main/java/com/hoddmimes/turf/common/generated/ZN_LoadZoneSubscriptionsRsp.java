@@ -83,9 +83,10 @@ import com.google.gson.GsonBuilder;
                 return  Optional.ofNullable(null);
             }
 
-            List<ZN_SubscriptionData> tList = ListFactory.getList("[]");
-            tList.addAll( mSubscriptions );
-            return  Optional.ofNullable(tList);
+             //List<ZN_SubscriptionData> tList = ListFactory.getList("[]");
+             //tList.addAll( mSubscriptions );
+             // return  Optional.ofNullable(tList);
+             return Optional.ofNullable(mSubscriptions);
             }
 
         

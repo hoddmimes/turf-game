@@ -100,7 +100,8 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
             e.printStackTrace();
             tURlString = tTimStr;
         }
-        mLogger.debug("[getZoneCollectTimeOffset] local-time: " + tTimStr + " url-time: " +  tURlString );
+
+        //mLogger.debug("[getZoneCollectTimeOffset] local-time: " + tTimStr + " url-time: " +  tURlString );
         return tURlString;
     }
     private JsonElement getZoneEvents() {

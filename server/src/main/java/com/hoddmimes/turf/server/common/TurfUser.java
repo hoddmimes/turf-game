@@ -34,6 +34,9 @@ public class TurfUser
         return jUser.get("points").getAsInt();
     }
 
+    public String getUserKey() {
+        return String.valueOf( this.getRegionId() ) + "-" + String.valueOf( this.getUserId() );
+    }
 
     public int getActiveZones() {
         if (jUser.has("zones")) {
@@ -44,15 +47,17 @@ public class TurfUser
 
     public int getRegionId() {
         if (jUser.has("region")) {
-            jUser.get("region").getAsInt();
+            JsonObject jRegion = jUser.get("region").getAsJsonObject();
+            return jRegion.get("id").getAsInt();
         }
         return 0;
     }
 
-    public int getRegionName() {
+    public String getRegionName() {
         if (jUser.has("region")) {
-            jUser.get("name").getAsInt();
+            JsonObject jRegion = jUser.get("region").getAsJsonObject();
+            return jRegion.get("name").getAsString();
         }
-        return 0;
+        return null;
     }
 }

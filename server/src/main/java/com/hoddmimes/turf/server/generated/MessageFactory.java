@@ -48,9 +48,9 @@ public class MessageFactory implements MessageFactoryInterface
             	return tMessage;
             }
 			
-            case "DayRankingUserInit":
+            case "DayRankingInitUser":
             {
-            	DayRankingUserInit tMessage = new DayRankingUserInit();
+            	DayRankingInitUser tMessage = new DayRankingInitUser();
             	tMessage.decode( new JsonDecoder(pJsonMessageString));
             	return tMessage;
             }

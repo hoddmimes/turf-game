@@ -11,7 +11,7 @@ retreiving statistical information.
 
 ##Overall Solution
 
-![alt text](https://github.com/hoddmimes/turf-game/blob/master/Architecture.png)
+![alt text](https://github.com/hoddmimes/turf-game/blob/master/doc/Architecture.png)
 
 ### Turf Server
 Is the central component running all the services. The component is implemented as a daemon.

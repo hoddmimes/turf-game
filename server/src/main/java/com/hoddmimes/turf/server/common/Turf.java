@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipException;
 
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Element;
 
 import com.google.gson.JsonElement;
@@ -84,26 +85,38 @@ public class Turf
 	}
 	
 	
-	public static  JsonElement turfServerGET( String pPath ) {
-		return turfServerGET(pPath, true);
+	public static  JsonElement turfServerGET( String pPath, Logger pLogger ) {
+		return turfServerGET(pPath, true, pLogger);
 	}
 
 	@SuppressWarnings("static-access")
-	public static  JsonElement turfServerGET( String pPath, boolean pRecovery ) 
+	public static  JsonElement turfServerGET( String pPath, boolean pRecovery, Logger pLogger )
 	{
 		JsonElement tElement = null;
 		boolean tGotAnswer = false;
-		boolean tConnectSuccess = false;
 
 		while (!tGotAnswer) {
 			try {
-				tConnectSuccess = false;
-				URLConnection tConn = new URL(URL_PATH + pPath ).openConnection();
-				tConnectSuccess = true;
-
+				HttpURLConnection tConn = (HttpURLConnection) new URL(URL_PATH + pPath).openConnection();
 				tConn.setRequestProperty("Accept-Encoding", "gzip, deflate");
-				InputStream tInStream = new GZIPInputStream(tConn.getInputStream());
+				tConn.setRequestMethod("GET");
+				tConn.setRequestProperty("Content-Type", "application/json;charset=iso-8859-1");
+				tConn.setDoOutput(false);
+				tConn.setDoInput(true);
+				tConn.setUseCaches (false);
 
+
+				// Check status code
+				if (tConn.getResponseCode() != 200) {
+					pLogger.error("[turfServerGET] error response code: " + tConn.getResponseCode());
+					return null;
+				}
+
+
+				InputStream tInStream = tConn.getInputStream();
+				if ((tConn.getContentEncoding() != null) && (tConn.getContentEncoding().toLowerCase().contains("gzip"))) {
+					tInStream = new GZIPInputStream( tConn.getInputStream());
+				}
 
 				BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "utf-8"), 8);
 				tElement  =  new JsonParser().parse(tReader);
@@ -118,18 +131,11 @@ public class Turf
                     } catch (InterruptedException ie) {
                     }
                 }
-            } catch( ZipException ze) {
-                    if (tConnectSuccess) {
-                        return null;
-                    }
-			} catch (IOException e) {
+            } catch (IOException e) {
 				System.out.println( e.getMessage());
 				if (!pRecovery) {
 					return null;
 				} else {
-					if (tConnectSuccess) {
-						return null;
-					}
 					try { Thread.currentThread().sleep(DEFAULT_ERROR_WAIT_MS); }
 					catch( InterruptedException ie) {}
 				}
@@ -137,21 +143,21 @@ public class Turf
 		}
 		return tElement;
 	}
-	
-	public static  JsonElement turfServerPOST( String pPath, String pRequestData ) {
-		return turfServerPOST(pPath, pRequestData, true);
+
+
+	public static  JsonElement turfServerPOST( String pPath, String pRequestData, Logger pLogger ) {
+		return turfServerPOST(pPath, pRequestData, true, pLogger);
 	}
 	
 	@SuppressWarnings("static-access")
-	public static JsonElement turfServerPOST( String pPath, String pRequestData, boolean pRecovery ) 
+	public static JsonElement turfServerPOST( String pPath, String pRequestData, boolean pRecovery, Logger pLogger )
 	{
 		JsonElement tElement = null;
 		boolean tGotAnswer = false;
-		boolean tConnectSuccess = false;
+
 
 		while (!tGotAnswer) {
 			try {
-				tConnectSuccess = false;
 				HttpURLConnection tConn = (HttpURLConnection) new URL(URL_PATH + pPath).openConnection();
 				tConn.setRequestProperty("Accept-Encoding", "gzip, deflate");
 				tConn.setRequestMethod("POST");
@@ -165,16 +171,26 @@ public class Turf
 				tOut.write(pRequestData.getBytes("iso-8859-1"));
 				tOut.flush();
 				tOut.close();
-				tConnectSuccess = true;
 
 
-				InputStream tInStream = new GZIPInputStream( tConn.getInputStream());
+				// Check status code
+				if (tConn.getResponseCode() != 200) {
+					pLogger.error("[turfServerPOST] error response code: " + tConn.getResponseCode());
+					return null;
+				}
+
+
+				InputStream tInStream = tConn.getInputStream();
+				if ((tConn.getContentEncoding() != null) && (tConn.getContentEncoding().toLowerCase().contains("gzip"))) {
+					tInStream = new GZIPInputStream( tConn.getInputStream());
+				}
+
 				BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "utf-8"), 8);
 				tElement  =  new JsonParser().parse(tReader);
 				tGotAnswer = true;
 
 			} catch (MalformedURLException e) {
-				System.out.println( e.getMessage());
+				pLogger.error("failed to POST rqst to Turf Game Server, reason: " + e.getMessage());
 				if (!pRecovery) {
 					return null;
 				} else {
@@ -182,11 +198,6 @@ public class Turf
 					catch( InterruptedException ie) {}
 				}
 			}
-			catch( ZipException ze) {
-			    if (tConnectSuccess) {
-			        return null;
-                }
-            }
 			catch (IOException e) {
 				e.printStackTrace();
 				if (!pRecovery) {

@@ -1,6 +1,7 @@
 package com.hoddmimes.turf.server.common;
 
 import com.google.gson.JsonArray;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +14,9 @@ public class ZoneDictionary extends Thread
     Map<String, TurfZone>            mZoneNameMap;
     Map<Integer, List<TurfZone>>    mRegionIdMap;
     Map<String, List<TurfZone>>     mRegionNameMap;
+    Logger                          mLogger;
 
-
-    public ZoneDictionary()
+    public ZoneDictionary( Logger pLogger)
     {
         mZoneIdMap = new HashMap<>(65000); // Zones by zone-id
         mZoneNameMap = new HashMap<>(65000); // Zones by zone-name
@@ -53,7 +54,7 @@ public class ZoneDictionary extends Thread
         mRegionIdMap.clear();
         mRegionNameMap.clear();
 
-        JsonArray tZoneArray = Turf.turfServerGET("zones/all").getAsJsonArray();
+        JsonArray tZoneArray = Turf.turfServerGET("zones/all", mLogger).getAsJsonArray();
         for( int i = 0; i < tZoneArray.size(); i++) {
             TurfZone z = new TurfZone( tZoneArray.get(i).getAsJsonObject());
             mZoneNameMap.put( z.getName(), z);
@@ -84,7 +85,7 @@ public class ZoneDictionary extends Thread
     }
 
     public static void main( String args[]) {
-        ZoneDictionary zd = new ZoneDictionary();
+        ZoneDictionary zd = new ZoneDictionary( null );
         System.out.println("Loaded:  " + zd.sync() + " zones");
     }
 

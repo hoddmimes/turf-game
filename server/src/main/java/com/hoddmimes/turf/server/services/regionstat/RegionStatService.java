@@ -300,10 +300,13 @@ public class RegionStatService implements TurfServiceInterface
             int tExecTime = (int) (System.currentTimeMillis() - tStartTime);
             long tFreeMemory = (Runtime.getRuntime().freeMemory() / (1024 * 1024));
             long tUsedMemory = ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024));
+            long tSpanSec = (tTakeOverEvents.get( tTakeOverEvents.size() - 1).getLatestTakeOverTime() - tTakeOverEvents.get(0).getLatestTakeOverTime() ) / 1000L;
 
-            mLogger.debug(String.format("TakeOverEvents: %3d, NewTakeOver: %3d ExecTime: %5d ms, Regions Updated: %2d Free Mem: %3d Used Mem: %3d %n",
+
+            mLogger.debug(String.format("TakeOverEvents: %3d, NewTakeOver: %3d (span: %3d sec) ExecTime: %5d ms, Regions Updated: %2d Free Mem: %3d Used Mem: %3d %n",
                     pZoneUpdates.getAsJsonArray().size(),
                     tTakeOverEvents.size(),
+                    tSpanSec,
                     tExecTime,
                     tUpdatedRegions,
                     tFreeMemory,
@@ -532,7 +535,7 @@ public class RegionStatService implements TurfServiceInterface
 
     private void loadRegionsFromTurfServer() {
         int	pTrackedRegions = 0;
-        JsonElement tElement = Turf.turfServerGET("regions", true);
+        JsonElement tElement = Turf.turfServerGET("regions", true, mLogger);
         if (tElement != null) {
             JsonArray tRegionArray = tElement.getAsJsonArray();
             if (tRegionArray != null) {

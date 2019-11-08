@@ -258,7 +258,7 @@ public class DayRankingService implements TurfServiceInterface {
                     String tPostRqst = "{\"region\": \"" + pRegion.getName() + "\", \"from\":" + tX + " , \"to\": " + tY + " }";
 
 
-                    JsonElement jElement = Turf.turfServerPOST("users/top", tPostRqst);
+                    JsonElement jElement = Turf.turfServerPOST("users/top", tPostRqst, mLogger);
                     if (jElement == null) {
                         return jUsers;
                     }
@@ -361,7 +361,7 @@ public class DayRankingService implements TurfServiceInterface {
             return ru;
         }
 
-        private void updateRankingData(DayRankingConfiguration.Region pRegion, List<JsonObject> tUserArray ) {
+        private int updateRankingData(DayRankingConfiguration.Region pRegion, List<JsonObject> tUserArray ) {
             int tUpd = 0, tIns = 0, tFnd = 0;
             boolean tUserChanged;
             long tNow = System.currentTimeMillis();
@@ -404,6 +404,7 @@ public class DayRankingService implements TurfServiceInterface {
                 mService.mLogger.debug("<updateRankingData> region: " + pRegion.getName() + " int-found: " + tFnd + " updates: " + tUpd + " insert: " + tIns +
                         " dbSave: " + tDBSave + " exec-time: " + tExecTime + " ms. (turf-usr-arr: " + tUserArray.size() + ")");
             }
+            return tUpd;
         }
 
 
@@ -429,6 +430,7 @@ public class DayRankingService implements TurfServiceInterface {
         }
 
         void refresh() { //Frotz
+            int tUserUpdated = 0, tTurfUsers = 0;
             // Check if we passed date boundary, if so finalize date and initialize for a new day
             if (newDay()) {
                 finalizeDay();
@@ -441,15 +443,19 @@ public class DayRankingService implements TurfServiceInterface {
                 // Get current user ranking for the region
                 List<JsonObject> tUserRanking = getUserRanking( r );
                 if (tUserRanking != null) {
+                    tTurfUsers += tUserRanking.size();
                     // Check if Ranking Start Data exists
                     if (!mRankingRegions.containsKey( r.getId())) {
                         setStartDayRankingData( r, tUserRanking );
                     } else {
-                        updateRankingData(r, tUserRanking);
+                        tUserUpdated += updateRankingData(r, tUserRanking);
                     }
                 } else {
                     mService.mLogger.info("No ranking data found for region: " + r.getName() );
                 }
+            }
+            if (!mConfig.getDebug()) {
+                mService.mLogger.info("<updateUserRanking> turf-users: " + tTurfUsers + " updated users: " + tUserUpdated );
             }
         }
 

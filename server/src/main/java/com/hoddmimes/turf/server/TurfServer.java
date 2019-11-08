@@ -106,11 +106,15 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     }
     private JsonElement getZoneEvents() {
         String tFromTimStr = getZoneCollectTimeOffset( mServerCfg.getApiHistoryCollectOffsetMin(), mServerCfg.getApiTimeZoneOffetHr());
-        JsonElement tRsp = Turf.turfServerGET( "feeds?afterDate=" + tFromTimStr);
+        JsonElement tRsp = Turf.turfServerGET( "feeds?afterDate=" + tFromTimStr, mLogger);
         return tRsp;
     }
 
     private int countZones( JsonElement pJsonElement ) {
+        if (pJsonElement == null) {
+            return -1;
+        }
+
         if (pJsonElement.isJsonArray()) {
             int tCount = 0;
             JsonArray tJsonArray = pJsonElement.getAsJsonArray();
@@ -128,22 +132,21 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     private void execServerTasks() {
         while(!(cServerShoulExit )) {
             JsonElement tZoneUpdateRsp = getZoneEvents();
+
             mLogger.debug("[zonesUpdated] zones " + countZones(tZoneUpdateRsp) + " retreived");
+            if (tZoneUpdateRsp != null) {
+                if (mZoneNotifierService != null) {
+                    mZoneNotifierService.processZoneUpdates(tZoneUpdateRsp);
+                }
 
-            if (mZoneNotifierService != null) {
-                mZoneNotifierService.processZoneUpdates( tZoneUpdateRsp );
+                if (mRegionStatService != null) {
+                    mRegionStatService.processZoneUpdates(tZoneUpdateRsp);
+                }
+
+                if (mUserTraceService != null) {
+                    mUserTraceService.processZoneUpdates(tZoneUpdateRsp);
+                }
             }
-
-            if (mRegionStatService != null) {
-                mRegionStatService.processZoneUpdates( tZoneUpdateRsp );
-            }
-
-            if (mUserTraceService != null) {
-                mUserTraceService.processZoneUpdates( tZoneUpdateRsp );
-            }
-
-
-
             try {
                 Thread.sleep( mServerCfg.getApiZoneCollectIntervalMs());
             }
@@ -165,7 +168,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         mDbAux.connectToDatabase();
 
 
-        mZoneDictory = new ZoneDictionary();
+        mZoneDictory = new ZoneDictionary( mLogger );
         mLogger.info("ZoneDictionary loaded [" + mZoneDictory.getSize() + "] zones.");
         declareTcpIpServer();
 

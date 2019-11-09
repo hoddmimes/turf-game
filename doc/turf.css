@@ -1,0 +1,39 @@
+body {
+     background-image: url('turf-bg.jpg');
+}
+
+.divTurf {
+    margin-left:40px;
+    margin-right:40px;
+    margin-top:60px;
+    padding-left: 12px;
+    padding-right: 10px;
+    font-family: Arial,
+    san-serif;
+    border:solid; color:#000000
+    align: center;
+    background-color: #FFFFFF;
+}
+
+h1 {
+    color: navy;
+    margin-left: 20px;
+}
+
+table {
+    width: 80%;
+    text-align: center;
+}
+
+th {
+   background-color: #999c98;
+}
+
+tr {
+   background-color: #B0B4AE;
+}
+
+table, th, tr, td {
+    border: 2px solid black;
+    border-collapse: collapse;
+}

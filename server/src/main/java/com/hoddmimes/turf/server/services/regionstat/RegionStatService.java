@@ -253,7 +253,8 @@ public class RegionStatService implements TurfServiceInterface
         }
         if (mDbgCtx.ifDebug(DebugContext.TAKE_OVER_FEED)) {
             if (tTakeOverEvents.size() >=2) {
-                long tSec = (tTakeOverEvents.get( tTakeOverEvents.size() - 1).getLatestTakeOverTime() - tTakeOverEvents.get(0).getLatestTakeOverTime() ) / 1000L;
+                long tSec = (tTakeOverEvents.size() >= 2) ?
+                        ((tTakeOverEvents.get( tTakeOverEvents.size() - 1).getLatestTakeOverTime() - tTakeOverEvents.get(0).getLatestTakeOverTime() ) / 1000L) : 0;
                 mLogger.debug(
                         String.format("---- takeOverEvent: %3d newTakeOverEvents: %3d timeSpan: %4d sec ----",
                                 pZoneUpdates.getAsJsonArray().size(),
@@ -300,7 +301,8 @@ public class RegionStatService implements TurfServiceInterface
             int tExecTime = (int) (System.currentTimeMillis() - tStartTime);
             long tFreeMemory = (Runtime.getRuntime().freeMemory() / (1024 * 1024));
             long tUsedMemory = ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024));
-            long tSpanSec = (tTakeOverEvents.get( tTakeOverEvents.size() - 1).getLatestTakeOverTime() - tTakeOverEvents.get(0).getLatestTakeOverTime() ) / 1000L;
+            long tSpanSec = (tTakeOverEvents.size() >= 2) ?
+                    ((tTakeOverEvents.get( tTakeOverEvents.size() - 1).getLatestTakeOverTime() - tTakeOverEvents.get(0).getLatestTakeOverTime() ) / 1000L) : 0;
 
 
             mLogger.debug(String.format("TakeOverEvents: %3d, NewTakeOver: %3d (span: %3d sec) ExecTime: %5d ms, Regions Updated: %2d Free Mem: %3d Used Mem: %3d %n",

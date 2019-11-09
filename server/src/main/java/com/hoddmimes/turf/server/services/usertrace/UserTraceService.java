@@ -106,14 +106,15 @@ public class UserTraceService implements TurfServiceInterface {
          * Check if we have any session that has expired
          */
         long tNow = System.currentTimeMillis();
-        ArrayList tRmLst = new ArrayList();
+        ArrayList<TraceUser> tRmLst = new ArrayList();
         for( TraceUser tu : mUsers.values()) {
             if ((tNow - tu.mLatestZone.getLatestTakeOverTime()) > (mConfig.getSessionInactivityMin() * 60000L)) {
                 log( tu.getEndSessionMessage());
                 tRmLst.add( tu );
             }
         }
-        tRmLst.stream().forEach( tu ->mUsers.remove(tu));
+
+        tRmLst.stream().forEach( tu ->mUsers.remove(tu.mName));
     }
 
 

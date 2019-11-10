@@ -133,7 +133,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         while(!(cServerShoulExit )) {
             JsonElement tZoneUpdateRsp = getZoneEvents();
 
-            mLogger.debug("[zonesUpdated] zones " + countZones(tZoneUpdateRsp) + " retreived");
+            //mLogger.debug("[zonesUpdated] zones " + countZones(tZoneUpdateRsp) + " retreived");
             if (tZoneUpdateRsp != null) {
                 if (mZoneNotifierService != null) {
                     mZoneNotifierService.processZoneUpdates(tZoneUpdateRsp);

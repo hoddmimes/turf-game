@@ -1,11 +1,29 @@
 # Compiled class file
 *.class
 
+# Generated files
+server/src/main/java/com/hoddmimes/turf/server/generated/*
+common/src/main/java/com/hoddmimes/turf/common/generated/*
+
 # Log file
 *.log
 
+# Various intermidiate directories
+.idea/
+build/
+.gradle/
+out/
+
 # BlueJ files
 *.ctxt
+
+#various files
+watermark
+*.json
+turf-server-secret.cfg
+server/src/main/java/com/hoddmimes/turf/server/Test.java
+*.*~
+
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

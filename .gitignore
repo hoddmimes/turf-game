@@ -23,7 +23,10 @@ watermark
 turf-server-secret.cfg
 server/src/main/java/com/hoddmimes/turf/server/Test.java
 *.*~
-
+*.iml
+gradle/
+gradlew
+gradlew.bat
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

@@ -58,6 +58,7 @@
         <Attribute name="user" type="String"/>
         <Attribute name="points" type="int"/>
         <Attribute name="takes" type="int"/>
+        <Attribute name="distance" type="int"/>
         <Attribute name="place" type="int" dbTransient="true"/>/>
         <Attribute name="PPH" type="int" dbTransient="true"/>
         <Attribute name="activeZones" type="int" dbTransient="true"/>

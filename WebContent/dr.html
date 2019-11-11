@@ -41,6 +41,8 @@
                   <th class="thDayRanking">Zones</th>
                   <th class="thDayRanking">PPH</th>
                   <th class="thDayRanking">Points</th>
+                  <th class="thDayRanking">Seen</th>
+                  <th class="thDayRanking">Distance</th>
                </tr>
             </table>
       </div>
@@ -56,12 +58,14 @@
 
      var dayRankingTableDef = { 'table' : 'dayRanking',
                         'keys' : [
-                           {'type' : 'int',    'column' : 0,  'jkey' : 'place',        'cssClass' : 'tdDayRanking'} ,
-                           {'type' : 'string', 'column' : 1,  'jkey' : 'user',         'cssClass' : 'tdDayRanking'} ,
-                           {'type' : 'int',    'column' : 2,  'jkey' : 'takes',        'cssClass' : 'tdDayRanking'} ,
+                           {'type' : 'int',    'column' : 0,  'jkey' : 'place',        'cssClass' : 'tdDayRanking'},
+                           {'type' : 'string', 'column' : 1,  'jkey' : 'user',         'cssClass' : 'tdDayRanking'},
+                           {'type' : 'int',    'column' : 2,  'jkey' : 'takes',        'cssClass' : 'tdDayRanking'},
                            {'type' : 'int',    'column' : 3,  'jkey' : 'activeZones',  'cssClass' : 'tdDayRanking'},
                            {'type' : 'int',    'column' : 4,  'jkey' : 'pph',          'cssClass' : 'tdDayRanking'},
-                           {'type' : 'int',    'column' : 5,  'jkey' : 'points',       'cssClass' : 'tdDayRanking'}  ]};
+                           {'type' : 'int',    'column' : 5,  'jkey' : 'points',       'cssClass' : 'tdDayRanking'},
+                           {'type' : 'long',    'column' : 6,  'jkey' : 'lastSeen',    'cssClass' : 'tdDayRanking'},
+                           {'type' : 'double:1','column' : 7,  'jkey' : 'distance',    'cssClass' : 'tdDayRanking'}  ]};
 
 
 

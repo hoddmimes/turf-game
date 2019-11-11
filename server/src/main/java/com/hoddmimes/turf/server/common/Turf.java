@@ -33,6 +33,7 @@ public class Turf
 	public static final SimpleDateFormat SDFDate = new SimpleDateFormat("yyyy-MM-dd");
 	public static final SimpleDateFormat SDFSimpleTime = new SimpleDateFormat("HH:mm:ss");
 	public static final SimpleDateFormat SDFTime = new SimpleDateFormat("HH:mm:ss.SSS");
+	public static final SimpleDateFormat SDFHHSS = new SimpleDateFormat("HH:mm");
 	
 	
 	public static  String formatTimeDiff( long pMs ) {

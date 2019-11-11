@@ -8,13 +8,11 @@ import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.*;
 import com.hoddmimes.turf.server.TurfServerInterface;
 import com.hoddmimes.turf.server.TurfServiceInterface;
-import com.hoddmimes.turf.server.common.EventFilterNewZoneTakeOver;
-import com.hoddmimes.turf.server.common.Turf;
-import com.hoddmimes.turf.server.common.TurfUser;
-import com.hoddmimes.turf.server.common.ZoneEvent;
+import com.hoddmimes.turf.server.common.*;
 import com.hoddmimes.turf.server.configuration.DayRankingConfiguration;
 import com.hoddmimes.turf.server.generated.*;
 import com.hoddmimes.turf.server.generated.DayRankingUser;
+import com.hoddmimes.turf.server.services.regionstat.DistanceCalculator;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -45,7 +43,7 @@ public class DayRankingService implements TurfServiceInterface {
     private volatile Map<Integer, DayRankingUser>           mRankingUsers;
     private volatile Map<Integer, DayRankingInitUser>       mRankingInitUsers;
     private volatile Map<Integer, DayRankingRegion>         mRankingRegions;
-
+    private volatile Map<Integer, ZoneEvent>                mUserZones;
 
 
 
@@ -61,6 +59,7 @@ public class DayRankingService implements TurfServiceInterface {
         mRankingUsers = new HashMap<>();
         mRankingInitUsers = new HashMap<>();
         mRankingRegions = new HashMap<>();
+        mUserZones = new HashMap<>();
         mLogger.info("Initialize " + this.getClass().getSimpleName());
 
         loadStartRankingFromDB();
@@ -77,6 +76,12 @@ public class DayRankingService implements TurfServiceInterface {
             DayRankingUser ru = mRankingUsers.get( toe.getCurrentOwnerId());
             if (ru != null) {
                 ru.setLatestTakeTime(toe.getLatestTakeOverTime());
+                ZoneEvent ltoe = mUserZones.get( toe.getCurrentOwnerId() );
+                if (ltoe != null) {
+                    double tDistance = DistanceCalculator.distance(toe.getLat(), toe.getLong(), ltoe.getLat(), ltoe.getLong());
+                    ru.setDistance((int) (ru.getDistance().orElse(0) + Math.round(tDistance)));
+                }
+                mUserZones.put( toe.getCurrentOwnerId(), toe);
             }
         }
     }
@@ -135,6 +140,17 @@ public class DayRankingService implements TurfServiceInterface {
             u.setPph( dru.getPPH().orElse(0));
             u.setTakes( dru.getTakes().orElse(0));
             u.setUser( dru.getUser().get());
+
+
+            long tm = dru.getLatestTakeTime().orElse(0L);
+            if (tm == 0) {
+                u.setLastSeen("00:00");
+            } else {
+                u.setLastSeen(  Turf.SDFHHSS.format( tm ));
+            }
+
+            double tKm = dru.getDistance().orElse(0) / 1000.0d;
+            u.setDistance( tKm ); // Distance in Km
             drUsers.add(u);
 
         }

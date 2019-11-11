@@ -146,6 +146,9 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
                 if (mUserTraceService != null) {
                     mUserTraceService.processZoneUpdates(tZoneUpdateRsp);
                 }
+                if (mDayRankingService != null) {
+                    mDayRankingService.processZoneUpdates(tZoneUpdateRsp);
+                }
             }
             try {
                 Thread.sleep( mServerCfg.getApiZoneCollectIntervalMs());

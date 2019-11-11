@@ -155,6 +155,8 @@
         <Attribute name="points" type="int"/>
         <Attribute name="activeZones" type="int"/>
         <Attribute name="pph" type="int"/>
+        <Attribute name="distance" type="double"/>
+        <Attribute name="lastSeen" type="String"/>
     </Message>
 
     <Message name="DR_RankingRsp"  rootMessage="true">

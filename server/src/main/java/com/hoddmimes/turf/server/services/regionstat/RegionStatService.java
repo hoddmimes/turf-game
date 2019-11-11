@@ -305,7 +305,7 @@ public class RegionStatService implements TurfServiceInterface
                     ((tTakeOverEvents.get( tTakeOverEvents.size() - 1).getLatestTakeOverTime() - tTakeOverEvents.get(0).getLatestTakeOverTime() ) / 1000L) : 0;
 
 
-            mLogger.debug(String.format("TakeOverEvents: %3d, NewTakeOver: %3d (span: %3d sec) ExecTime: %5d ms, Regions Updated: %2d Free Mem: %3d Used Mem: %3d %n",
+            mLogger.debug(String.format("TakeOverEvents: %3d, NewTakeOver: %3d (span: %3d sec) ExecTime: %5d ms, Regions Updated: %2d Free Mem: %3d Used Mem: %3d",
                     pZoneUpdates.getAsJsonArray().size(),
                     tTakeOverEvents.size(),
                     tSpanSec,

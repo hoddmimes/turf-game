@@ -114,7 +114,15 @@ public class DayRankingService implements TurfServiceInterface {
             return TGStatus.create(false,"No day ranking exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson().toString();
         }
 
-        List<DayRankingUser> tUserList = getCurrentRankingUsers( pRqst.getRegionId().get() );
+        // If the date requested is for the current date we collected the response from the cache
+        // If not the response needs to be built from the database
+        List<DayRankingUser> tUserList = null;
+        if (mCurrentDate.compareTo( tDate ) == 0)
+            tUserList = getCurrentRankingUsers( pRqst.getRegionId().get() );
+        else {
+            Bson tFilter= Filters.and(Filters.eq("date", tDate), Filters.eq("regionId", tRegionId));
+            tUserList = mDbAux.findDayRankingUser( tFilter );
+        }
 
         if ((tUserList == null) || (tUserList.size() == 0)) {
             return TGStatus.create(false,"No day ranking users exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson().toString();

@@ -78,8 +78,12 @@ public class DayRankingService implements TurfServiceInterface {
                 ru.setLatestTakeTime(toe.getLatestTakeOverTime());
                 ZoneEvent ltoe = mUserZones.get( toe.getCurrentOwnerId() );
                 if (ltoe != null) {
-                    double tDistance = DistanceCalculator.distance(toe.getLat(), toe.getLong(), ltoe.getLat(), ltoe.getLong());
-                    ru.setDistance((int) (ru.getDistance().orElse(0) + Math.round(tDistance)));
+                    long tm = ltoe.getLatestTakeOverTime() - toe.getLatestTakeOverTime();
+                    if (tm > (30L * 60000L)) { // if longer than 30 min new session
+                        double tDistance = DistanceCalculator.distance(toe.getLat(), toe.getLong(), ltoe.getLat(), ltoe.getLong());
+                        ru.setDistance((int) (ru.getDistance().orElse(0) + Math.round(tDistance)));
+                        ru.setTime(ru.getTime().orElse(0L) + tm);
+                    }
                 }
                 mUserZones.put( toe.getCurrentOwnerId(), toe);
             }
@@ -140,14 +144,7 @@ public class DayRankingService implements TurfServiceInterface {
             u.setPph( dru.getPPH().orElse(0));
             u.setTakes( dru.getTakes().orElse(0));
             u.setUser( dru.getUser().get());
-
-
-            long tm = dru.getLatestTakeTime().orElse(0L);
-            if (tm == 0) {
-                u.setLastSeen("00:00");
-            } else {
-                u.setLastSeen(  Turf.SDFHHSS.format( tm ));
-            }
+            u.setTime( dru.getTime().orElse(0L));
 
             double tKm = dru.getDistance().orElse(0) / 1000.0d;
             u.setDistance( tKm ); // Distance in Km

@@ -59,6 +59,7 @@
         <Attribute name="points" type="int"/>
         <Attribute name="takes" type="int"/>
         <Attribute name="distance" type="int"/>
+        <Attribute name="time" type="long"/>
         <Attribute name="place" type="int" dbTransient="true"/>/>
         <Attribute name="PPH" type="int" dbTransient="true"/>
         <Attribute name="activeZones" type="int" dbTransient="true"/>

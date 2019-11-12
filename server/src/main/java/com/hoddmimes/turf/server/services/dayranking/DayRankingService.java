@@ -71,21 +71,36 @@ public class DayRankingService implements TurfServiceInterface {
     @Override
     public void processZoneUpdates(JsonElement pZoneUpdates)
     {
+        long tTotTime = 0;
+        int  tTotDistance = 0;
+        int  tTotUsers = 0;
         List<ZoneEvent> tTakeOverEvents = mZoneFilter.getNewTakeover(pZoneUpdates.getAsJsonArray());
         for( ZoneEvent toe: tTakeOverEvents) {
             DayRankingUser ru = mRankingUsers.get( toe.getCurrentOwnerId());
             if (ru != null) {
+                tTotUsers++;
                 ru.setLatestTakeTime(toe.getLatestTakeOverTime());
                 ZoneEvent ltoe = mUserZones.get( toe.getCurrentOwnerId() );
                 if (ltoe != null) {
-                    long tm = ltoe.getLatestTakeOverTime() - toe.getLatestTakeOverTime();
-                    if (tm < (30L * 60000L)) { // if longer than 30 min new session and ignore time and distance
+                    long tmSec = (toe.getLatestTakeOverTime() - ltoe.getLatestTakeOverTime()) / 1000L;
+                    if (tmSec < (30L * 60L)) { // if longer than 30 min new session and ignore time and distance
                         double tDistance = DistanceCalculator.distance(toe.getLat(), toe.getLong(), ltoe.getLat(), ltoe.getLong());
                         ru.setDistance((int) (ru.getDistance().orElse(0) + Math.round(tDistance)));
-                        ru.setTime(ru.getTime().orElse(0L) + tm);
+                        ru.setTime(ru.getTime().orElse(0L) + tmSec);
+
+                        tTotTime += tmSec;
+                        tTotDistance += Math.round( tDistance );
                     }
                 }
-                mUserZones.put( toe.getCurrentOwnerId(), toe);
+            }
+            mUserZones.put( toe.getCurrentOwnerId(), toe);
+        }
+        if ((tTotTime > 0) && (tTotDistance > 0)) {
+            if (mConfig.getDebug()) {
+                mLogger.debug("DayRanking (update zones) Users found: " + tTotUsers +
+                        " tot-time: " + Turf.formatTimeDiff((tTotTime * 1000L)) +
+                        " tot-distance: " + tTotDistance + " m.");
+
             }
         }
     }

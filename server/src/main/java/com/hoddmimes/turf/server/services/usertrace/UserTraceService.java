@@ -1,6 +1,7 @@
 package com.hoddmimes.turf.server.services.usertrace;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.hoddmimes.jsontransform.MessageInterface;
 import com.hoddmimes.turf.server.TurfServerInterface;
 import com.hoddmimes.turf.server.TurfServiceInterface;
@@ -127,7 +128,7 @@ public class UserTraceService implements TurfServiceInterface {
 
 
     @Override
-    public String execute(MessageInterface tRqstMsg) {
+    public JsonObject execute(MessageInterface tRqstMsg) {
         return null;
     }
 

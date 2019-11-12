@@ -106,7 +106,7 @@ public class DayRankingService implements TurfServiceInterface {
     }
 
     @Override
-    public String execute(MessageInterface tRqstMsg) {
+    public JsonObject execute(MessageInterface tRqstMsg) {
         if (tRqstMsg instanceof DR_RankingRqst) {
             return executeGetDayRanking((DR_RankingRqst) tRqstMsg);
         }
@@ -115,7 +115,7 @@ public class DayRankingService implements TurfServiceInterface {
         }
 
         return TGStatus.createError("No " + this.getClass().getSimpleName() + " service method not found for request \"" +
-                tRqstMsg.getMessageName() + "\"", null ).toJson().toString();
+                tRqstMsg.getMessageName() + "\"", null ).toJson();
 
     }
 
@@ -129,13 +129,13 @@ public class DayRankingService implements TurfServiceInterface {
         return tList;
     }
 
-    private String executeGetDayRanking( DR_RankingRqst pRqst  ) {
+    private JsonObject executeGetDayRanking( DR_RankingRqst pRqst  ) {
         DR_RankingRsp tResponse = new DR_RankingRsp();
         String tDate = pRqst.getDate().orElse( mCurrentDate );
         int tRegionId = pRqst.getRegionId().orElse(141);
         List<DayRankingRegion> tRegionLst = mDbAux.findDayRankingRegion(  tDate, tRegionId );
         if ((tRegionLst == null) || (tRegionLst.size() == 0)) {
-            return TGStatus.create(false,"No day ranking exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson().toString();
+            return TGStatus.create(false,"No day ranking exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson();
         }
 
         // If the date requested is for the current date we collected the response from the cache
@@ -149,7 +149,7 @@ public class DayRankingService implements TurfServiceInterface {
         }
 
         if ((tUserList == null) || (tUserList.size() == 0)) {
-            return TGStatus.create(false,"No day ranking users exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson().toString();
+            return TGStatus.create(false,"No day ranking users exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson();
         }
         ArrayList<DR_User> drUsers = new ArrayList<>();
         for ( DayRankingUser dru : tUserList) {
@@ -178,10 +178,10 @@ public class DayRankingService implements TurfServiceInterface {
         tResponse.setRegionId( dr.getRegionId().get());
         tResponse.setStartTime( HH_MM_SS_FORMAT.format( dr.getStartTime().get()));
         tResponse.setUsers( drUsers.subList(0, Math.min(drUsers.size(), mConfig.getMaxDisplayUsers())));
-        return tResponse.toJson().toString();
+        return tResponse.toJson();
     }
 
-    private String executeGetRegions( DR_RegionRqst pRqst ) {
+    private JsonObject executeGetRegions( DR_RegionRqst pRqst ) {
         DR_RegionRsp tResponse = new DR_RegionRsp();
         ArrayList<DR_Region> tRegionList = new ArrayList<>();
         for( DayRankingConfiguration.Region r : mConfig.getRegions()) {
@@ -196,7 +196,7 @@ public class DayRankingService implements TurfServiceInterface {
         }
         tResponse.setFirstDateInDB( getFirstDateInDB());
         tResponse.addRegions(tRegionList);
-        return tResponse.toJson().toString();
+        return tResponse.toJson();
 
     }
 

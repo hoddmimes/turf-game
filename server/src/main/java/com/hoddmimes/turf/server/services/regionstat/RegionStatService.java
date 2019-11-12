@@ -5,7 +5,6 @@ package com.hoddmimes.turf.server.services.regionstat;
   - Load configuration
   - Load statistics from database
   - Process zone updates
-
  */
 
 
@@ -63,20 +62,20 @@ public class RegionStatService implements TurfServiceInterface
         mNBF.setGroupingUsed(false);
     }
 
-    public String execute( MessageInterface tRqstMsg )
+    public JsonObject execute( MessageInterface tRqstMsg )
     {
         if (tRqstMsg instanceof RS_RegionStatisticsRqst) {
             return executeGetStatistics((RS_RegionStatisticsRqst) tRqstMsg);
         }
 
         return TGStatus.createError("No " + this.getClass().getSimpleName() + " service method found for request \"" +
-                tRqstMsg.getMessageName() + "\"", null ).toJson().toString();
+                tRqstMsg.getMessageName() + "\"", null ).toJson();
 
     }
 
 
 
-    private String executeGetStatistics(RS_RegionStatisticsRqst pRqstMsg)
+    private JsonObject executeGetStatistics(RS_RegionStatisticsRqst pRqstMsg)
     {
         if (pRqstMsg.getIsTotalRequest().orElse( true)) {
             return executeGetTotalStatistics(pRqstMsg);
@@ -85,7 +84,7 @@ public class RegionStatService implements TurfServiceInterface
         }
     }
 
-    String executeGetHourStatistics(RS_RegionStatisticsRqst pRqstMsg) {
+    JsonObject executeGetHourStatistics(RS_RegionStatisticsRqst pRqstMsg) {
         RS_RegionStatisticsRsp tResponse = new RS_RegionStatisticsRsp();
         ArrayList<RegionStatistics> tReginRsponseList = new ArrayList<>();
 
@@ -103,10 +102,10 @@ public class RegionStatService implements TurfServiceInterface
         tResponse.addRegionStats( tReginRsponseList );
         tResponse.setPeriodHH(mConfig.getPeriodMS() / (3600L * 1000L));
         tResponse.setTotalSamples( tTotalSamples );
-        return tResponse.toJson().toString();
+        return tResponse.toJson();
     }
 
-    String executeGetTotalStatistics(RS_RegionStatisticsRqst pRqstMsg) {
+    JsonObject executeGetTotalStatistics(RS_RegionStatisticsRqst pRqstMsg) {
         RS_RegionStatisticsRsp tResponse = new RS_RegionStatisticsRsp();
         ArrayList<RegionStatistics> tReginRsponseList = new ArrayList<>();
 
@@ -132,7 +131,7 @@ public class RegionStatService implements TurfServiceInterface
         }
 
 
-        return tResponse.toJson().toString();
+        return tResponse.toJson();
     }
 
     private RegionStatistics buildHourStatisticResponse( RegionStat r  ) {

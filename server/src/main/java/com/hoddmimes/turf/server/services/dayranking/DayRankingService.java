@@ -79,7 +79,7 @@ public class DayRankingService implements TurfServiceInterface {
                 ZoneEvent ltoe = mUserZones.get( toe.getCurrentOwnerId() );
                 if (ltoe != null) {
                     long tm = ltoe.getLatestTakeOverTime() - toe.getLatestTakeOverTime();
-                    if (tm > (30L * 60000L)) { // if longer than 30 min new session
+                    if (tm < (30L * 60000L)) { // if longer than 30 min new session and ignore time and distance
                         double tDistance = DistanceCalculator.distance(toe.getLat(), toe.getLong(), ltoe.getLat(), ltoe.getLong());
                         ru.setDistance((int) (ru.getDistance().orElse(0) + Math.round(tDistance)));
                         ru.setTime(ru.getTime().orElse(0L) + tm);

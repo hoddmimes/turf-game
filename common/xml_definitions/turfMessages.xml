@@ -157,6 +157,7 @@
         <Attribute name="pph" type="int"/>
         <Attribute name="distance" type="double"/>
         <Attribute name="time" type="long"/>
+        <Attribute name="speed" type="double"/>
     </Message>
 
     <Message name="DR_RankingRsp"  rootMessage="true">

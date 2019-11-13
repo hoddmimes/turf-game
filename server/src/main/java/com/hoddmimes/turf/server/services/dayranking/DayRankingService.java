@@ -163,6 +163,14 @@ public class DayRankingService implements TurfServiceInterface {
 
             double tKm = dru.getDistance().orElse(0) / 1000.0d;
             u.setDistance( tKm ); // Distance in Km
+
+            if (dru.getTime().isPresent()) {
+                double tSpeed = (dru.getDistance().orElse(0) / dru.getTime().get()) * 3.6d;
+                u.setSpeed(tSpeed);
+            } else {
+                u.setSpeed( 0d );
+            }
+
             drUsers.add(u);
 
         }

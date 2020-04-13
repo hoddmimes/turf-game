@@ -71,23 +71,42 @@ public class DayRankingService implements TurfServiceInterface {
     @Override
     public void processZoneUpdates(JsonElement pZoneUpdates)
     {
+        long tTotTime = 0;
+        int  tTotDistance = 0;
+        int  tTotUsers = 0;
         List<ZoneEvent> tTakeOverEvents = mZoneFilter.getNewTakeover(pZoneUpdates.getAsJsonArray());
         for( ZoneEvent toe: tTakeOverEvents) {
             DayRankingUser ru = mRankingUsers.get( toe.getCurrentOwnerId());
             if (ru != null) {
+                tTotUsers++;
                 ru.setLatestTakeTime(toe.getLatestTakeOverTime());
                 ZoneEvent ltoe = mUserZones.get( toe.getCurrentOwnerId() );
                 if (ltoe != null) {
-                    double tDistance = DistanceCalculator.distance(toe.getLat(), toe.getLong(), ltoe.getLat(), ltoe.getLong());
-                    ru.setDistance((int) (ru.getDistance().orElse(0) + Math.round(tDistance)));
+                    long tmSec = (toe.getLatestTakeOverTime() - ltoe.getLatestTakeOverTime()) / 1000L;
+                    if (tmSec < (30L * 60L)) { // if longer than 30 min new session and ignore time and distance
+                        double tDistance = DistanceCalculator.distance(toe.getLat(), toe.getLong(), ltoe.getLat(), ltoe.getLong());
+                        ru.setDistance((int) (ru.getDistance().orElse(0) + Math.round(tDistance)));
+                        ru.setTime(ru.getTime().orElse(0L) + tmSec);
+
+                        tTotTime += tmSec;
+                        tTotDistance += Math.round( tDistance );
+                    }
                 }
-                mUserZones.put( toe.getCurrentOwnerId(), toe);
+            }
+            mUserZones.put( toe.getCurrentOwnerId(), toe);
+        }
+        if ((tTotTime > 0) && (tTotDistance > 0)) {
+            if (mConfig.getDebug()) {
+                mLogger.debug("DayRanking (update zones) Users found: " + tTotUsers +
+                        " tot-time: " + Turf.formatTimeDiff((tTotTime * 1000L)) +
+                        " tot-distance: " + tTotDistance + " m.");
+
             }
         }
     }
 
     @Override
-    public String execute(MessageInterface tRqstMsg) {
+    public JsonObject execute(MessageInterface tRqstMsg) {
         if (tRqstMsg instanceof DR_RankingRqst) {
             return executeGetDayRanking((DR_RankingRqst) tRqstMsg);
         }
@@ -96,7 +115,7 @@ public class DayRankingService implements TurfServiceInterface {
         }
 
         return TGStatus.createError("No " + this.getClass().getSimpleName() + " service method not found for request \"" +
-                tRqstMsg.getMessageName() + "\"", null ).toJson().toString();
+                tRqstMsg.getMessageName() + "\"", null ).toJson();
 
     }
 
@@ -110,13 +129,13 @@ public class DayRankingService implements TurfServiceInterface {
         return tList;
     }
 
-    private String executeGetDayRanking( DR_RankingRqst pRqst  ) {
+    private JsonObject executeGetDayRanking( DR_RankingRqst pRqst  ) {
         DR_RankingRsp tResponse = new DR_RankingRsp();
         String tDate = pRqst.getDate().orElse( mCurrentDate );
         int tRegionId = pRqst.getRegionId().orElse(141);
         List<DayRankingRegion> tRegionLst = mDbAux.findDayRankingRegion(  tDate, tRegionId );
         if ((tRegionLst == null) || (tRegionLst.size() == 0)) {
-            return TGStatus.create(false,"No day ranking exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson().toString();
+            return TGStatus.create(false,"No day ranking exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson();
         }
 
         // If the date requested is for the current date we collected the response from the cache
@@ -130,7 +149,7 @@ public class DayRankingService implements TurfServiceInterface {
         }
 
         if ((tUserList == null) || (tUserList.size() == 0)) {
-            return TGStatus.create(false,"No day ranking users exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson().toString();
+            return TGStatus.create(false,"No day ranking users exists for region \"" + pRqst.getRegion().get() + "\" (" + pRqst.getRegionId().get() + ") and date \"" + tDate + "\"").toJson();
         }
         ArrayList<DR_User> drUsers = new ArrayList<>();
         for ( DayRankingUser dru : tUserList) {
@@ -140,17 +159,18 @@ public class DayRankingService implements TurfServiceInterface {
             u.setPph( dru.getPPH().orElse(0));
             u.setTakes( dru.getTakes().orElse(0));
             u.setUser( dru.getUser().get());
-
-
-            long tm = dru.getLatestTakeTime().orElse(0L);
-            if (tm == 0) {
-                u.setLastSeen("00:00");
-            } else {
-                u.setLastSeen(  Turf.SDFHHSS.format( tm ));
-            }
+            u.setTime( dru.getTime().orElse(0L));
 
             double tKm = dru.getDistance().orElse(0) / 1000.0d;
             u.setDistance( tKm ); // Distance in Km
+
+            if (dru.getTime().isPresent()) {
+                double tSpeed = (dru.getDistance().orElse(0) / dru.getTime().get()) * 3.6d;
+                u.setSpeed(tSpeed);
+            } else {
+                u.setSpeed( 0d );
+            }
+
             drUsers.add(u);
 
         }
@@ -166,10 +186,10 @@ public class DayRankingService implements TurfServiceInterface {
         tResponse.setRegionId( dr.getRegionId().get());
         tResponse.setStartTime( HH_MM_SS_FORMAT.format( dr.getStartTime().get()));
         tResponse.setUsers( drUsers.subList(0, Math.min(drUsers.size(), mConfig.getMaxDisplayUsers())));
-        return tResponse.toJson().toString();
+        return tResponse.toJson();
     }
 
-    private String executeGetRegions( DR_RegionRqst pRqst ) {
+    private JsonObject executeGetRegions( DR_RegionRqst pRqst ) {
         DR_RegionRsp tResponse = new DR_RegionRsp();
         ArrayList<DR_Region> tRegionList = new ArrayList<>();
         for( DayRankingConfiguration.Region r : mConfig.getRegions()) {
@@ -184,7 +204,7 @@ public class DayRankingService implements TurfServiceInterface {
         }
         tResponse.setFirstDateInDB( getFirstDateInDB());
         tResponse.addRegions(tRegionList);
-        return tResponse.toJson().toString();
+        return tResponse.toJson();
 
     }
 

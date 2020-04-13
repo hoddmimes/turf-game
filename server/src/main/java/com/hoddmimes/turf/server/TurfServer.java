@@ -302,7 +302,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         }
     }
 
-    private String turfRequestDispatch( String pJsonRequest ) {
+    private JsonObject turfRequestDispatch( String pJsonRequest ) {
         MessageFactory tFactory = new MessageFactory();
 
         String tJsonRqstMsgName = null;
@@ -313,12 +313,12 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         }
         catch( NameNotFoundException e) {
             mLogger.error("Failed to parse servlet Json request messsage", e);
-            return TGStatus.createError( "failed to retreive Turf Rqst Msg Id from servlet Json request", null).toJson().toString();
+            return TGStatus.createError( "failed to retreive Turf Rqst Msg Id from servlet Json request", null).toJson();
         }
 
         MessageInterface tRqstMsg = tFactory.getMessageInstance( pJsonRequest );
         if (tRqstMsg == null) {
-            return TGStatus.createError( "Unknown Turf Rqst \"" + tJsonRqstMsgName + "\"", null).toJson().toString();
+            return TGStatus.createError( "Unknown Turf Rqst \"" + tJsonRqstMsgName + "\"", null).toJson();
         }
 
         if (tRqstMsg.getMessageName().startsWith("DR_")) {
@@ -338,25 +338,25 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         }
 
         // No service found for request message
-        return TGStatus.createError("No service for for request message \"" + tJsonRqstMsgName + "\"", null).toJson().toString();
+        return TGStatus.createError("No service for for request message \"" + tJsonRqstMsgName + "\"", null).toJson();
     }
 
     @Override
     public void tcpMessageRead(TcpThread pThread, byte[] pBuffer) {
         String tRequest = null;
-        String tResponse = null;
+        JsonObject jResponse = null;
 
         try {
             tRequest = new String(pBuffer, "ISO-8859-1");
             mLogger.trace("[server-request] " + tRequest);
-            tResponse = turfRequestDispatch( tRequest );
+            jResponse = turfRequestDispatch( tRequest );
         } catch (UnsupportedEncodingException e) {
-            tResponse = TGStatus.createError("Invalid encoded request", e).toJson().toString();
+            jResponse = TGStatus.createError("Invalid encoded request", e).toJson();
         }
 
         // Send response
-        mLogger.trace("[server-response] " + tResponse);
-        sendResponse(pThread, tResponse);
+        mLogger.trace("[server-response] " + jResponse.toString());
+        sendResponse(pThread, jResponse.toString());
     }
 
     @Override
@@ -364,36 +364,36 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         pThread.close();
     }
 
-    private String executeUserLogon( TG_LogonRqst pRqstMsg ) {
+    private JsonObject executeUserLogon( TG_LogonRqst pRqstMsg ) {
 
         List<User> tUsers = mDbAux.findUser( pRqstMsg.getMailAddress().get());
         if ((tUsers == null) || (tUsers.size() == 0)) {
             mLogger.warn("Logon failure, user \"" + pRqstMsg.getMailAddress().get() +"\" does not exist");
-            return TGStatus.create(false,"Unknown user or invalid password", null).toJson().toString();
+            return TGStatus.create(false,"Unknown user or invalid password", null).toJson();
         }
         User tUser = tUsers.get(0);
 
         if (!tUser.getConfirmed().get()) {
-            return TGStatus.create(false,"Login failed, user mail address is not yet confirmed", null).toJson().toString();
+            return TGStatus.create(false,"Login failed, user mail address is not yet confirmed", null).toJson();
         }
 
         if (tUser.getPassword().get().compareTo(PasswordRules.hashPassword( pRqstMsg.getPassword().get())) != 0) {
             mLogger.warn("Logon failure, invalid password for user \"" + pRqstMsg.getMailAddress().get() +"\"");
-            return TGStatus.create(false,"Unknown user or invalid password", null).toJson().toString();
+            return TGStatus.create(false,"Unknown user or invalid password", null).toJson();
         }
 
         tUser.setLastLogin( Turf.SDF.format( System.currentTimeMillis()));
         tUser.setLoginCounts( tUser.getLoginCounts().get() + 1);
         mDbAux.updateUser( tUser.getMailAddr().get(), tUser, false);
 
-        return TGStatus.create(true,"Successfull logon", "/turf/zn.html").toJson().toString();
+        return TGStatus.create(true,"Successfull logon", "/turf/zn.html").toJson();
     }
 
-    private String executeWhenInitialized( TG_WhenInitializedRqst pRqstMsg )
+    private JsonObject executeWhenInitialized( TG_WhenInitializedRqst pRqstMsg )
     {
         List<FirstEntry> tFirstEntryList = mDbAux.findAllFirstEntry();
         if ((tFirstEntryList == null) || (tFirstEntryList.size() == 0)) {
-            return TGStatus.create(false,"System initialization info not found", null).toJson().toString();
+            return TGStatus.create(false,"System initialization info not found", null).toJson();
         }
 
         FirstEntry fe = tFirstEntryList.get(0);
@@ -402,9 +402,9 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         jRsp.setDateTime( fe.getTime().get());
         String arr[] = fe.getTime().get().split(" ");
         jRsp.setDate( arr[0]);
-        return jRsp.toJson().toString();
+        return jRsp.toJson();
     }
-    private String execute( MessageInterface pRqstMsg ) {
+    private JsonObject execute( MessageInterface pRqstMsg ) {
         if (pRqstMsg instanceof TG_LogonRqst) {
             return executeUserLogon((TG_LogonRqst) pRqstMsg);
         }
@@ -414,7 +414,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         }
 
         return TGStatus.createError("No " + this.getClass().getSimpleName() + " service method found for request \"" +
-                pRqstMsg.getMessageName() + "\"", null ).toJson().toString();
+                pRqstMsg.getMessageName() + "\"", null ).toJson();
     }
 
     static class ExecServerTasksThread extends Thread

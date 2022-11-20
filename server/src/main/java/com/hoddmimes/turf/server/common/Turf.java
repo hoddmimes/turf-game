@@ -8,12 +8,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipException;
 
+
+import org.apache.coyote.http2.Http2Exception;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Element;
 
@@ -109,7 +109,7 @@ public class Turf
 
 				// Check status code
 				if (tConn.getResponseCode() != 200) {
-					pLogger.error("[turfServerGET] error response code: " + tConn.getResponseCode());
+					pLogger.error("[turfServerGET] path: " + pPath + " error response code: " + tConn.getResponseCode());
 					return null;
 				}
 
@@ -120,7 +120,7 @@ public class Turf
 				}
 
 				BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "utf-8"), 8);
-				tElement  =  new JsonParser().parse(tReader);
+				tElement  =   JsonParser.parseReader(tReader);
 				tGotAnswer = true;
 			} catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -144,6 +144,42 @@ public class Turf
 		}
 		return tElement;
 	}
+
+
+	public static JsonElement turfServerGETSignal(String pPath, Logger pLogger) throws HttpException {
+		JsonElement tElement = null;
+
+
+		try {
+			HttpURLConnection tConn = (HttpURLConnection) new URL(URL_PATH + pPath).openConnection();
+			tConn.setRequestProperty("Accept-Encoding", "gzip, deflate");
+			tConn.setRequestMethod("GET");
+			tConn.setRequestProperty("Content-Type", "application/json;charset=iso-8859-1");
+			tConn.setDoOutput(false);
+			tConn.setDoInput(true);
+			tConn.setUseCaches(false);
+
+
+			// Check status code
+			if (tConn.getResponseCode() != 200) {
+				pLogger.warn("[turfServerGETSignal] error response code: " + tConn.getResponseCode());
+				throw new HttpException(null, tConn.getResponseCode());
+			}
+
+
+			InputStream tInStream = tConn.getInputStream();
+			if ((tConn.getContentEncoding() != null) && (tConn.getContentEncoding().toLowerCase().contains("gzip"))) {
+				tInStream = new GZIPInputStream(tConn.getInputStream());
+			}
+
+			BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "utf-8"), 8);
+			tElement = JsonParser.parseReader( tReader );
+		} catch (IOException e) {
+			throw new HttpException(e, 0);
+		}
+		return tElement;
+	}
+
 
 
 	public static  JsonElement turfServerPOST( String pPath, String pRequestData, Logger pLogger ) {
@@ -176,7 +212,7 @@ public class Turf
 
 				// Check status code
 				if (tConn.getResponseCode() != 200) {
-					pLogger.error("[turfServerPOST] error response code: " + tConn.getResponseCode());
+					pLogger.error("[turfServerPOST] path: " + pPath + " rqst: " + pRequestData + "   error response code: " + tConn.getResponseCode());
 					return null;
 				}
 

@@ -1,0 +1,200 @@
+<html>
+  <head>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+   <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
+   <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>    
+   <script
+           src="https://code.jquery.com/jquery-3.3.1.js"
+           integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+           crossorigin="anonymous">
+   </script>
+   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   <script src="js/turf.js" type="text/javascript"></script>
+   <script src="js/table.js" type="text/javascript"></script>
+
+   <title>Turf Zone Notification</title>
+   <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+   <meta name="description" contents="Turf Game Heat Map">
+   <meta name="keywords" contents="TurfGame Turf game GPS outdoor Heat Map">
+   <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 70; bottom: 0; width: 100%; }
+	#menu { position: absolute; top: 10; bottom: 0; hight: 70; width: 100%; left: 40% }
+   </style>
+</head>
+
+<body>
+    <div id="menu">
+      <label>Heat Map Type </label>
+      <select id="heatmaptype">
+             <option value="CURRENT">Present</option>
+	     <option value="HISTORICAL">Historical</option>
+      </select>
+      <button onclick="refreshMap()">Refresh Map</button>
+      <br><br>
+      <b style="color:#ff0000;">RED &lt; 4 hrs</b>, <b style="color:#ff7800;">ORANGE &lt; 12 hrs</b>,  <b style="color:#8F00FF;"> VIOLET &lt; 24</b>, <b style="color:#000000;"> BLACK &gt; 24 hrs</b>
+    </div>
+    <div id="map"></div>
+   <body onload="loadDataFromServer()"/>
+
+<script>
+
+  function refreshMap( form ) {
+      var e = document.getElementById("heatmaptype");
+      var tMapType = e.value;
+      loadGeoPositionsFromServer( tMapType);
+  }
+
+  
+const iconSize = 32;
+const markerWidth = 6;
+
+
+  function createIcon( rgb ) {
+  
+      var tIconMarker = {
+	  width: iconSize,
+	  height: iconSize,
+	  rgb : rgb,
+	  data: new Uint8Array(iconSize * iconSize * 4),
+
+	  // When the layer is added to the map,
+	  // get the rendering context for the map canvas.
+	  onAdd: function () {
+	      const canvas = document.createElement('canvas');
+	      canvas.width = this.width;
+	      canvas.height = this.height;
+	      this.context = canvas.getContext('2d');
+	  },
+
+	  // Call once before every frame where the icon will be used.
+	  render: function () {
+	      const hx_start = 0;                  // Horizontal X starting point
+	      const hy_start = (iconSize / 2) - (markerWidth/2); // Horizontal Y starting point
+	      const vx_start = (iconSize / 2) - (markerWidth/2); // Vertical X starting point
+	      const vy_start = 0;                  // Vertical Y starting point
+
+	 
+	      const context = this.context;
+
+	      context.clearRect(0, 0, this.width, this.height);
+
+	      context.beginPath();
+	      context.rect(  hx_start, // x starting point
+		        hy_start, // y starting point
+		        iconSize,
+		        markerWidth );
+	      context.fillStyle = 'rgba(' + this.rgb.red + ',' + this.rgb.green + ',' + this.rgb.blue + ')';
+	      context.fill();
+
+
+	      context.beginPath();
+ 	      context.rect(  vx_start, // x starting point
+		        vy_start, // y starting point
+		        markerWidth,
+		        iconSize );
+	      context.fillStyle = 'rgba(' + this.rgb.red + ',' + this.rgb.green + ',' + this.rgb.blue + ')';
+	      context.fill();
+
+
+
+	      this.data = context.getImageData( 0,0,this.width,this.height).data;
+
+	      map.triggerRepaint();
+
+	      // Return `true` to let the map know that the image was updated.
+	      return true;
+	  }
+      };
+      return tIconMarker;
+  };
+
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYmVydGlsc3NvbiIsImEiOiJja3FuaHZuZjAwZDRjMnVucDVwb3NodmZzIn0.qFHp7bOV48OWX3uUwHBjSA';
+  var map;
+  var geoJsonData;
+  var pointZero = [17.937865, 59.322357];  
+
+
+  function loadDataFromServer()
+  {
+    loadGeoPositionsFromServer("CURRENT");
+  }
+
+  function loadGeoPositionsFromServer( pHeatMapType)
+ 	{
+ 	  var rqst = {HM_ZoneRqst : {"type" : pHeatMapType}};
+
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/heatmap', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /* Alerts the results */
+      posting.done(function( msg ) {
+	  layerList = msg.HM_ZoneRsp.mapLayers;
+
+          map = new mapboxgl.Map({
+              container: 'map', // container id
+              style: 'mapbox://styles/mapbox/streets-v11', // style URL
+              center: pointZero, // starting position [lng, lat]
+              zoom: 12 }); // starting zoom
+	       
+
+          map.on('load',makeHeatMap);
+
+	  /*
+	  const el = document.createElement('div');
+	  el.className = 'marker';
+
+	  // make a marker for each feature and add to the map
+	  new mapboxgl.Marker(el).setLngLat(zeroMarker).addTo(map);
+	  */
+
+        });
+
+   }
+
+   function makeHeatMap() {
+       var iconlist = [];
+
+       for( var i = 0; i < layerList.length; i++ ) {
+	   iconlist[i] = createIcon( layerList[i].color );
+	   map.addImage('iconimage-' + i, iconlist[i], { pixelRatio: 2 });
+
+	   map.addSource('layersrc-' + i, {
+             type: 'geojson',
+             data: layerList[i].mapBoxData });
+
+	 
+	   map.addLayer({
+               'id': 'maplayer-' + i,
+               'type': 'symbol',
+               'source': 'layersrc-' + i,
+               'layout': {
+	           'icon-image': 'iconimage-' + i,
+		   'icon-size': 1.0,
+		   'icon-anchor': 'center',
+                   'icon-allow-overlap': true
+	       }
+            });
+
+
+	   map.on('click', 'maplayer-' + i, function (e) {
+            new mapboxgl.Popup()
+               .setLngLat(e.features[0].geometry.coordinates)
+               .setHTML(e.features[0].properties.message)
+               .addTo(map);
+           });
+
+       }
+   }
+
+
+
+</script>
+</body>
+</html>

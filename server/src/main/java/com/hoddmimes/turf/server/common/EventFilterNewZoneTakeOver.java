@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Zone events are clllected periodically by doing pools to the turf server.
+ * Zone events are collected periodically by doing pools to the turf server.
  * The response returned contains the take been taken for the last 'n' minutes, max
- * 15 min. There is no esy way of seeing what of the events that has been been new and being already
+ * 15 min. There is no easy way of seeing what of the events that has been  new and being already
  * processed in an earlier response, pretty much since the granularity is seconds.
  *
  * This class somewhat tries to keep track on what zone takes that has been processed and which has not.

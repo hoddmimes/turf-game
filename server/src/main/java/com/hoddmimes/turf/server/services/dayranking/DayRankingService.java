@@ -285,6 +285,7 @@ public class DayRankingService implements TurfServiceInterface {
 
     class RefreshRankingThread extends Thread {
         DayRankingService mService;
+        Object tWaitObject = new Object();
 
         RefreshRankingThread( DayRankingService pService) {
             mService = pService;
@@ -299,8 +300,13 @@ public class DayRankingService implements TurfServiceInterface {
             boolean tNoMore = false;
             try {
                 while( (!tNoMore) && (tX < tY)) {
-                    String tPostRqst = "{\"region\": \"" + pRegion.getName() + "\", \"from\":" + tX + " , \"to\": " + tY + " }";
 
+
+                    String tPostRqst = "{\"region\": \"" + pRegion.getName() + "\", \"from\":" + tX + " , \"to\": " + tY + " }";
+                    synchronized (tWaitObject ) {
+                        try {tWaitObject.wait(3000L);}
+                        catch (InterruptedException ie) {}
+                    }
 
                     JsonElement jElement = Turf.turfServerPOST("users/top", tPostRqst, mLogger);
                     if (jElement == null) {
@@ -320,7 +326,7 @@ public class DayRankingService implements TurfServiceInterface {
                 return jUsers;
             }
             catch( Throwable e) {
-                mService.mLogger.error("Failed to retreive user day ranking from Turf service", e);
+                mService.mLogger.error("Failed to retrieve user day ranking from Turf service", e);
                 return jUsers;
             }
         }
@@ -503,10 +509,11 @@ public class DayRankingService implements TurfServiceInterface {
             }
         }
 
-        private long calcDismissTime( long pWaitTime ) {
+        private long calcDismissTime( long pWaitTimeMs ) {
             long tNow = System.currentTimeMillis();
             long tRem = (tNow % 60000L);
-            return (pWaitTime - tRem) + 500L;
+            long tSleepTimeMs = (pWaitTimeMs - tRem) + 500L;
+            return  tSleepTimeMs;
         }
 
 

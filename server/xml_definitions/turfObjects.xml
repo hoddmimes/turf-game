@@ -102,4 +102,23 @@
         <Attribute name="timestamp" type="long" dbKey="unique"/>
     </Message>
 
+    <!-- Structure for zone activity map -->
+    <Message name="TurfActivityZone" rootMessage="true" db="true" dbCollection="ZoneHeatMap">
+        <Attribute name="regionId" type="int" dbKey="not unique"/>
+        <Attribute name="zoneId" type="int" dbKey="unique"/>
+        <Attribute name="dateLastTaken" type="String"/>
+        <Attribute name="lat" type="double"/>
+        <Attribute name="long" type="double"/>
+        <Attribute name="takeovers" type="long"/>
+        <Attribute name="totHoldTimeSec" type="long"/>
+        <Attribute name="user" type="String"/>
+        <code>
+            public void addHoldSec( long pSec ) {
+               mTakeovers++;
+               mTotHoldTimeSec += pSec;
+            }
+        </code>
+    </Message>
+
+
 </Messages>

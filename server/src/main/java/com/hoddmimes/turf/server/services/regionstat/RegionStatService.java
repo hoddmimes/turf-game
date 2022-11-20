@@ -40,7 +40,7 @@ public class RegionStatService implements TurfServiceInterface
 
     private TurfServerInterface mTurfIf;
     private Logger mLogger;
-    private EventFilterNewZoneTakeOver tZoneFilter = null;
+    private EventFilterNewZoneTakeOver mZoneFilter = null;
     private MongoAux mDbAux;
     private RegionStatConfiguration mConfig = null;
     private DebugContext mDbgCtx = null;
@@ -240,7 +240,7 @@ public class RegionStatService implements TurfServiceInterface
     public void processZoneUpdates(JsonElement pZoneUpdates) {
         long tStartTime = System.currentTimeMillis();
 
-        List<ZoneEvent> tTakeOverEvents = tZoneFilter.getNewTakeover(pZoneUpdates.getAsJsonArray());
+        List<ZoneEvent> tTakeOverEvents = mZoneFilter.getNewTakeover(pZoneUpdates.getAsJsonArray());
 
 
         if (mDbgCtx.ifDebug(DebugContext.TAKE_OVER_FEED_VERBOSE)) {
@@ -318,7 +318,7 @@ public class RegionStatService implements TurfServiceInterface
     @Override
     public void initialize( TurfServerInterface pTurfServerInterface ) {
         mTurfIf = pTurfServerInterface;
-        tZoneFilter = new EventFilterNewZoneTakeOver();
+        mZoneFilter = new EventFilterNewZoneTakeOver();
 
         // Retreive region stat configuration
         mConfig = pTurfServerInterface.getServerConfiguration().getRegionStatConfiguration();

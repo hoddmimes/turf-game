@@ -15,6 +15,10 @@ public class TurfZone
     private String  mRegionCountry;
     private boolean mHasRegion;
 
+    private String mLastTaken;
+    private String mUser; // Current owner
+
+
     public TurfZone(JsonObject pZone ) {
        mId = pZone.get("id").getAsInt();
        mName = pZone.get("name").getAsString();
@@ -22,6 +26,15 @@ public class TurfZone
        mTP = pZone.get("pointsPerHour").getAsInt();
        mLat = pZone.get("latitude").getAsDouble();
        mLong = pZone.get("longitude").getAsDouble();
+       mLastTaken = (pZone.has("dateLastTaken")) ? pZone.get("dateLastTaken").getAsString() : null;
+
+       if (pZone.has("currentOwner")) {
+           JsonObject jCurrOwner = pZone.get("currentOwner").getAsJsonObject();
+           mUser = (jCurrOwner.has("name")) ? jCurrOwner.get("name").getAsString() : null;
+       } else {
+           mUser = null;
+       }
+
 
        if (pZone.get("region") != null ) {
            JsonObject jRegion = pZone.get("region").getAsJsonObject();
@@ -39,6 +52,9 @@ public class TurfZone
     }
 
 
+    public String getLastDateTaken() {
+        return mLastTaken;
+    }
 
     public boolean hasRegion() {
         return mHasRegion;
@@ -50,7 +66,7 @@ public class TurfZone
 
     public String getRegionCountry() { return mRegionCountry; }
 
-    public double geLatitude() {
+    public double getLatitude() {
         return mLat;
     }
 
@@ -72,5 +88,9 @@ public class TurfZone
 
     public String getName() {
         return mName;
+    }
+
+    public String getOwner() {
+        return mUser;
     }
 }

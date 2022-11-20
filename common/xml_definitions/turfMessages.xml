@@ -167,4 +167,12 @@
         <Attribute name="users" type="DR_User" list="array"/>
     </Message>
 
+    <Message name="HM_ZoneRqst"  rootMessage="true">
+        <Attribute name="type" type="String"/> <!-- CURRENT / AVERAGE -->
+    </Message>
+
+    <Message name="HM_ZoneRsp"  rootMessage="true">
+       <!-- Messy structure check the code i.e. server, services, ZoneHeatMapService -->
+    </Message>
+
 </Messages>

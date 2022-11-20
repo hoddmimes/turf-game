@@ -13,6 +13,8 @@ public class ServerConfiguration
     private String mTcpIpInterface;
     private int mTcpIpServerPort;
 
+    private String mLocalAllZoneDB;
+
     String mDbHost = null;
     int    mDbPort = 0;
     String mDbName = null;
@@ -22,6 +24,8 @@ public class ServerConfiguration
     private RegionStatConfiguration mRegionStatCfg = null;
     private UserTraceConfiguration  mUserTraceCfg = null;
     private DayRankingConfiguration  mDayRankCfg = null;
+
+    private ZoneHeatMapConfiguration mZoneHeatMapCfg = null;
 
 
 
@@ -57,6 +61,11 @@ public class ServerConfiguration
                 mDayRankCfg.parse(mRoot);
             }
 
+            if (XmlAux.isElementPresent(mRoot, "ZoneHeatMap")) {
+                mZoneHeatMapCfg = new ZoneHeatMapConfiguration();
+                mZoneHeatMapCfg.parse(mRoot);
+            }
+
             if (XmlAux.isElementPresent(mRoot, "RegionStatisticsService")) {
                 mRegionStatCfg = new RegionStatConfiguration();
                 mRegionStatCfg.parse(mRoot);
@@ -72,6 +81,7 @@ public class ServerConfiguration
             mApiCollectIntervalSec = XmlAux.getIntAttribute( tTurfAPI, "zoneCollectIntervalSec", 30);
             mApiTimeZoneOffsetHr =  XmlAux.getIntAttribute( tTurfAPI, "timeZoneOffsetHr", 30);
             mApiHistoryOffsetMin =  XmlAux.getIntAttribute( tTurfAPI, "historyOffsetMin", 30);
+            mLocalAllZoneDB = XmlAux.getStringAttribute( tTurfAPI, "localZoneDB", null );
 
             Element tTcpIp= XmlAux.getElement(mRoot, "TcpIp");
             mTcpIpInterface = XmlAux.getStringAttribute( tTcpIp, "interface", "0.0.0.0");
@@ -132,6 +142,9 @@ public class ServerConfiguration
         return this.mDbPort;
     }
 
+    public String getLocalAllZonesDBFile() {
+        return mLocalAllZoneDB;
+    }
 
     public boolean startZoneNotify() {
         return (mZoneNotifyCfg == null) ? false : true;
@@ -143,6 +156,9 @@ public class ServerConfiguration
     public boolean startDayRanking() {
         return (mDayRankCfg == null) ? false : true;
     }
+    public boolean startZoneHeatMap() {
+        return (mZoneHeatMapCfg == null) ? false : true;
+    }
 
     public ZoneNotifyConfiguration getZoneNotifyConfiguration() {
         return mZoneNotifyCfg;
@@ -152,5 +168,7 @@ public class ServerConfiguration
     }
     public UserTraceConfiguration getUserTraceConfiguration() { return mUserTraceCfg; }
     public DayRankingConfiguration getDayRankingConfiguration() { return mDayRankCfg; }
+
+    public ZoneHeatMapConfiguration getZoneHeatMapConfiguration() { return mZoneHeatMapCfg; }
 
 }

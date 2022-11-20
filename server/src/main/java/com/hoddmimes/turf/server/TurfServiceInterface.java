@@ -11,5 +11,5 @@ public interface TurfServiceInterface
 {
     public void initialize( TurfServerInterface pTurfServerInterface );
     public void processZoneUpdates( JsonElement pZoneUpdates );
-    public JsonObject execute(MessageInterface tRqstMsg );
+    public JsonElement execute(MessageInterface tRqstMsg );
 }

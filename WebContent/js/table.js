@@ -24,7 +24,7 @@ function formatTime( deltatime ) {
         return ("00" + hh).slice(-2)  + ":" + ("00" + mm).slice(-2) + ":" + ("00" + sec).slice(-2);
     }
 }
-startsWith
+
 function isDeltaTime( format ) {
     return format.startsWith("deltatime");
 }

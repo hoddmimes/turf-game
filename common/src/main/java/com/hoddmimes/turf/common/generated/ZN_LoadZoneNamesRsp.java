@@ -1,10 +1,29 @@
 
-            package com.hoddmimes.turf.common.generated;
+/*
+ * Copyright (c)  Hoddmimes Solution AB 2021.
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.hoddmimes.turf.common.generated;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalDouble;
@@ -23,17 +42,25 @@ import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+
+
             
 
             @SuppressWarnings({"WeakerAccess","unused","unchecked"})
             public class ZN_LoadZoneNamesRsp implements MessageInterface 
             {
+                public static String NAME = "ZN_LoadZoneNamesRsp";
+
             
                     private List<String> mRegionNames;
                     private List<ZN_ZoneNames> mRegions;
-               public ZN_LoadZoneNamesRsp() {}
+               public ZN_LoadZoneNamesRsp()
+               {
+                
+               }
 
                public ZN_LoadZoneNamesRsp(String pJsonString ) {
+                    
                     JsonDecoder tDecoder = new JsonDecoder( pJsonString );
                     this.decode( tDecoder );
                }
@@ -152,6 +179,37 @@ import com.google.gson.GsonBuilder;
         public String toString() {
              Gson gsonPrinter = new GsonBuilder().setPrettyPrinting().create();
              return  gsonPrinter.toJson( this.toJson());
+        }
+    
+
+        public static  Builder getZN_LoadZoneNamesRspBuilder() {
+            return new ZN_LoadZoneNamesRsp.Builder();
+        }
+
+
+        public static class  Builder {
+          private ZN_LoadZoneNamesRsp mInstance;
+
+          private Builder () {
+            mInstance = new ZN_LoadZoneNamesRsp();
+          }
+
+        
+                        public Builder setRegionNames( List<String> pValue ) {
+                        mInstance.setRegionNames( pValue );
+                        return this;
+                    }
+                
+                    public Builder setRegions( List<ZN_ZoneNames> pValue )  {
+                        mInstance.setRegions( pValue );
+                        return this;
+                    }
+                
+
+        public ZN_LoadZoneNamesRsp build() {
+            return mInstance;
+        }
+
         }
     
             }

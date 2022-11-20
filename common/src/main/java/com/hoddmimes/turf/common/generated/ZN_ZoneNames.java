@@ -1,10 +1,29 @@
 
-            package com.hoddmimes.turf.common.generated;
+/*
+ * Copyright (c)  Hoddmimes Solution AB 2021.
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.hoddmimes.turf.common.generated;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalDouble;
@@ -23,17 +42,25 @@ import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+
+
             
 
             @SuppressWarnings({"WeakerAccess","unused","unchecked"})
             public class ZN_ZoneNames implements MessageInterface 
             {
+                public static String NAME = "ZN_ZoneNames";
+
             
                     private String mRegion;
                     private List<String> mNames;
-               public ZN_ZoneNames() {}
+               public ZN_ZoneNames()
+               {
+                
+               }
 
                public ZN_ZoneNames(String pJsonString ) {
+                    
                     JsonDecoder tDecoder = new JsonDecoder( pJsonString );
                     this.decode( tDecoder );
                }
@@ -107,6 +134,37 @@ import com.google.gson.GsonBuilder;
         public String toString() {
              Gson gsonPrinter = new GsonBuilder().setPrettyPrinting().create();
              return  gsonPrinter.toJson( this.toJson());
+        }
+    
+
+        public static  Builder getZN_ZoneNamesBuilder() {
+            return new ZN_ZoneNames.Builder();
+        }
+
+
+        public static class  Builder {
+          private ZN_ZoneNames mInstance;
+
+          private Builder () {
+            mInstance = new ZN_ZoneNames();
+          }
+
+        
+                        public Builder setRegion( String pValue ) {
+                        mInstance.setRegion( pValue );
+                        return this;
+                    }
+                
+                        public Builder setNames( List<String> pValue ) {
+                        mInstance.setNames( pValue );
+                        return this;
+                    }
+                
+
+        public ZN_ZoneNames build() {
+            return mInstance;
+        }
+
         }
     
             }

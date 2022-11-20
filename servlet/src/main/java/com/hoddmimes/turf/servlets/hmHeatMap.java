@@ -1,0 +1,30 @@
+package com.hoddmimes.turf.servlets;
+
+import com.hoddmimes.turf.common.TGStatus;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+
+
+@Path("/heatmap")
+public class hmHeatMap
+{
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public String loadZone( String pRqst )
+    {
+        String tResponse = null;
+        ServletResourcesIf tResources = ServletResources.getInstance();
+
+        try {
+            tResponse = tResources.sendToTurfServer(pRqst);
+
+        }
+        catch( IOException e) {
+            tResponse = TGStatus.createError("Failed to load heatmap zones", e).toJson().toString();
+        }
+        System.out.println( tResponse );
+        return tResponse;
+    }
+}

@@ -60,6 +60,11 @@ public class ZoneEvent
         return jZone.get("id").getAsInt();
     }
 
+    public String getLatestTakeTime() {
+        JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
+        return jZone.get("dateLastTaken").getAsString();
+    }
+
     public int getRegionId() {
         JsonObject jZone = mZoneEvent.getAsJsonObject("zone");
         JsonObject jRegion = jZone.getAsJsonObject("region").getAsJsonObject();

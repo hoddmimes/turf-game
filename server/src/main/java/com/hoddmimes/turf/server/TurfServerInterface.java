@@ -14,6 +14,7 @@ public interface TurfServerInterface
     public TurfZone getZoneById(int pId );
     public TurfZone getZoneByName(String pName );
     public Map<Integer, List<TurfZone>> getZonesByRegionIds();
+    public List<TurfZone> getZonesByRegionId(int pRegionId );
     public Map<String, List<TurfZone>> getZonesByRegionNames();
 
     public ServerConfiguration getServerConfiguration();

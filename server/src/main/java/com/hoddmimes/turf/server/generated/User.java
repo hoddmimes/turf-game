@@ -1,10 +1,29 @@
 
-            package com.hoddmimes.turf.server.generated;
+/*
+ * Copyright (c)  Hoddmimes Solution AB 2021.
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.hoddmimes.turf.server.generated;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalDouble;
@@ -32,11 +51,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+
+
             
 
             @SuppressWarnings({"WeakerAccess","unused","unchecked"})
             public class User implements MessageInterface , MessageMongoInterface
             {
+                public static String NAME = "User";
+
             
                 private String mMongoId = null;
                     private String mMailAddr;
@@ -45,9 +68,13 @@ import com.google.gson.GsonBuilder;
                     private Integer mLoginCounts;
                     private Boolean mConfirmed;
                     private String mConfirmationId;
-               public User() {}
+               public User()
+               {
+                
+               }
 
                public User(String pJsonString ) {
+                    
                     JsonDecoder tDecoder = new JsonDecoder( pJsonString );
                     this.decode( tDecoder );
                }
@@ -182,21 +209,25 @@ import com.google.gson.GsonBuilder;
     
         public Document getMongoDocument() {
             MongoEncoder tEncoder = new MongoEncoder();
-        
-                tEncoder.add("mailAddr",  mMailAddr );
-                tEncoder.add("password",  mPassword );
-                tEncoder.add("lastLogin",  mLastLogin );
-                tEncoder.add("loginCounts",  mLoginCounts );
-                tEncoder.add("confirmed",  mConfirmed );
-                tEncoder.add("confirmationId",  mConfirmationId );
+            
+            mongoEncode( tEncoder );
             return tEncoder.getDoc();
+        }
+
+     protected void mongoEncode(  MongoEncoder pEncoder ) {
+        
+                pEncoder.add("mailAddr",  mMailAddr );
+                pEncoder.add("password",  mPassword );
+                pEncoder.add("lastLogin",  mLastLogin );
+                pEncoder.add("loginCounts",  mLoginCounts );
+                pEncoder.add("confirmed",  mConfirmed );
+                pEncoder.add("confirmationId",  mConfirmationId );
     }
     
         public void decodeMongoDocument( Document pDoc ) {
+
             Document tDoc = null;
             List<Document> tDocLst = null;
-
-
             MongoDecoder tDecoder = new MongoDecoder( pDoc );
 
             
@@ -216,6 +247,57 @@ import com.google.gson.GsonBuilder;
            mConfirmationId = tDecoder.readString("confirmationId");
         
         } // End decodeMongoDocument
+    
+
+        public static  Builder getUserBuilder() {
+            return new User.Builder();
+        }
+
+
+        public static class  Builder {
+          private User mInstance;
+
+          private Builder () {
+            mInstance = new User();
+          }
+
+        
+                        public Builder setMailAddr( String pValue ) {
+                        mInstance.setMailAddr( pValue );
+                        return this;
+                    }
+                
+                        public Builder setPassword( String pValue ) {
+                        mInstance.setPassword( pValue );
+                        return this;
+                    }
+                
+                        public Builder setLastLogin( String pValue ) {
+                        mInstance.setLastLogin( pValue );
+                        return this;
+                    }
+                
+                        public Builder setLoginCounts( Integer pValue ) {
+                        mInstance.setLoginCounts( pValue );
+                        return this;
+                    }
+                
+                        public Builder setConfirmed( Boolean pValue ) {
+                        mInstance.setConfirmed( pValue );
+                        return this;
+                    }
+                
+                        public Builder setConfirmationId( String pValue ) {
+                        mInstance.setConfirmationId( pValue );
+                        return this;
+                    }
+                
+
+        public User build() {
+            return mInstance;
+        }
+
+        }
     
             }
             

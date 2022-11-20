@@ -30,6 +30,8 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
     private TcpClientSync mTcpClient;
 
 
+
+
     public static ServletResourcesIf getInstance()
     {
         return cInstance;

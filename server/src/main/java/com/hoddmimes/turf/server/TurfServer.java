@@ -24,6 +24,7 @@ import com.hoddmimes.turf.server.generated.FirstEntry;
 import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.User;
 import com.hoddmimes.turf.server.services.dayranking.DayRankingService;
+import com.hoddmimes.turf.server.services.heatmap.ZoneHeatMapService;
 import com.hoddmimes.turf.server.services.notifier.ZoneNotifierService;
 import com.hoddmimes.turf.server.services.regionstat.RegionStatService;
 import com.hoddmimes.turf.server.services.usertrace.UserTraceService;
@@ -47,17 +48,18 @@ import java.util.Map;
 public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, TcpThreadCallbackIf, WrapperListener
 {
     private static boolean cDaemonMode = true;
-    static volatile boolean cServerShoulExit = false;
+    static volatile boolean cServerShouldExit = false;
     static ExecServerTasksThread cServerTaskThread = null;
 
     private String mServerCfgFilename = null;
     private ServerConfiguration mServerCfg = null;
-    private ZoneDictionary mZoneDictory = null;
+    private ZoneDictionary mZoneDictionary = null;
 
     private ZoneNotifierService mZoneNotifierService = null;
     private RegionStatService mRegionStatService = null;
     private UserTraceService mUserTraceService = null;
     private DayRankingService mDayRankingService = null;
+    private ZoneHeatMapService mZoneHeatMapService = null;
 
 
     private TcpServer mTcpIpServer;
@@ -76,6 +78,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     public static void main( String args[] ) {
         checkDaemonMode(args);
         if (TurfServer.cDaemonMode) {
+            System.out.println("Starting server in Daemon mode ");
             WrapperManager.start(new TurfServer(), args);
         } else {
             TurfServer tf = new TurfServer();
@@ -130,7 +133,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     }
 
     private void execServerTasks() {
-        while(!(cServerShoulExit )) {
+        while(!(cServerShouldExit)) {
             JsonElement tZoneUpdateRsp = getZoneEvents();
 
             //mLogger.debug("[zonesUpdated] zones " + countZones(tZoneUpdateRsp) + " retreived");
@@ -149,12 +152,17 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
                 if (mDayRankingService != null) {
                     mDayRankingService.processZoneUpdates(tZoneUpdateRsp);
                 }
+
+                if (mZoneHeatMapService != null) {
+                    mZoneHeatMapService.processZoneUpdates(tZoneUpdateRsp);
+                }
+
             }
             try {
                 Thread.sleep( mServerCfg.getApiZoneCollectIntervalMs());
             }
             catch( InterruptedException e) {
-                if (cServerShoulExit) {
+                if (cServerShouldExit) {
                     mLogger.info("Execution server task (thread) is interrupted and will exit");
                 } else {
                     e.printStackTrace();
@@ -171,8 +179,8 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         mDbAux.connectToDatabase();
 
 
-        mZoneDictory = new ZoneDictionary( mLogger );
-        mLogger.info("ZoneDictionary loaded [" + mZoneDictory.getSize() + "] zones.");
+        mZoneDictionary = new ZoneDictionary( mLogger, mServerCfg.getLocalAllZonesDBFile() );
+        mLogger.info("ZoneDictionary loaded [" + mZoneDictionary.getSize() + "] zones.");
         declareTcpIpServer();
 
 
@@ -196,6 +204,12 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
             mDayRankingService = new DayRankingService();
             mDayRankingService.initialize( this );
         }
+
+        if (mServerCfg.startZoneHeatMap()) {
+            mZoneHeatMapService = new ZoneHeatMapService();
+            mZoneHeatMapService.initialize( this );
+        }
+
     }
 
     private void parseConfiguration( String args[])
@@ -241,24 +255,29 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
     @Override
     public TurfZone getZoneById(int pId) {
-        return mZoneDictory.getZoneById( pId );
+        return mZoneDictionary.getZoneById( pId );
     }
 
     @Override
     public TurfZone getZoneByName(String pName) {
-        return mZoneDictory.getZonebyName( pName );
+        return mZoneDictionary.getZonebyName( pName );
     }
 
     @Override
     public Map<Integer, List<TurfZone>> getZonesByRegionIds()
     {
-        return this.mZoneDictory.getZonesByRegionsId();
+        return this.mZoneDictionary.getZonesByRegionsId();
+    }
+    @Override
+    public List<TurfZone> getZonesByRegionId( int pRegionId )
+    {
+        return this.mZoneDictionary.getZonesByRegionId( pRegionId );
     }
 
     @Override
     public Map<String, List<TurfZone>> getZonesByRegionNames()
     {
-        return this.mZoneDictory.getZonesByRegionsNames();
+        return this.mZoneDictionary.getZonesByRegionsNames();
     }
 
 
@@ -319,6 +338,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         MessageInterface tRqstMsg = tFactory.getMessageInstance( pJsonRequest );
         if (tRqstMsg == null) {
             return TGStatus.createError( "Unknown Turf Rqst \"" + tJsonRqstMsgName + "\"", null).toJson();
+        }
+
+        if (tRqstMsg.getMessageName().startsWith("HM_")) {
+            return this.mZoneHeatMapService.execute( tRqstMsg );
         }
 
         if (tRqstMsg.getMessageName().startsWith("DR_")) {
@@ -447,7 +470,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
     @Override
     public int stop(int pExitCode) {
-        cServerShoulExit = true;
+        cServerShouldExit = true;
         if (cServerTaskThread != null) {
             try {cServerTaskThread.interrupt();}
             catch( Exception e) { e.printStackTrace();}

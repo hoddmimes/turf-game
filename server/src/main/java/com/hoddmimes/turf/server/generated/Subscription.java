@@ -1,10 +1,29 @@
 
-            package com.hoddmimes.turf.server.generated;
+/*
+ * Copyright (c)  Hoddmimes Solution AB 2021.
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.hoddmimes.turf.server.generated;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalDouble;
@@ -32,11 +51,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+
+
             
 
             @SuppressWarnings({"WeakerAccess","unused","unchecked"})
             public class Subscription implements MessageInterface , MessageMongoInterface
             {
+                public static String NAME = "Subscription";
+
             
                 private String mMongoId = null;
                     private String mMailAddr;
@@ -45,9 +68,13 @@ import com.google.gson.GsonBuilder;
                     private String mCreateTime;
                     private String mNotificationTime;
                     private Integer mNotifications;
-               public Subscription() {}
+               public Subscription()
+               {
+                
+               }
 
                public Subscription(String pJsonString ) {
+                    
                     JsonDecoder tDecoder = new JsonDecoder( pJsonString );
                     this.decode( tDecoder );
                }
@@ -182,21 +209,25 @@ import com.google.gson.GsonBuilder;
     
         public Document getMongoDocument() {
             MongoEncoder tEncoder = new MongoEncoder();
-        
-                tEncoder.add("mailAddr",  mMailAddr );
-                tEncoder.add("zoneName",  mZoneName );
-                tEncoder.add("zoneId",  mZoneId );
-                tEncoder.add("createTime",  mCreateTime );
-                tEncoder.add("notificationTime",  mNotificationTime );
-                tEncoder.add("notifications",  mNotifications );
+            
+            mongoEncode( tEncoder );
             return tEncoder.getDoc();
+        }
+
+     protected void mongoEncode(  MongoEncoder pEncoder ) {
+        
+                pEncoder.add("mailAddr",  mMailAddr );
+                pEncoder.add("zoneName",  mZoneName );
+                pEncoder.add("zoneId",  mZoneId );
+                pEncoder.add("createTime",  mCreateTime );
+                pEncoder.add("notificationTime",  mNotificationTime );
+                pEncoder.add("notifications",  mNotifications );
     }
     
         public void decodeMongoDocument( Document pDoc ) {
+
             Document tDoc = null;
             List<Document> tDocLst = null;
-
-
             MongoDecoder tDecoder = new MongoDecoder( pDoc );
 
             
@@ -216,6 +247,57 @@ import com.google.gson.GsonBuilder;
            mNotifications = tDecoder.readInteger("notifications");
         
         } // End decodeMongoDocument
+    
+
+        public static  Builder getSubscriptionBuilder() {
+            return new Subscription.Builder();
+        }
+
+
+        public static class  Builder {
+          private Subscription mInstance;
+
+          private Builder () {
+            mInstance = new Subscription();
+          }
+
+        
+                        public Builder setMailAddr( String pValue ) {
+                        mInstance.setMailAddr( pValue );
+                        return this;
+                    }
+                
+                        public Builder setZoneName( String pValue ) {
+                        mInstance.setZoneName( pValue );
+                        return this;
+                    }
+                
+                        public Builder setZoneId( Integer pValue ) {
+                        mInstance.setZoneId( pValue );
+                        return this;
+                    }
+                
+                        public Builder setCreateTime( String pValue ) {
+                        mInstance.setCreateTime( pValue );
+                        return this;
+                    }
+                
+                        public Builder setNotificationTime( String pValue ) {
+                        mInstance.setNotificationTime( pValue );
+                        return this;
+                    }
+                
+                        public Builder setNotifications( Integer pValue ) {
+                        mInstance.setNotifications( pValue );
+                        return this;
+                    }
+                
+
+        public Subscription build() {
+            return mInstance;
+        }
+
+        }
     
             }
             

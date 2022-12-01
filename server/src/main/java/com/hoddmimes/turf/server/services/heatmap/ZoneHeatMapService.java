@@ -137,6 +137,7 @@ public class ZoneHeatMapService extends Thread implements TurfServiceInterface {
                         taz.setDateLastTaken(tZoneEvent.getLatestTakeTime());
                         taz.addHoldSec(tDiffSec);
                         taz.setUser( tZoneEvent.getCurrentOwner());
+                        mDbAux.updateTurfActivityZone( taz, true);
                     } else {
                         mLogger.warn("Take over time less or equal to zero seconds");
                     }

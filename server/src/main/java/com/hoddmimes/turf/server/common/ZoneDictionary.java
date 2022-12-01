@@ -9,6 +9,7 @@ import org.apache.coyote.http2.Http2Exception;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
@@ -120,7 +121,16 @@ public class ZoneDictionary extends Thread
 
     private JsonElement loadZonesFromLocalStorage() {
         JsonReader tReader = null;
+
+        if (mLocalAllZonesDbFile == null) {
+            mLogger.error("local all-zones local db configuration is not provided ");
+        }
+
         try {
+            File tFile = new File( mLocalAllZonesDbFile );
+            if  (!tFile.exists()) {
+                mLogger.error("local all-zones-local-db-file \"" + mLocalAllZonesDbFile + "\" does not exists");
+            }
             tReader = new JsonReader(new FileReader( mLocalAllZonesDbFile ));
             mLogger.info("Zone directory loaded from local storage");
             return JsonParser.parseReader(tReader);

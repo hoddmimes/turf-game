@@ -23,7 +23,7 @@ public class TurfZone
        mId = pZone.get("id").getAsInt();
        mName = pZone.get("name").getAsString();
        mPPH = pZone.get("pointsPerHour").getAsInt();
-       mTP = pZone.get("pointsPerHour").getAsInt();
+       mTP = pZone.get("takeoverPoints").getAsInt();
        mLat = pZone.get("latitude").getAsDouble();
        mLong = pZone.get("longitude").getAsDouble();
        mLastTaken = (pZone.has("dateLastTaken")) ? pZone.get("dateLastTaken").getAsString() : null;

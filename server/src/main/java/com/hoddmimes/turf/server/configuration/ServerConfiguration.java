@@ -27,6 +27,8 @@ public class ServerConfiguration
 
     private ZoneHeatMapConfiguration mZoneHeatMapCfg = null;
 
+    private ZoneDensityConfiguration mZoneDensityCfg = null;
+
 
 
     Element mRoot = null;
@@ -65,6 +67,11 @@ public class ServerConfiguration
                 mZoneHeatMapCfg = new ZoneHeatMapConfiguration();
                 mZoneHeatMapCfg.parse(mRoot);
             }
+            if (XmlAux.isElementPresent(mRoot, "ZoneDensity")) {
+                mZoneDensityCfg = new ZoneDensityConfiguration();
+                mZoneDensityCfg.parse(mRoot);
+            }
+
 
             if (XmlAux.isElementPresent(mRoot, "RegionStatisticsService")) {
                 mRegionStatCfg = new RegionStatConfiguration();
@@ -158,6 +165,10 @@ public class ServerConfiguration
     }
     public boolean startZoneHeatMap() {
         return (mZoneHeatMapCfg == null) ? false : true;
+    }
+
+    public boolean startZoneDensity() {
+        return (mZoneDensityCfg == null) ? false : true;
     }
 
     public ZoneNotifyConfiguration getZoneNotifyConfiguration() {

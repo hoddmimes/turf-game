@@ -11,7 +11,23 @@ def versionFile = "server/src/main/java/com/hoddmimes/turf/server/generated/Vers
 sourceCompatibility = 1.8
 
 repositories {
+    maven {
+        url "https://maven.geotoolkit.org"
+    }
+
     mavenCentral()
+    maven {
+        url "https://repo1.maven.org/maven2/"
+    }
+    maven {
+        url "https://repo.osgeo.org/repository/release/"
+    }
+    maven {
+        url "https://repo.osgeo.org/repository/snapshot/"
+    }
+    maven {
+        url "https://repo.opengeo.org"
+    }
 }
 
 
@@ -184,6 +200,9 @@ dependencies {
     implementation group: 'org.mongodb', name: 'mongo-java-driver', version: '3.8.2'
     implementation group: 'org.mongodb', name: 'mongodb-driver-core', version: '3.8.2'
     implementation group: 'org.mongodb', name: 'bson', version: '3.8.2'
+
+    implementation group: 'org.geotools', name: 'gt-main', version: '28-RC'
+    implementation group: 'org.geotools', name: 'gt-geojson', version: '28-RC'
 
     implementation fileTree(dir: 'libs', include: 'pojojson-1.1.jar')
     implementation fileTree(dir: 'libs', include: 'wrapper.jar')

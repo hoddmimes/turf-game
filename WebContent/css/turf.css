@@ -86,19 +86,20 @@ optgroup { font-size:14px; }
 
 #divZoneTable {
     table-layout:fixed;
-	margin-top:30px;
-	width:430px;
+    margin-top:30px;
+    width:430px;
 	min-height:248px;
 	overflow-y: auto;    /* Trigger vertical scroll    */
     overflow-x: hidden;  /* Hide the horizontal scroll */
 }
+
 .tableZone {
 	background:#ffffff;
 	font-family:Arial, Helvetica, sans-serif;
 	font-size:14px;
 	color:navy;
 	margin-left:auto;
-    margin-right:auto;
+        margin-right:auto;
 	border-collapse: collapse;
 }
 
@@ -177,6 +178,19 @@ optgroup { font-size:14px; }
     border-collapse: collapse;
     border: 1px solid lightgray;
 }
+
+.zdh1 {
+    font-family : arial;
+    font-size: 16px;
+    color: darkblue;
+    text-align: center;
+}
+
+.zdtd {
+  padding-right: 15px;
+}
+
+
 /*
    =========================================
    ============= Turf CSS End ==============

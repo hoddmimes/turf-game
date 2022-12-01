@@ -24,6 +24,7 @@ import com.hoddmimes.turf.server.generated.FirstEntry;
 import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.User;
 import com.hoddmimes.turf.server.services.dayranking.DayRankingService;
+import com.hoddmimes.turf.server.services.density.ZoneDensityService;
 import com.hoddmimes.turf.server.services.heatmap.ZoneHeatMapService;
 import com.hoddmimes.turf.server.services.notifier.ZoneNotifierService;
 import com.hoddmimes.turf.server.services.regionstat.RegionStatService;
@@ -47,7 +48,7 @@ import java.util.Map;
 
 public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, TcpThreadCallbackIf, WrapperListener
 {
-    private static boolean cDaemonMode = true;
+    private static boolean cDaemonMode = false;
     static volatile boolean cServerShouldExit = false;
     static ExecServerTasksThread cServerTaskThread = null;
 
@@ -60,6 +61,8 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     private UserTraceService mUserTraceService = null;
     private DayRankingService mDayRankingService = null;
     private ZoneHeatMapService mZoneHeatMapService = null;
+
+    private ZoneDensityService mZoneDensityService = null;
 
 
     private TcpServer mTcpIpServer;
@@ -157,6 +160,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
                     mZoneHeatMapService.processZoneUpdates(tZoneUpdateRsp);
                 }
 
+                if (mZoneDensityService != null) {
+                    mZoneDensityService.processZoneUpdates(tZoneUpdateRsp);
+                }
+
             }
             try {
                 Thread.sleep( mServerCfg.getApiZoneCollectIntervalMs());
@@ -208,6 +215,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         if (mServerCfg.startZoneHeatMap()) {
             mZoneHeatMapService = new ZoneHeatMapService();
             mZoneHeatMapService.initialize( this );
+        }
+        if (mServerCfg.startZoneDensity()) {
+            mZoneDensityService = new ZoneDensityService();
+            mZoneDensityService.initialize( this );
         }
 
     }
@@ -344,6 +355,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
             return this.mZoneHeatMapService.execute( tRqstMsg );
         }
 
+        if (tRqstMsg.getMessageName().startsWith("ZD_")) {
+            return this.mZoneDensityService.execute( tRqstMsg );
+        }
+
         if (tRqstMsg.getMessageName().startsWith("DR_")) {
             return this.mDayRankingService.execute( tRqstMsg );
         }
@@ -359,6 +374,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         if (tRqstMsg.getMessageName().startsWith("TG_")) {
             return this.execute( tRqstMsg );
         }
+
 
         // No service found for request message
         return TGStatus.createError("No service for for request message \"" + tJsonRqstMsgName + "\"", null).toJson();

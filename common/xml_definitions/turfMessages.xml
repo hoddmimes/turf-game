@@ -175,4 +175,42 @@
        <!-- Messy structure check the code i.e. server, services, ZoneHeatMapService -->
     </Message>
 
+    <Message name="ZD_LongLat">
+        <Attribute name="lng" type="double"/>
+        <Attribute name="lat" type="double"/>
+    </Message>
+
+    <Message name="ZD_DensityRqst"  rootMessage="true">
+        <Attribute name="regionId" type="int"/>
+        <Attribute name="coordinates" type="ZD_LongLat" list="array"/>
+    </Message>
+
+    <Message name="ZD_DensityRsp"  rootMessage="true">
+        <Attribute name="zones" type="int"/>
+        <Attribute name="squareMeters" type="int"/> <!-- area square meters -->
+        <Attribute name="squareKM" type="double"/> <!-- area square kilometer -->
+        <Attribute name="totalDistance" type="int"/> <!-- dist between all zones (m) -->
+        <Attribute name="totalDistanceKM" type="double"/> <!-- dist between all zones (km) -->
+        <Attribute name="avgTP" type="double"/> <!-- tot TP / zones -->
+        <Attribute name="avgPPH" type="double"/> <!-- tot PPH / zones -->
+        <Attribute name="avgDist" type="int"/> <!-- Average distance between zones, shortest path -->
+        <Attribute name="zone_sqkm" type="double"/> <!-- tot zones / square KM -->
+        <Attribute name="tp_sqkm" type="double"/> <!-- tot tp /square KM -->
+        <Attribute name="pph_sqkm" type="double"/> <!-- tot pph / square km -->
+        <Attribute name="zone_km" type="double"/> <!-- tot zones / square KM -->
+        <Attribute name="tp_km" type="double"/> <!-- tot tp /square KM -->
+        <Attribute name="pph_km" type="double"/> <!-- tot pph / square km -->
+
+    </Message>
+
+
+    <Message name="ZD_ZonesRqst"  rootMessage="true">
+        <Attribute name="regionId" type="int"/>
+    </Message>
+
+    <Message name="ZD_ZonesRsp"  rootMessage="true">
+        <!-- Messy structure check the code i.e. server, services, ZoneDensityService -->
+    </Message>
+
+
 </Messages>

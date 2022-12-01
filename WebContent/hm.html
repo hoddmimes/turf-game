@@ -47,68 +47,6 @@
   }
 
   
-const iconSize = 32;
-const markerWidth = 6;
-
-
-  function createIcon( rgb ) {
-  
-      var tIconMarker = {
-	  width: iconSize,
-	  height: iconSize,
-	  rgb : rgb,
-	  data: new Uint8Array(iconSize * iconSize * 4),
-
-	  // When the layer is added to the map,
-	  // get the rendering context for the map canvas.
-	  onAdd: function () {
-	      const canvas = document.createElement('canvas');
-	      canvas.width = this.width;
-	      canvas.height = this.height;
-	      this.context = canvas.getContext('2d');
-	  },
-
-	  // Call once before every frame where the icon will be used.
-	  render: function () {
-	      const hx_start = 0;                  // Horizontal X starting point
-	      const hy_start = (iconSize / 2) - (markerWidth/2); // Horizontal Y starting point
-	      const vx_start = (iconSize / 2) - (markerWidth/2); // Vertical X starting point
-	      const vy_start = 0;                  // Vertical Y starting point
-
-	 
-	      const context = this.context;
-
-	      context.clearRect(0, 0, this.width, this.height);
-
-	      context.beginPath();
-	      context.rect(  hx_start, // x starting point
-		        hy_start, // y starting point
-		        iconSize,
-		        markerWidth );
-	      context.fillStyle = 'rgba(' + this.rgb.red + ',' + this.rgb.green + ',' + this.rgb.blue + ')';
-	      context.fill();
-
-
-	      context.beginPath();
- 	      context.rect(  vx_start, // x starting point
-		        vy_start, // y starting point
-		        markerWidth,
-		        iconSize );
-	      context.fillStyle = 'rgba(' + this.rgb.red + ',' + this.rgb.green + ',' + this.rgb.blue + ')';
-	      context.fill();
-
-
-
-	      this.data = context.getImageData( 0,0,this.width,this.height).data;
-
-	      map.triggerRepaint();
-
-	      // Return `true` to let the map know that the image was updated.
-	      return true;
-	  }
-      };
-      return tIconMarker;
-  };
 
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmVydGlsc3NvbiIsImEiOiJja3FuaHZuZjAwZDRjMnVucDVwb3NodmZzIn0.qFHp7bOV48OWX3uUwHBjSA';
   var map;

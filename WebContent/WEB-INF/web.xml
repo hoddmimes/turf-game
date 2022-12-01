@@ -33,6 +33,33 @@
             <param-name>turfServerPort</param-name>
             <param-value>9797</param-value>
         </init-param>
+
+        <init-param>
+            <param-name>turfTestServerHost</param-name>
+            <param-value>192.168.42.139</param-value>
+        </init-param>
+        <init-param>
+            <param-name>turfTestServerPort</param-name>
+            <param-value>9797</param-value>
+        </init-param>
+        <init-param>
+            <param-name>messagesToTestSystem</param-name>
+        </init-param>
+        <init-param>
+            <param-name>turfTestServerEnabled</param-name>
+            <param-value>false</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>logfile</param-name>
+            <param-value>"/var/lib/tomcat/webapps/turf/turfServices.log"</param-value>
+        </init-param>
+        <init-param>
+            <param-name>appendMode</param-name>
+            <param-value>true</param-value>
+        </init-param>
+
+
         <load-on-startup>1</load-on-startup>
     </servlet>
 

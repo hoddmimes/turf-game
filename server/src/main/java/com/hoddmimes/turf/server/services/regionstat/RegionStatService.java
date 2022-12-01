@@ -149,8 +149,8 @@ public class RegionStatService implements TurfServiceInterface
         trs.setAvgTime( evalAvgTime( tHHList ));
         trs.setAvgTP( evalAvgTP( tHHList ));
         trs.setTotTakes( tHHList.stream().mapToLong( rhs -> rhs.getTotTakes().orElse(0L)).sum());
-        trs.setPphFactor( evalPPHFactor( r ));
-        trs.setTpFactor( evalTPFactor( r ));
+        trs.setPphFactor( evalPPHFactor( r.getHoursStat().orElse( new ArrayList<>()) )); //frotz
+        trs.setTpFactor( evalTPFactor( r.getHoursStat().orElse( new ArrayList<>()) ));
         return trs;
     }
 
@@ -653,7 +653,7 @@ public class RegionStatService implements TurfServiceInterface
 
     // ========================================================================
 
-    private long evalAvgPPHHoldTime( LinkedList<HourRegionStat> rhl ) {
+    private long evalAvgPPHHoldTime( List<HourRegionStat> rhl ) {
         // calculate how long in average a zone is owned before taken by someone (getTotPPHTime is seconds)
         if ((rhl == null) || (rhl.size() == 0)) {
             return 0L;
@@ -668,7 +668,7 @@ public class RegionStatService implements TurfServiceInterface
         return Math.round( pphHoldTime / pphChanges);
     }
 
-    private double evalAvgPPH( LinkedList<HourRegionStat> rhl ) {
+    private double evalAvgPPH( List<HourRegionStat> rhl ) {
         // calculate the average PPH for zones taken
         if ((rhl == null) || (rhl.size() == 0)) {
             return 0L;
@@ -682,7 +682,7 @@ public class RegionStatService implements TurfServiceInterface
         return pph / pphChanges;
     }
 
-    private long evalAvgAggregatedPPH( LinkedList<HourRegionStat> rhl ) {
+    private long evalAvgAggregatedPPH( List<HourRegionStat> rhl ) {
         // calculate the averahe PPH taken for each ownership
         // i.e. avg-pph * avg-pph-hold-time / pph-changes
 
@@ -702,7 +702,7 @@ public class RegionStatService implements TurfServiceInterface
 
 
 
-    private long evalAvgDistance( LinkedList<HourRegionStat> rhl ) {
+    private long evalAvgDistance( List<HourRegionStat> rhl ) {
         // calculate distance per zone take
         if ((rhl == null) || (rhl.size() == 0)) {
             return 0L;
@@ -718,7 +718,7 @@ public class RegionStatService implements TurfServiceInterface
         return x;
     }
 
-    private long evalAvgTime( LinkedList<HourRegionStat> rhl ) {
+    private long evalAvgTime( List<HourRegionStat> rhl ) {
         // calculate distance per zone take
         if ((rhl == null) || (rhl.size() == 0)) {
             return 0L;
@@ -734,7 +734,7 @@ public class RegionStatService implements TurfServiceInterface
         return x;
     }
 
-    private long evalAvgTP(LinkedList<HourRegionStat> rhl) {
+    private long evalAvgTP(List<HourRegionStat> rhl) {
         // calculate timea user spend to ride between zone in average
 
         // calculate distance per zone take
@@ -752,12 +752,12 @@ public class RegionStatService implements TurfServiceInterface
         return x;
     }
 
-    private double evalPPHFactor( LinkedList<HourRegionStat> rhl) {
+    private double evalPPHFactor( List<HourRegionStat> rhl) {
         // calculate PPH factor for the region
         return evalAvgPPH(rhl) * (double) evalAvgPPHHoldTime(rhl);
     }
 
-    private double evalTPFactor( LinkedList<HourRegionStat> rhl) {
+    private double evalTPFactor( List<HourRegionStat> rhl) {
         // calculate TP factor average
         double x = evalAvgTime(rhl);
         double y = evalAvgTP(rhl);

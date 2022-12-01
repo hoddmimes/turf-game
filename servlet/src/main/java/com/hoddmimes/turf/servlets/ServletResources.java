@@ -1,11 +1,12 @@
 package com.hoddmimes.turf.servlets;
 
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.hoddmimes.turf.common.transport.TcpClient;
 import com.hoddmimes.turf.common.transport.TcpClientSync;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -20,15 +21,18 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class ServletResources extends HttpServlet implements ServletResourcesIf
 {
-    private  static Logger cLogger = LogManager.getLogger( ServletResources.class );
+    private  Logger mLogger;
     private static volatile ServletResources cInstance = null;
-    private TcpClientSync mTcpClient;
-
+    private TcpClientSync mTcpClient = null;
+    private volatile TcpClientSync mTcpClientTest = null; // Connection to test system
+    private List<String> mMsgsToTestSystem;
+    private TestConnector mTestConnector = null;
 
 
 
@@ -40,6 +44,7 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
     public ServletResources() {
         super();
         cInstance = this;
+        mMsgsToTestSystem = new ArrayList<>();
     }
 
     public void init(ServletConfig pConfig) throws ServletException {
@@ -47,16 +52,39 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
 
         createWatermark();
 
+        String tLogilename = pConfig.getInitParameter("logfile");
+        Boolean tAppendMode = Boolean.parseBoolean(pConfig.getInitParameter("appendMode"));
+        Logger.setLogfile( tLogilename,tAppendMode );
+        mLogger = Logger.getInstance();
+
+        if (Boolean.parseBoolean( pConfig.getInitParameter("turfTestServerEnabled"))) {
+                String tMsgsString = pConfig.getInitParameter("messagesToTestSystem");
+                if (tMsgsString != null) {
+                    tMsgsString.replace(" ","");
+                    String[] tMsgArr = tMsgsString.split(",");
+                    if (tMsgArr != null) {
+                        for (int i = 0; i < tMsgArr.length; i++) {
+                            mMsgsToTestSystem.add( tMsgArr[i] );
+                        }
+                    }
+                }
+                //Create Transport connection to TurfServer
+                mTestConnector = new TestConnector( pConfig.getInitParameter("turfTestServerHost"),
+                                                    Integer.parseInt( pConfig.getInitParameter("turfTestServerPort")));
+                mTestConnector.start();
+
+        }
 
         try {
             //Create Transport connection to TurfServer
             String tHost = pConfig.getInitParameter("turfServerHost");
             int tPort = Integer.parseInt( pConfig.getInitParameter("turfServerPort"));
             mTcpClient = new TcpClientSync( tHost, tPort);
+            mLogger.log("Successfully connected to turf server \"" + tHost + "\" on port " + tPort );
         }
         catch (Exception e ) {
-            cLogger.error("Failed to initialize Turf servlet setup", e );
-            throw new ServletException( "Failed to initialize Turf Serlet setup", e );
+            mLogger.error("Failed to initialize Turf servlet setup", e );
+            throw new ServletException( "Failed to initialize Turf Servlet setup", e );
         }
     }
 
@@ -72,9 +100,38 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
         }
     }
 
+    private boolean msgToTestSystem( String pJsonRqstMsg ) {
+        if (mTcpClientTest == null) {
+            return false;
+        }
+        JsonElement jRqstElement = JsonParser.parseString(pJsonRqstMsg);
+        if ((jRqstElement != null) && (jRqstElement.isJsonObject())) {
+            JsonObject jRqstMsg = jRqstElement.getAsJsonObject();
+            String tMsgName = jRqstMsg.keySet().stream().findFirst().orElse("");
+            for (String tFilterMsg : mMsgsToTestSystem) {
+                if (tMsgName.startsWith(tFilterMsg)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+
     @Override
     public String sendToTurfServer( String pJsonRequest ) throws IOException {
-        byte[] tResponse = mTcpClient.transcieve( pJsonRequest.getBytes("ISO-8859-1") );
+        byte[] tResponse = null;
+
+        if (msgToTestSystem( pJsonRequest)) {
+            mLogger.log("[to-test-server] " + pJsonRequest );
+            tResponse = mTcpClientTest.transcieve( pJsonRequest.getBytes("ISO-8859-1") );
+            mLogger.log("[from-test-server] " + new String( tResponse,"ISO-8859-1" ) );
+        } else {
+            mLogger.log("[to-server] " + pJsonRequest );
+            tResponse = mTcpClient.transcieve( pJsonRequest.getBytes("ISO-8859-1") );
+            mLogger.log("[from-server] " + new String( tResponse,"ISO-8859-1" ) );
+        }
         return new String( tResponse,"ISO-8859-1" );
     }
 
@@ -117,5 +174,32 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
         ServletOutputStream out = response.getOutputStream();
         out.write( tBuffer );
         out.flush();
+    }
+
+    class TestConnector extends Thread
+    {
+        String mHost;
+        int mPort;
+
+        TestConnector( String pHost, int pPort ) {
+            mHost = pHost;
+            mPort = pPort;
+        }
+        public void run() {
+            if (mTcpClientTest == null) {
+                try {
+                    mTcpClientTest = new TcpClientSync( mHost, mPort);
+                    mLogger.log("successfully connected to test system \"" + mHost + "\"  on port " + mPort);
+                }
+                catch (Exception e ) {
+                    mLogger.log("Failed to connect to test system \"" + mHost + "\" on port " + mPort + " reason: " + e.getMessage());
+                    mTcpClientTest = null;
+                }
+                try { Thread.sleep(15000L );}
+                catch( InterruptedException ie )
+                {
+                }
+            }
+        }
     }
 }

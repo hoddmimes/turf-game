@@ -1,5 +1,170 @@
 
 
+const iconSize = 32;
+
+
+
+  function createIcon( rgb ) {
+  
+      var tIconMarker = {
+	  width: iconSize,
+	  height: iconSize,
+	  rgb : rgb,
+	  data: new Uint8Array(iconSize * iconSize * 4),
+
+	  // When the layer is added to the map,
+	  // get the rendering context for the map canvas.
+	  onAdd: function () {
+	      const canvas = document.createElement('canvas');
+	      canvas.width = this.width;
+	      canvas.height = this.height;
+	      this.context = canvas.getContext('2d');
+	  },
+
+	  // Call once before every frame where the icon will be used.
+	  render: function () {
+
+	      const markerWidth = 6;
+	      
+	      const hx_start = 0;                  // Horizontal X starting point
+	      const hy_start = (iconSize / 2) - (markerWidth/2); // Horizontal Y starting point
+	      const vx_start = (iconSize / 2) - (markerWidth/2); // Vertical X starting point
+	      const vy_start = 0;                  // Vertical Y starting point
+
+
+	
+	      const context = this.context;
+
+	      context.clearRect(0, 0, this.width, this.height);
+
+	      context.beginPath();
+	      context.rect(  hx_start, // x starting point
+		        hy_start, // y starting point
+		        iconSize,
+		        markerWidth );
+	      context.fillStyle = 'rgba(' + this.rgb.red + ',' + this.rgb.green + ',' + this.rgb.blue + ')';
+	      context.fill();
+
+
+	      context.beginPath();
+ 	      context.rect(  vx_start, // x starting point
+		        vy_start, // y starting point
+		        markerWidth,
+		        iconSize );
+	      context.fillStyle = 'rgba(' + this.rgb.red + ',' + this.rgb.green + ',' + this.rgb.blue + ')';
+	      context.fill();
+
+
+
+	      this.data = context.getImageData( 0,0,this.width,this.height).data;
+
+	      map.triggerRepaint();
+
+	      // Return `true` to let the map know that the image was updated.
+	      return true;
+	  }
+      };
+      return tIconMarker;
+  };
+
+
+  function createZoneIcon() {
+  
+      var tIconMarker = {
+	  width: iconSize,
+	  height: iconSize,
+	  data: new Uint8Array(iconSize * iconSize * 4),
+
+	  // When the layer is added to the map,
+	  // get the rendering context for the map canvas.
+	  onAdd: function () {
+	      const canvas = document.createElement('canvas');
+	      canvas.width = this.width;
+	      canvas.height = this.height;
+	      this.context = canvas.getContext('2d');
+	  },
+
+	  // Call once before every frame where the icon will be used.
+	  render: function () {
+	      const markerWidth = 6;
+	      const markerOffset = 4;
+
+	      const thx_start = markerOffset;                  // Horizontal X start
+	      const thy_start = markerOffset;                  // Horizontal Y Start
+
+	      
+	      const bhx_start = markerOffset;                  // Horizontal X start
+	      const bhy_start = iconSize - (markerWidth + markerOffset)// Horizontal Y Start
+
+	      const lvx_start = markerOffset;                  // Vertical  Left X start
+	      const lvy_start = markerOffset;                  // Vertical Left Y Start
+	      
+
+     	      const rvx_start = iconSize - (markerWidth + markerOffset); // Vertical  Right X start
+	      const rvy_start = markerOffset;                  // Vertical Right Y Start
+	      
+
+	      const bar_height = iconSize - (2 * markerOffset); // Horizontal width
+	      const bar_width =  iconSize - (2 * markerOffset); // Horizontal width
+	      
+	      
+	      const context = this.context;
+
+	      context.clearRect(0, 0, this.width, this.height);
+
+	      // top bar
+	      context.beginPath();
+	      context.rect(thx_start, // x starting point
+		           thy_start, // y starting point
+		           bar_width, // width
+		           markerWidth ); // height
+	      context.fillStyle = "#FF0000";
+	      context.fill();
+
+	      // bottom bar
+	      context.beginPath();
+ 	      context.rect( bhx_start,  // x starting point
+		            bhy_start, // y starting point
+		            bar_width,
+		            markerWidth);
+	      context.fillStyle = "#FF0000";
+	      context.fill();
+
+
+	      // left bar
+	      context.beginPath();
+	      context.rect(lvx_start, // x starting point
+		           lvy_start, // y starting point
+		           markerWidth,  // width
+		           bar_height ); // height
+	      context.fillStyle = "#FF0000";
+	      context.fill();
+
+	      // right bar
+	      context.beginPath();
+	      context.rect(rvx_start,
+		           rvy_start, // y starting point
+		           markerWidth,  // width
+		           bar_height ); // height
+	      context.fillStyle = "#FF0000";
+	      context.fill();
+
+	      
+
+	      this.data = context.getImageData( 0,0,this.width,this.height).data;
+
+	      map.triggerRepaint();
+
+	      // Return `true` to let the map know that the image was updated.
+	      return true;
+	  }
+      };
+      return tIconMarker;
+  };
+
+
+
+
 
 function getUrlParam() {
     var vars = {};

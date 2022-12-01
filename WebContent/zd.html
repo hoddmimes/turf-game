@@ -222,7 +222,13 @@
 	  rqst.ZD_DensityRqst.coordinates[i] = {'lng': lineData.geometry.coordinates[i][0],
 					   'lat': lineData.geometry.coordinates[i][1]};
       }
-      
+
+
+      windowId = windowId + 1;
+	  
+      var wnd = window.open('/turf/zdpopup.html', 'popUpWindow' + windowId.toString(),
+			         'height=320,width=400,left=100,top=100,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no, status=yes');
+	 	  
 
 
       /* Send the data using post with element id name and name2*/
@@ -236,13 +242,9 @@
       posting.done(function( msg ) {
 	  densityRsp = msg.ZD_DensityRsp;
 
-	  windowId = windowId + 1;
-	  var wnd = window.open('/turf/zdpopup.html', 'popUpWindow' + windowId.toString(),
-		         'height=500,width=400,left=100,top=100,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no, status=yes');
-
 	  wnd.onload = function(e){
 	     wnd.document.getElementById("zdp_zones").innerHTML = densityRsp.zones.toString();
-	     wnd.document.getElementById("zdp_sqm").innerHTML = densityRsp.squareMeters.toString();
+	      wnd.document.getElementById("zdp_sqm").innerHTML = densityRsp.squareMeters.toString().replace(/(.)(?=(\d{3})+$)/g,'$1,');
 	     wnd.document.getElementById("zdp_sqkm").innerHTML = ftrim( densityRsp.squareKM );
 	     wnd.document.getElementById("zdp_dist").innerHTML = ftrim(densityRsp.totalDistanceKM);
 

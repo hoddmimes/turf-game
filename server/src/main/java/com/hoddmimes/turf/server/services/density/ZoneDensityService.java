@@ -9,10 +9,8 @@ import com.hoddmimes.turf.common.generated.*;
 import com.hoddmimes.turf.server.TurfServerInterface;
 import com.hoddmimes.turf.server.TurfServiceInterface;
 import com.hoddmimes.turf.server.common.*;
-import com.hoddmimes.turf.server.configuration.ZoneHeatMapConfiguration;
-import com.hoddmimes.turf.server.generated.MongoAux;
-import com.hoddmimes.turf.server.generated.TurfActivityZone;
-import com.hoddmimes.turf.server.services.heatmap.ZoneHeatMapService;
+import com.hoddmimes.turf.server.services.density.pathcost.AlgAnnealing;
+import com.hoddmimes.turf.server.services.density.pathcost.AlgNearestNeighbor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.geotools.geometry.jts.JTS;
@@ -28,14 +26,10 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import si.uom.SI;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.hoddmimes.turf.server.common.Turf.TurfSDF;
 
 public class ZoneDensityService implements TurfServiceInterface {
     private TurfServerInterface mTurfIf;
@@ -70,6 +64,30 @@ public class ZoneDensityService implements TurfServiceInterface {
                 pRqstMsg.getMessageName() + "\"", null ).toJson();
     }
 
+    private void dumpZonesInPolygon( List<TurfZone> pZones ) {
+        File tFile = new File("polygon-zones.json");
+        if (!tFile.exists()) {
+            return;
+        }
+        try {
+            PrintWriter fp = new PrintWriter( tFile );
+            JsonArray jArr = new JsonArray();
+            for( TurfZone tz : pZones ) {
+                JsonArray jPoint = new JsonArray();
+                jPoint.add( tz.getLong() );
+                jPoint.add( tz.getLatitude());
+                jArr.add( jPoint );
+            }
+            fp.println( jArr.toString());
+            fp.flush();
+            fp.close();
+        }
+        catch( Exception e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+
     private JsonObject executeDensityRequest( ZD_DensityRqst pRqstMsg) {
         List<TurfZone> tTurfZones = mTurfIf.getZonesByRegionId(pRqstMsg.getRegionId().get());
         Polygon tPolygonArea = createPolygon(pRqstMsg.getCoordinates().get());
@@ -77,6 +95,10 @@ public class ZoneDensityService implements TurfServiceInterface {
         ZD_DensityRsp tRsp = new ZD_DensityRsp();
 
         List<TurfZone> tZonesInPolygon = tTurfZones.stream().filter(z -> pointWithinPolygon(z, tPolygonArea)).collect(Collectors.toList());
+
+        dumpZonesInPolygon( tZonesInPolygon );
+
+
         double tArea = calcArea(tPolygonArea);
 
         tRsp.setSquareMeters( (int) Math.round(tArea));
@@ -104,8 +126,9 @@ public class ZoneDensityService implements TurfServiceInterface {
         }
 
 
-        PathCost tPathCost = new PathCost(tZonesInPolygon);
-        double tTotPathLength = tPathCost.getTotalLength();
+        AlgAnnealing tPathCost = new AlgAnnealing(tZonesInPolygon.size(), 1000000, 0.9999952);
+        tPathCost.initialize( tZonesInPolygon );
+        double tTotPathLength = tPathCost.getDistance();
         double tTotTP = tZonesInPolygon.stream().mapToDouble(z -> z.getTP()).sum();
         double tTotPPH = tZonesInPolygon.stream().mapToDouble(z -> z.getPPH()).sum();
 

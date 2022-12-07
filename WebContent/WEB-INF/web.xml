@@ -44,6 +44,11 @@
         </init-param>
         <init-param>
             <param-name>messagesToTestSystem</param-name>
+            <param-value></param-value>
+        </init-param>
+        <init-param>
+            <param-name>messagesToLogfile</param-name>
+            <param-value>ZD_DensityRqst,ZD_DensityRsp</param-value>
         </init-param>
         <init-param>
             <param-name>turfTestServerEnabled</param-name>

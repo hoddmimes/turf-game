@@ -224,12 +224,14 @@
       }
 
 
+
+  
       windowId = windowId + 1;
 	  
       var wnd = window.open('/turf/zdpopup.html', 'popUpWindow' + windowId.toString(),
 			         'height=320,width=400,left=100,top=100,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no, status=yes');
 	 	  
-
+      
 
       /* Send the data using post with element id name and name2*/
       var posting = $.ajax( { url:'/turf/app/density', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
@@ -240,13 +242,19 @@
 
       /*geometry Alerts the results */
       posting.done(function( msg ) {
-	  densityRsp = msg.ZD_DensityRsp;
+	  var densityRsp = msg.ZD_DensityRsp;
 
+      	  console.log("Window name: " + wnd.name + " state: " + wnd.document.readyState);
+	  
 	  wnd.onload = function(e){
+
+	      console.log("(onload) Window name: " + wnd.name + " state: " + wnd.document.readyState);
+	      console.log("(onload) DensistyRsp: " + JSON.stringify( densityRsp ));
+	      
 	     wnd.document.getElementById("zdp_zones").innerHTML = densityRsp.zones.toString();
-	      wnd.document.getElementById("zdp_sqm").innerHTML = densityRsp.squareMeters.toString().replace(/(.)(?=(\d{3})+$)/g,'$1,');
-	     wnd.document.getElementById("zdp_sqkm").innerHTML = ftrim( densityRsp.squareKM );
-	     wnd.document.getElementById("zdp_dist").innerHTML = ftrim(densityRsp.totalDistanceKM);
+	     wnd.document.getElementById("zdp_sqm").innerHTML  = densityRsp.squareMeters.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	     wnd.document.getElementById("zdp_sqkm").innerHTML  = ftrim( densityRsp.squareKM );
+	     wnd.document.getElementById("zdp_dist").innerHTML  = ftrim(densityRsp.totalDistanceKM);
 
 	     wnd.document.getElementById("zdp_avg_dist").innerHTML = densityRsp.avgDist.toString();
 	     wnd.document.getElementById("zdp_avg_tp").innerHTML = ftrim(densityRsp.avgTP);
@@ -260,8 +268,10 @@
 	     wnd.document.getElementById("zdp_tp_km").innerHTML = ftrim(densityRsp.tp_km);
 	     wnd.document.getElementById("zdp_pph_km").innerHTML = ftrim(densityRsp.pph_km);
 	  }
+	  wnd.onload(null);
       });
   }
+
 
   
       

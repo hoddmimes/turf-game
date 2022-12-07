@@ -32,6 +32,7 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
     private TcpClientSync mTcpClient = null;
     private volatile TcpClientSync mTcpClientTest = null; // Connection to test system
     private List<String> mMsgsToTestSystem;
+    private List<String> mMsgsToLog;
     private TestConnector mTestConnector = null;
 
 
@@ -45,9 +46,12 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
         super();
         cInstance = this;
         mMsgsToTestSystem = new ArrayList<>();
+        mMsgsToLog = new ArrayList<>();
     }
 
     public void init(ServletConfig pConfig) throws ServletException {
+
+
         super.init(pConfig);
 
         createWatermark();
@@ -56,6 +60,18 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
         Boolean tAppendMode = Boolean.parseBoolean(pConfig.getInitParameter("appendMode"));
         Logger.setLogfile( tLogilename,tAppendMode );
         mLogger = Logger.getInstance();
+
+        String tMsgsListToLogfile = pConfig.getInitParameter("messagesToLogfile");
+        if ((tMsgsListToLogfile != null) && (tMsgsListToLogfile.length() > 0))
+        {
+            tMsgsListToLogfile.replace(" ", "");
+            String[] tMsgArr = tMsgsListToLogfile.split(",");
+            if (tMsgArr != null) {
+                for (int i = 0; i < tMsgArr.length; i++) {
+                    mMsgsToLog.add( tMsgArr[i] );
+                }
+            }
+        }
 
         if (Boolean.parseBoolean( pConfig.getInitParameter("turfTestServerEnabled"))) {
                 String tMsgsString = pConfig.getInitParameter("messagesToTestSystem");
@@ -117,22 +133,42 @@ public class ServletResources extends HttpServlet implements ServletResourcesIf
         return false;
     }
 
-
+    private boolean msgToLog( String pJsonRqstMsg ) {
+        JsonElement jRqstElement = JsonParser.parseString(pJsonRqstMsg);
+        if ((jRqstElement != null) && (jRqstElement.isJsonObject())) {
+            JsonObject jRqstMsg = jRqstElement.getAsJsonObject();
+            String tMsgName = jRqstMsg.keySet().stream().findFirst().orElse("");
+            for (String tFilterMsg : mMsgsToLog) {
+                if (tMsgName.startsWith(tFilterMsg)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     @Override
     public String sendToTurfServer( String pJsonRequest ) throws IOException {
-        byte[] tResponse = null;
+        String tResponse = null;
 
         if (msgToTestSystem( pJsonRequest)) {
-            mLogger.log("[to-test-server] " + pJsonRequest );
-            tResponse = mTcpClientTest.transcieve( pJsonRequest.getBytes("ISO-8859-1") );
-            mLogger.log("[from-test-server] " + new String( tResponse,"ISO-8859-1" ) );
+            if (msgToLog( pJsonRequest )) {
+                mLogger.log("[to-test-server] " + pJsonRequest);
+            }
+            tResponse = new String( mTcpClientTest.transcieve( pJsonRequest.getBytes("ISO-8859-1")), "ISO-8859-1");
+            if (msgToLog( tResponse )) {
+                mLogger.log("[from-test-server] " + tResponse );
+            }
         } else {
-            mLogger.log("[to-server] " + pJsonRequest );
-            tResponse = mTcpClient.transcieve( pJsonRequest.getBytes("ISO-8859-1") );
-            mLogger.log("[from-server] " + new String( tResponse,"ISO-8859-1" ) );
+            if (msgToLog( pJsonRequest )) {
+                mLogger.log("[to-server] " + pJsonRequest);
+            }
+            tResponse = new String( mTcpClient.transcieve( pJsonRequest.getBytes("ISO-8859-1")), "ISO-8859-1");
+            if (msgToLog( tResponse )) {
+                mLogger.log("[from-server] " + tResponse );
+            }
         }
-        return new String( tResponse,"ISO-8859-1" );
+        return tResponse;
     }
 
 

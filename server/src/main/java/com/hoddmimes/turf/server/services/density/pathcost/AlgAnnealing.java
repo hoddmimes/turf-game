@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class AlgAnnealing implements PathCostInterface
+public class AlgAnnealing
 {
     private Distances mDistances;
     private List<Node>      mNodeList;
@@ -25,7 +25,7 @@ public class AlgAnnealing implements PathCostInterface
         mRandom = new Random();
     }
 
-    @Override
+
     public void initialize(List<TurfZone> pZones) {
         mNodeList = new ArrayList<>();
         for (int i = 0; i < pZones.size(); i++) {
@@ -35,7 +35,7 @@ public class AlgAnnealing implements PathCostInterface
         mDistances = new Distances( mNodeList );
     }
 
-    @Override
+
     public void initialize(JsonArray pJsonPoints ) {
         mNodeList = new ArrayList<>();
         for (int i = 0; i < pJsonPoints.size(); i++) {
@@ -47,7 +47,7 @@ public class AlgAnnealing implements PathCostInterface
         mDistances = new Distances( mNodeList );
     }
 
-    @Override
+
     public double getDistance() {
         System.out.println("Starting temprature: " + mStartingTemprature + ", # of iterations: " + mNumberOfIterations + " and colling rate: " + mCoolingRate);
         double t = mStartingTemprature;
@@ -85,7 +85,7 @@ public class AlgAnnealing implements PathCostInterface
 
 
 
-    @Override
+
     public List<Integer> getPath() {
         return mBestNodePath;
     }

@@ -32,10 +32,9 @@ public class TestNN
 
     private void test() {
         AlgNearestNeighbor pc = new AlgNearestNeighbor();
+        pc.initialize( jZones );
         for (int i = 0; i < jZones.size(); i++) {
-            JsonArray jArr = shiftZones( i );
-            pc.initialize( jArr );
-            System.out.println("Start Node: " + i + " cost: " + (int) Math.round(pc.getDistance()) + "  path: " + pc.getPath());
+            System.out.println("Start Node: " + i + " cost: " + (int) Math.round(pc.getDistance(i)) + "  path: " + pc.getPath());
         }
     }
 

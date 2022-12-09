@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AlgNearestNeighbor implements PathCostInterface
+public class AlgNearestNeighbor
 {
     List<Node> mNodeList;
     Distances  mDistances;
@@ -18,7 +18,7 @@ public class AlgNearestNeighbor implements PathCostInterface
     public AlgNearestNeighbor() {
 
     }
-    @Override
+
     public void initialize(List<TurfZone> pZones) {
         mNodeList = new ArrayList<>();
         for (int i = 0; i < pZones.size(); i++) {
@@ -28,7 +28,7 @@ public class AlgNearestNeighbor implements PathCostInterface
         mDistances = new Distances( mNodeList );
     }
 
-    @Override
+
     public void initialize(JsonArray pJsonPoints) {
         mNodeList = new ArrayList<>();
         for (int i = 0; i < pJsonPoints.size(); i++) {
@@ -54,11 +54,12 @@ public class AlgNearestNeighbor implements PathCostInterface
         return tTotCost;
     }
 
-    @Override
-    public double getDistance() {
+
+    public double getDistance(int pStartingNode ) {
         mPath = new ArrayList<>();
         mVisits = new boolean[mNodeList.size()];
-        return findDistance(mNodeList.get(0).nodeId);
+        mPath = new ArrayList<>();
+        return findDistance(mNodeList.get(pStartingNode).nodeId);
     }
 
     private double findDistance(int pCurrentNodeId) {
@@ -86,7 +87,6 @@ public class AlgNearestNeighbor implements PathCostInterface
         return tNextNodeId;
     }
 
-    @Override
     public List<Integer> getPath() {
         return mPath;
     }

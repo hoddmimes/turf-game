@@ -126,9 +126,16 @@ public class ZoneDensityService implements TurfServiceInterface {
         }
 
 
-        AlgAnnealing tPathCost = new AlgAnnealing(tZonesInPolygon.size(), 1000000, 0.9999952);
+        AlgNearestNeighbor tPathCost = new AlgNearestNeighbor();
         tPathCost.initialize( tZonesInPolygon );
-        double tTotPathLength = tPathCost.getDistance();
+
+        double tTotPathLength = (tZonesInPolygon.size() == 0) ? 0 : Double.MAX_VALUE;
+        for (int i = 0; i < tZonesInPolygon.size(); i++) {
+            double tDistance = tPathCost.getDistance(i);
+            if (tDistance < tTotPathLength) {
+                tTotPathLength = tDistance;
+            }
+        }
         double tTotTP = tZonesInPolygon.stream().mapToDouble(z -> z.getTP()).sum();
         double tTotPPH = tZonesInPolygon.stream().mapToDouble(z -> z.getPPH()).sum();
 

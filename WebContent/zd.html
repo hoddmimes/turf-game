@@ -54,6 +54,7 @@
       </select>
       <button onclick="calcArea()">Calculate</button>
       <button onclick="clearMarkers()">Clear</button>
+      <button onclick="showShortestPath()" id="shortestPathBtn">Show Shortest Path</button>
     </div>
     <div id="map" style="background-color:yellow;"></div>
     <body onload="loadMap()"/>
@@ -74,9 +75,17 @@
 			     }
 		};
 
-  var zoneData = {'type': 'FeatureCollection', 'features': [] };
+  var traceData = {'type' : 'FeatureCollection',
+		   'features':[
+		       {'type':'Feature',
+		       'geometry':{'type':'LineString',
+				   'coordinates':[]
+				  }}]
+		  };
+  
+  var zoneData =  {'type' : 'FeatureCollection','features': [] };
 
-
+  var traceCoordinates;
 
   
   function setupInitialSourcesAndLayers() {
@@ -117,6 +126,71 @@
   }
 
 
+  function clearShortestPath() {
+      if (map)  {
+	  if (map.getLayer("trace")) {
+	      map.removeLayer("trace");
+	  }
+
+	  if (map.getSource("trace")) {
+	      map.removeSource("trace");
+	  }
+      }
+      document.getElementById("shortestPathBtn").disabled = true;
+  }
+  
+  function showShortestPath()
+  {
+      	  if (map.getLayer("trace")) {
+	      map.removeLayer("trace");
+	  }
+
+	  if (map.getSource("trace")) {
+	      map.removeSource("trace");
+	  }
+      traceData.features[0].geometry.coordinates = [];
+      
+      map.addSource('trace', { type: 'geojson', data: traceData });
+      
+      map.addLayer({
+	'id': 'trace',
+	'type': 'line',
+	'source': 'trace',
+	'paint': {
+	    'line-color': 'red',
+	    'line-opacity': 0.75,
+	    'line-width': 3
+	}
+      });
+
+      var tDelay = 0;
+      if (traceCoordinates.length < 20) {
+	  tDelay = 444;
+      } else if (traceCoordinates.length < 60) {
+	  tDelay = 300;
+      } else if (traceCoordinates.length < 150) {
+	  tDelay = 200;
+      } else { 
+	   tDelay = 100;
+      }
+      
+      let i = 0;
+      const timer = setInterval(() => {
+      if (i < traceCoordinates.length) {
+	    traceData.features[0].geometry.coordinates.push(traceCoordinates[i]);
+	    map.getSource('trace').setData(traceData);
+	    //map.panTo(traceCoordinates[i]);
+	    i++;
+	} else {
+	    window.clearInterval(timer);
+	}
+    }, tDelay);
+
+      
+      
+  }
+
+
 
 
   function loadTurfZones() {
@@ -149,6 +223,7 @@
          markers[i].remove();
       }
       markers = [];
+      clearShortestPath();
   }
 
 
@@ -157,6 +232,9 @@
   
   function loadMap()
   {
+      clearShortestPath();
+      
+      
       map = new mapboxgl.Map({
               container: 'map', // container id
               style: 'mapbox://styles/mapbox/streets-v11', // style URL
@@ -176,6 +254,8 @@
 	  //alert(`A click event has occurred at ${e.lngLat}`);
 	  if (lineData.geometry.coordinates.length > 0) {
 	      lineData.geometry.coordinates = [];
+	      clearShortestPath();
+              
 	      map.getSource('lineSource').setData( lineData );
 	      map.triggerRepaint();
 	  }
@@ -243,6 +323,8 @@
       /*geometry Alerts the results */
       posting.done(function( msg ) {
 	  var densityRsp = msg.ZD_DensityRsp;
+	  document.getElementById("shortestPathBtn").disabled = false;
+	  traceCoordinates = JSON.parse(msg.ZD_DensityRsp.shortestPathJStr);
 
       	  console.log("Window name: " + wnd.name + " state: " + wnd.document.readyState);
 	  
@@ -266,9 +348,13 @@
 
 	     wnd.document.getElementById("zdp_zone_km").innerHTML = ftrim(densityRsp.zone_km);
 	     wnd.document.getElementById("zdp_tp_km").innerHTML = ftrim(densityRsp.tp_km);
-	     wnd.document.getElementById("zdp_pph_km").innerHTML = ftrim(densityRsp.pph_km);
+             wnd.document.getElementById("zdp_pph_km").innerHTML = ftrim(densityRsp.pph_km);
+              wnd.document.getElementById("zdp_sp_alg").innerHTML = densityRsp.spAlg.toString();
+
 	  }
-	  wnd.onload(null);
+          wnd.onload(null);
+	  
+
       });
   }
 

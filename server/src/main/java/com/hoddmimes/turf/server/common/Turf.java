@@ -25,6 +25,8 @@ public class Turf
 	public static final String URL_PATH = "http://api.turfgame.com/v4/";
 	
 	private static long DEFAULT_ERROR_WAIT_MS = 15000L;
+	private static long PACER_DELAY = 3000L;
+
 	
 	public static final SimpleDateFormat TurfSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -34,9 +36,30 @@ public class Turf
 	public static final SimpleDateFormat SDFSimpleTime = new SimpleDateFormat("HH:mm:ss");
 	public static final SimpleDateFormat SDFTime = new SimpleDateFormat("HH:mm:ss.SSS");
 	public static final SimpleDateFormat SDFHHSS = new SimpleDateFormat("HH:mm");
-	
-	
-	public static  String formatTimeDiff( long pMs ) {
+
+	private static Turf cInstance = null;
+
+	private long mLastRequestTime = 0L;
+
+	synchronized static public Turf getInstance() {
+		if (cInstance == null) {
+			cInstance = new Turf();
+		}
+		return cInstance;
+	}
+
+	private void pace() {
+		long tNow = System.currentTimeMillis();
+		if (tNow < (mLastRequestTime + PACER_DELAY)) {
+			long tWait = (mLastRequestTime + PACER_DELAY) - tNow;
+			try { Thread.sleep( tWait );}
+			catch( InterruptedException ie) {}
+		}
+		mLastRequestTime = System.currentTimeMillis();
+	}
+
+
+	public static String formatTimeDiff( long pMs ) {
 		if (pMs == 0) {
 			return "00:00";
 		}
@@ -85,16 +108,15 @@ public class Turf
 		return " " + pAttributename + "=\"" + pValue + "\"";
 	}
 	
-	
-	public static  JsonElement turfServerGET( String pPath, Logger pLogger ) {
-		return turfServerGET(pPath, true, pLogger);
-	}
 
-	@SuppressWarnings("static-access")
-	public static  JsonElement turfServerGET( String pPath, boolean pRecovery, Logger pLogger )
+
+
+	public synchronized  JsonElement turfServerGET( String pPath, boolean pRecovery, Logger pLogger )
 	{
 		JsonElement tElement = null;
 		boolean tGotAnswer = false;
+
+		pace();
 
 		while (!tGotAnswer) {
 			try {
@@ -146,9 +168,11 @@ public class Turf
 	}
 
 
-	public static JsonElement turfServerGETSignal(String pPath, Logger pLogger) throws HttpException {
+	public  synchronized JsonElement turfServerGETSignal(String pPath, Logger pLogger) throws HttpException {
 		JsonElement tElement = null;
 
+
+		pace();
 
 		try {
 			HttpURLConnection tConn = (HttpURLConnection) new URL(URL_PATH + pPath).openConnection();
@@ -182,16 +206,17 @@ public class Turf
 
 
 
-	public static  JsonElement turfServerPOST( String pPath, String pRequestData, Logger pLogger ) {
+	public   synchronized JsonElement turfServerPOST( String pPath, String pRequestData, Logger pLogger ) {
 		return turfServerPOST(pPath, pRequestData, true, pLogger);
 	}
 	
-	@SuppressWarnings("static-access")
-	public static JsonElement turfServerPOST( String pPath, String pRequestData, boolean pRecovery, Logger pLogger )
+
+	public  JsonElement turfServerPOST( String pPath, String pRequestData, boolean pRecovery, Logger pLogger )
 	{
 		JsonElement tElement = null;
 		boolean tGotAnswer = false;
 
+		pace();
 
 		while (!tGotAnswer) {
 			try {
@@ -209,22 +234,29 @@ public class Turf
 				tOut.flush();
 				tOut.close();
 
+				if (tConn.getResponseCode() == 429) {
+					pLogger.warn("[turfServerPOST] path: " + pPath + " rqst: " + pRequestData + " statuss: 429 requesting too frequently, dismiss 2 sec");
+					try {Thread.sleep( 2000L );}
+					catch( InterruptedException ie) {}
+					tGotAnswer = false;
+				} else {
 
-				// Check status code
-				if (tConn.getResponseCode() != 200) {
-					pLogger.error("[turfServerPOST] path: " + pPath + " rqst: " + pRequestData + "   error response code: " + tConn.getResponseCode());
-					return null;
+					// Check status code
+					if (tConn.getResponseCode() != 200) {
+						pLogger.error("[turfServerPOST] path: " + pPath + " rqst: " + pRequestData + "   error response code: " + tConn.getResponseCode());
+						return null;
+					}
+
+
+					InputStream tInStream = tConn.getInputStream();
+					if ((tConn.getContentEncoding() != null) && (tConn.getContentEncoding().toLowerCase().contains("gzip"))) {
+						tInStream = new GZIPInputStream(tConn.getInputStream());
+					}
+
+					BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "utf-8"), 8);
+					tElement = new JsonParser().parse(tReader);
+					tGotAnswer = true;
 				}
-
-
-				InputStream tInStream = tConn.getInputStream();
-				if ((tConn.getContentEncoding() != null) && (tConn.getContentEncoding().toLowerCase().contains("gzip"))) {
-					tInStream = new GZIPInputStream( tConn.getInputStream());
-				}
-
-				BufferedReader tReader = new BufferedReader(new InputStreamReader(tInStream, "utf-8"), 8);
-				tElement  =  new JsonParser().parse(tReader);
-				tGotAnswer = true;
 
 			} catch (MalformedURLException e) {
 				pLogger.error("failed to POST rqst to Turf Game Server, reason: " + e.getMessage());
@@ -243,9 +275,10 @@ public class Turf
 					try { Thread.currentThread().sleep(DEFAULT_ERROR_WAIT_MS); }
 					catch( InterruptedException ie) {}
 				}
-			}	
+			}
 		}
 		return tElement;
 	}
+
 	
 }

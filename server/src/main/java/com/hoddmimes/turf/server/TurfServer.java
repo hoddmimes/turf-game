@@ -25,12 +25,13 @@ import com.hoddmimes.turf.server.generated.MongoAux;
 import com.hoddmimes.turf.server.generated.User;
 import com.hoddmimes.turf.server.services.dayranking.DayRankingService;
 import com.hoddmimes.turf.server.services.density.ZoneDensityService;
-import com.hoddmimes.turf.server.services.heatmap.ZoneHeatMapService;
+import com.hoddmimes.turf.server.services.regionstat.heatmap.ZoneHeatMapService;
 import com.hoddmimes.turf.server.services.notifier.ZoneNotifierService;
 import com.hoddmimes.turf.server.services.regionstat.RegionStatService;
 import com.hoddmimes.turf.server.services.usertrace.UserTraceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 import org.w3c.dom.Element;
@@ -42,6 +43,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -112,7 +114,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     }
     private JsonElement getZoneEvents() {
         String tFromTimStr = getZoneCollectTimeOffset( mServerCfg.getApiHistoryCollectOffsetMin(), mServerCfg.getApiTimeZoneOffetHr());
-        JsonElement tRsp = Turf.turfServerGET( "feeds?afterDate=" + tFromTimStr, mLogger);
+        JsonElement tRsp = Turf.getInstance().turfServerGET( "feeds?afterDate=" + tFromTimStr, true, mLogger);
         return tRsp;
     }
 
@@ -179,11 +181,13 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     }
 
     private void initialize() {
+
         mLogger = LogManager.getLogger(this.getClass().getSimpleName());
-        mLogger.info("Intitializing " + this.getClass().getSimpleName()  + com.hoddmimes.turf.server.Version.build);
+        mLogger.info("Initializing " + this.getClass().getSimpleName()  + com.hoddmimes.turf.server.Version.build);
 
         mDbAux = new MongoAux( mServerCfg.getDbName(), mServerCfg.getDbHost(), mServerCfg.getDbPort());
         mDbAux.connectToDatabase();
+
 
 
         mZoneDictionary = new ZoneDictionary( mLogger, mServerCfg.getLocalAllZonesDBFile() );
@@ -220,6 +224,8 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
             mZoneDensityService = new ZoneDensityService();
             mZoneDensityService.initialize( this );
         }
+
+
 
     }
 

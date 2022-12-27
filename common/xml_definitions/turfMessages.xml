@@ -200,7 +200,8 @@
         <Attribute name="zone_km" type="double"/> <!-- tot zones / square KM -->
         <Attribute name="tp_km" type="double"/> <!-- tot tp /square KM -->
         <Attribute name="pph_km" type="double"/> <!-- tot pph / square km -->
-
+        <Attribute name="spAlg" type="String"/> <!-- shortest path algorith-->
+        <Attribute name="shortestPathJStr" type="String"/> <!-- piggy back shortest path coordinates as Json String, yes uggly -->
     </Message>
 
 
@@ -210,6 +211,42 @@
 
     <Message name="ZD_ZonesRsp"  rootMessage="true">
         <!-- Messy structure check the code i.e. server, services, ZoneDensityService -->
+    </Message>
+
+    <Message name="ZD_TspSaveRqst"  rootMessage="true">
+        <Attribute name="filename" type="String"/>
+        <Attribute name="maxNodes" type="int"/>
+        <Attribute name="regionId" type="int"/>
+        <Attribute name="coordinates" type="ZD_LongLat" list="array"/>
+    </Message>
+
+    <Message name="ZD_TspSaveRsp"  rootMessage="true">
+        <Attribute name="status" type="String"/>
+    </Message>
+
+    <Message name="ZD_TspLoadZonesRqst"  rootMessage="true">
+        <Attribute name="filename" type="String"/>
+        <Attribute name="maxNodes" type="int"/>
+    </Message>
+
+    <Message name="ZD_TspLoadZonesRsp"  rootMessage="true">
+        <Attribute name="statusCode" type="int"/>
+        <Attribute name="statusText" type="String"/>
+        <!-- Messy structure check the code i.e. server, services, ZoneDensityService -->
+    </Message>
+
+    <Message name="ZD_TspRqst"  rootMessage="true">
+        <Attribute name="algorithm" type="String"/>
+        <Attribute name="annealingSimulations" type="int"/>
+        <Attribute name="nodes" type="ZD_LongLat" list="array"/>
+    </Message>
+
+    <Message name="ZD_TspRsp"  rootMessage="true">
+        <Attribute name="statusCode" type="int"/>
+        <Attribute name="statusText" type="String"/>
+
+        <Attribute name="shortestPath" type="int"/>
+        <Attribute name="shortestPathJStr" type="String"/> <!-- yes uggly -->
     </Message>
 
 

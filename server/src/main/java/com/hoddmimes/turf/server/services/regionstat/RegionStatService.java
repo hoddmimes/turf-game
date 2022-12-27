@@ -536,7 +536,7 @@ public class RegionStatService implements TurfServiceInterface
 
     private void loadRegionsFromTurfServer() {
         int	pTrackedRegions = 0;
-        JsonElement tElement = Turf.turfServerGET("regions", true, mLogger);
+        JsonElement tElement = Turf.getInstance().turfServerGET("regions", true, mLogger);
         if (tElement != null) {
             JsonArray tRegionArray = tElement.getAsJsonArray();
             if (tRegionArray != null) {

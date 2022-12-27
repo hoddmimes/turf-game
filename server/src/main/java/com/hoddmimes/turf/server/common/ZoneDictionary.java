@@ -73,15 +73,15 @@ public class ZoneDictionary extends Thread
         mRegionNameMap.clear();
 
         JsonArray tZoneArray = null;
-
         try {
-            tZoneArray = Turf.turfServerGETSignal("zones/all", mLogger).getAsJsonArray();
-            mLogger.info("Zone directory loaded from TurfGame server");
+            tZoneArray = Turf.getInstance().turfServerGETSignal("zones/all", mLogger).getAsJsonArray();
             saveZonesToLocalStorage( tZoneArray );
+            mLogger.info("Zone directory loaded from TurfGame server. Toital zones: " + ((tZoneArray == null) ? 0 : tZoneArray.size()));
         }
         catch( HttpException e) {
             if (e.getHttpResponseCode() == 429) {
                 tZoneArray = loadZonesFromLocalStorage().getAsJsonArray();
+                mLogger.info("Zone directory loaded from local zone file" + ((tZoneArray == null) ? 0 : tZoneArray.size()));
             } else {
                 mLogger.error("Failed to load all-zones from TurfGame server", e);
                 System.exit(0);
@@ -113,6 +113,12 @@ public class ZoneDictionary extends Thread
             } else {
                 System.out.println(" zone: " + z.getName() + " id: " + z.getId() + " has no region");
             }
+        }
+
+
+        for(  Integer tRegionId : mRegionIdMap.keySet() ) {
+            List<TurfZone> tList = mRegionIdMap.get( tRegionId );
+            mLogger.info("zone-directory region: " + tRegionId + " zone loaded: " + tList.size());
         }
 
 

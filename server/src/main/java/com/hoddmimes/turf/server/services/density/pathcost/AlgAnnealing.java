@@ -49,7 +49,7 @@ public class AlgAnnealing
 
 
     public double getDistance() {
-        System.out.println("Starting temprature: " + mStartingTemprature + ", # of iterations: " + mNumberOfIterations + " and colling rate: " + mCoolingRate);
+        //System.out.println("Starting temprature: " + mStartingTemprature + ", # of iterations: " + mNumberOfIterations + " and colling rate: " + mCoolingRate);
         double t = mStartingTemprature;
 
         Route tBestSolution = new Route( mNodeList );

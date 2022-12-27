@@ -90,6 +90,11 @@ public class DayRankingService implements TurfServiceInterface {
 
                         tTotTime += tmSec;
                         tTotDistance += Math.round( tDistance );
+
+                        if (mLogger.isTraceEnabled()) {
+                            mLogger.trace("DayRanking (user session) user: " + ru.getUser().get() + " new Zone: " + ltoe.getZoneName() +
+                                    " time: " + tmSec + " sec distance: " + ((int) Math.round(tDistance)) + " m");
+                        }
                     }
                 }
             }
@@ -303,12 +308,11 @@ public class DayRankingService implements TurfServiceInterface {
 
 
                     String tPostRqst = "{\"region\": \"" + pRegion.getName() + "\", \"from\":" + tX + " , \"to\": " + tY + " }";
-                    synchronized (tWaitObject ) {
-                        try {tWaitObject.wait(3000L);}
-                        catch (InterruptedException ie) {}
-                    }
 
-                    JsonElement jElement = Turf.turfServerPOST("users/top", tPostRqst, mLogger);
+
+                    //mService.mLogger.info("user/top request rqst: \"" + tPostRqst + "\"");
+
+                    JsonElement jElement = Turf.getInstance().turfServerPOST("users/top", tPostRqst, mLogger);
                     if (jElement == null) {
                         return jUsers;
                     }
@@ -413,6 +417,7 @@ public class DayRankingService implements TurfServiceInterface {
 
         private int updateRankingData(DayRankingConfiguration.Region pRegion, List<JsonObject> tUserArray ) {
             int tUpd = 0, tIns = 0, tFnd = 0;
+            long tDistance = 0, tTime = 0;
             boolean tUserChanged;
             long tNow = System.currentTimeMillis();
             boolean tDBSave = false;
@@ -436,6 +441,8 @@ public class DayRankingService implements TurfServiceInterface {
                     }
 
                     tUserChanged = isUserChanged(ru, tu, rusi);
+                    tDistance += ru.getDistance().orElse(0);
+                    tTime += ru.getTime().orElse(0L);
                     ru.setActiveZones(tu.getActiveZones());
                     ru.setRegionId(tu.getRegionId());
                     ru.setPoints(tu.getPoints() - rusi.getInitPoints().get());
@@ -451,8 +458,10 @@ public class DayRankingService implements TurfServiceInterface {
             }
             long tExecTime = System.currentTimeMillis() - tNow;
             if (mConfig.getDebug()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
                 mService.mLogger.debug("<updateRankingData> region: " + pRegion.getName() + " int-found: " + tFnd + " updates: " + tUpd + " insert: " + tIns +
-                        " dbSave: " + tDBSave + " exec-time: " + tExecTime + " ms. (turf-usr-arr: " + tUserArray.size() + ")");
+                        " dbSave: " + tDBSave + " exec-time: " + tExecTime + " ms. (turf-usr-arr: " + tUserArray.size() + ") users dist: " + tDistance +
+                        " users time: " + tTime);
             }
             return tUpd;
         }
@@ -504,6 +513,7 @@ public class DayRankingService implements TurfServiceInterface {
                     mService.mLogger.info("No ranking data found for region: " + r.getName() );
                 }
             }
+
             if (!mConfig.getDebug()) {
                 mService.mLogger.info("<updateUserRanking> turf-users: " + tTurfUsers + " updated users: " + tUserUpdated );
             }

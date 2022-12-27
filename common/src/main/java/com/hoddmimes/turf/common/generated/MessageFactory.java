@@ -242,6 +242,48 @@ public class MessageFactory implements MessageFactoryInterface
             	return tMessage;
             }
 			
+            case "ZD_TspSaveRqst":
+            {
+            	ZD_TspSaveRqst tMessage = new ZD_TspSaveRqst();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "ZD_TspSaveRsp":
+            {
+            	ZD_TspSaveRsp tMessage = new ZD_TspSaveRsp();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "ZD_TspLoadZonesRqst":
+            {
+            	ZD_TspLoadZonesRqst tMessage = new ZD_TspLoadZonesRqst();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "ZD_TspLoadZonesRsp":
+            {
+            	ZD_TspLoadZonesRsp tMessage = new ZD_TspLoadZonesRsp();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "ZD_TspRqst":
+            {
+            	ZD_TspRqst tMessage = new ZD_TspRqst();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "ZD_TspRsp":
+            {
+            	ZD_TspRsp tMessage = new ZD_TspRsp();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
             default:
               return null;
 		}	

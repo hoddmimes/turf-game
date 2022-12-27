@@ -1,4 +1,4 @@
-package com.hoddmimes.turf.server.services.heatmap;
+package com.hoddmimes.turf.server.services.regionstat.heatmap;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -73,7 +73,7 @@ public class ZoneHeatMapService extends Thread implements TurfServiceInterface {
                 jZoneId.addProperty("id", tz.getId());
                 jRegionIdArr.add(jZoneId);
             }
-            JsonArray jZoneArray = Turf.turfServerPOST("zones", jRegionIdArr.toString(),mLogger).getAsJsonArray();
+            JsonArray jZoneArray = Turf.getInstance().turfServerPOST("zones", jRegionIdArr.toString(),mLogger).getAsJsonArray();
             for( int i = 0; i < jZoneArray.size(); i++) {
                 TurfZone z = new TurfZone( jZoneArray.get(i).getAsJsonObject());
                 tZones.add(z);

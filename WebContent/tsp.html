@@ -1,0 +1,307 @@
+<html>
+  <head>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+   <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
+   <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>    
+   <script
+           src="https://code.jquery.com/jquery-3.3.1.js"
+           integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+           crossorigin="anonymous">
+   </script>
+   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   <script src="js/turf.js" type="text/javascript"></script>
+   <script src="js/table.js" type="text/javascript"></script>
+
+
+   <title>TSP Calculation</title>
+   <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+   <style>
+     body { margin: 0; padding: 0; background-color:#bff2aa; }
+        #map { position: absolute; top: 70; bottom: 0; width: 100%; }
+	#menu { position: absolute; top: 10; bottom: 0; hight: 65; width: 100%; left: 40% }
+   </style>
+</head>
+
+  <body>
+    <div id="menu">
+      <label for="zcfile">Load coordinates from file</label>
+      <input type="text" id="zcfile" name="zcfile" value="zones.json">
+      <button onclick="loadZoneCoordinates()">Load</button><br><br>
+      <label for="regions">Algorithms</label>
+      <select name="algorithm" id="algorithm" onChange="changeRegion()" >
+      <option value="NN">Nearest Neighbor</option>
+      <option value="AA">Annealign</option>
+      <option value="CI">Cheapest Insert</option>
+      <option value="NI">Nearest Insert</option>
+      <option value="GG">Gready</option>
+      </select>
+      <button style="font-weight:bold; color:red" onclick="calcTSP()">Calculate</button>
+      <label for="aasimulations" style="font-weight:italic; color:gray">Annealing simulations</label>
+      <input type="text" id="aasimulations" name="aasimulations" maxlength="2" style="width: 30px;" value="4">
+      <label id="lblShortestPath" style="font-style:italic; font-weight: bold; color:black; margin-left:80px; font-size:18px"></label>
+
+    </div>
+    <div id="map" style="background-color:yellow;"></div>
+    <body onload="loadMap()"/>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYmVydGlsc3NvbiIsImEiOiJja3FuaHZuZjAwZDRjMnVucDVwb3NodmZzIn0.qFHp7bOV48OWX3uUwHBjSA';
+
+
+  var map;
+  var groundZero = [18.07176207279832, 59.330789224460716 ];
+
+  var markers = [];
+  var lineData = {'type' : 'Feature',
+		 'properties' : {},
+		 'geometry': {'type' : 'LineString',
+			      'coordinates' : []
+			     }
+		};
+
+  var traceData = {'type' : 'FeatureCollection',
+		   'features':[
+		       {'type':'Feature',
+		       'geometry':{'type':'LineString',
+				   'coordinates':[]
+				  }}]
+		  };
+  
+  var zoneData =  {'type' : 'FeatureCollection','features': [] };
+
+  var traceCoordinates;
+
+  
+  function setupInitialSourcesAndLayers() {
+
+      // Set up line source and layer
+      map.addSource('lineSource', {'type':'geojson', 'data':lineData} );
+
+      map.addLayer({
+	  'id': 'lineLayer',
+	  'type': 'line',
+	  'source': 'lineSource',
+	  'layout': {'line-join' : 'round', 'line-cap' : 'round' },
+	  'paint': {
+	      'line-color': 'black',
+	      'line-width': 2
+	  }
+      });
+
+      // Setup zone source and layer
+      var zoneIcon = createZoneIcon();
+      map.addImage('zoneIcon', zoneIcon, { pixelRatio: 2 });
+
+      map.addSource('zoneSource', {type: 'geojson', data: zoneData });
+
+      map.addLayer({
+               'id': 'zoneLayer',
+               'type': 'symbol',
+               'source': 'zoneSource',
+               'layout': {
+	           'icon-image': 'zoneIcon',
+		   'icon-size': 1.0,
+		   'icon-anchor': 'center',
+                   'icon-allow-overlap': true
+	       }
+      });
+
+      loadTurfZones();
+  }
+
+
+  function clearShortestPath() {
+      if (map)  {
+	  if (map.getLayer("trace")) {
+	      map.removeLayer("trace");
+	  }
+
+	  if (map.getSource("trace")) {
+	      map.removeSource("trace");
+	  }
+      }
+  }
+  
+  function showShortestPath()
+  {
+      	  if (map.getLayer("trace")) {
+	      map.removeLayer("trace");
+	  }
+
+	  if (map.getSource("trace")) {
+	      map.removeSource("trace");
+	  }
+      traceData.features[0].geometry.coordinates = [];
+      
+      map.addSource('trace', { type: 'geojson', data: traceData });
+      
+      map.addLayer({
+	'id': 'trace',
+	'type': 'line',
+	'source': 'trace',
+	'paint': {
+	    'line-color': 'red',
+	    'line-opacity': 0.75,
+	    'line-width': 3
+	}
+      });
+
+      var tDelay = 0;
+      if (traceCoordinates.length < 20) {
+	  tDelay = 444;
+      } else if (traceCoordinates.length < 60) {
+	  tDelay = 300;
+      } else if (traceCoordinates.length < 150) {
+	  tDelay = 200;
+      } else { 
+	   tDelay = 100;
+      }
+      
+      let i = 0;
+      const timer = setInterval(() => {
+      if (i < traceCoordinates.length) {
+	    traceData.features[0].geometry.coordinates.push(traceCoordinates[i]);
+	    map.getSource('trace').setData(traceData);
+	    //map.panTo(traceCoordinates[i]);
+	    i++;
+	} else {
+	    window.clearInterval(timer);
+	}
+    }, tDelay);
+
+      
+      
+  }
+
+
+
+
+  function loadTurfZones() {
+      var rqst = {ZD_TspLoadZonesRqst : {"filename" : document.getElementById("zcfile").value, "maxNode" : 999999 }};
+
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/density', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /*geometry Alerts the results */
+      posting.done(function( msg ) {
+
+	  if (msg.ZD_TspLoadZonesRsp.statusCode != 0) {
+	      alert( msg.ZD_TspLoadZonesRsp.statusText);
+	      return;
+	  }
+
+	  zoneData.features= msg.ZD_TspLoadZonesRsp.features;
+
+	  map.getSource('zoneSource').setData(zoneData);
+          map.setCenter(zoneData.features[0].geometry.coordinates);
+	  map.triggerRepaint();
+        });
+
+   }
+
+   
+
+  function clearMarkers() {
+     for( var i = 0; i < markers.length; i++ ) {
+         markers[i].remove();
+      }
+      markers = [];
+      clearShortestPath();
+  }
+
+
+
+  
+  
+  function loadMap()
+  {
+      clearShortestPath();
+      
+      
+      map = new mapboxgl.Map({
+              container: 'map', // container id
+              style: 'mapbox://styles/mapbox/streets-v11', // style URL
+              center: groundZero, // starting position [lng, lat]
+              zoom: 10 }); // starting zoom
+
+      map.on('load', setupInitialSourcesAndLayers );
+      
+      map.on('click','zoneLayer', (e) => {
+	new mapboxgl.Popup()
+               .setLngLat(e.features[0].geometry.coordinates)
+               .setHTML(e.features[0].properties.message)
+               .addTo(map);
+      });
+
+      map.on('click', (e) => {
+	  //alert(`A click event has occurred at ${e.lngLat}`);
+	  if (lineData.geometry.coordinates.length > 0) {
+	      lineData.geometry.coordinates = [];
+	      clearShortestPath();
+              
+	      map.getSource('lineSource').setData( lineData );
+	      map.triggerRepaint();
+	  }
+	  markers[ markers.length ] = new mapboxgl.Marker().setLngLat( e.lngLat ).addTo( map );
+      });
+
+  }
+  
+  function changeRegion() {
+      loadTurfZones();
+  }
+
+  function ftrim( pValue ) {
+    if (pValue < 1.0) {
+      return parseFloat(pValue).toFixed(4);
+    } else if (pValue < 10.0) {
+        return parseFloat(pValue).toFixed(2);
+    }
+    return parseFloat(pValue).toFixed(1);
+  }
+
+  function calcTSP() {
+      var rqst = {ZD_TspRqst : { 'algorithm' : document.getElementById("algorithm").value,
+				 'nodes' : [],
+				 'annealingSimulations' : document.getElementById("aasimulations").value  }};
+
+
+      document.getElementById("lblShortestPath").innerHTML = "";
+      
+      for( var i = 0; i < zoneData.features.length; i++ ) {
+	  let zll = {'lng': zoneData.features[i].geometry.coordinates[0], 'lat': zoneData.features[i].geometry.coordinates[1] }
+	  rqst.ZD_TspRqst.nodes[i] = zll;
+      }			    
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/density', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /*geometry Alerts the results */
+      posting.done(function( msg ) {
+	  if (msg.ZD_TspRsp.statusCode != 0) {
+	      alert( msg.ZD_TspRsp.statusText );
+	      return;
+	  }
+	  
+	  traceCoordinates = JSON.parse(msg.ZD_TspRsp.shortestPathJStr);
+	  document.getElementById("lblShortestPath").innerHTML = "Shortest path " + msg.ZD_TspRsp.shortestPath + " m";
+	  showShortestPath();
+      });
+  }
+
+
+  
+      
+</script>
+</body>
+</html>

@@ -4,8 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
-import com.hoddmimes.turf.server.TurfServerInterface;
-import org.apache.coyote.http2.Http2Exception;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -104,7 +102,7 @@ public class ZoneDictionary extends Thread
                 }
                 {
                     List<TurfZone> tRegionNameZoneList = mRegionNameMap.get(z.getRegionName());
-                    if (tRegionNameZoneList == null) {
+                   if (tRegionNameZoneList == null) {
                         tRegionNameZoneList = new ArrayList<>();
                         mRegionNameMap.put(z.getRegionName(), tRegionNameZoneList);
                     }

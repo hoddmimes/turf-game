@@ -182,8 +182,8 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
     private void initialize() {
 
-        mLogger = LogManager.getLogger(this.getClass().getSimpleName());
-        mLogger.info("Initializing " + this.getClass().getSimpleName()  + com.hoddmimes.turf.server.Version.build);
+        mLogger = LogManager.getLogger(this.getClass().getName());
+        mLogger.info("Initializing " + this.getClass().getSimpleName()  + com.hoddmimes.turf.server.generated.Version.build);
 
         mDbAux = new MongoAux( mServerCfg.getDbName(), mServerCfg.getDbHost(), mServerCfg.getDbPort());
         mDbAux.connectToDatabase();

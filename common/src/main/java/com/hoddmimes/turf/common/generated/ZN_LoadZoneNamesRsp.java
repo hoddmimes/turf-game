@@ -133,7 +133,6 @@ import com.google.gson.GsonBuilder;
             }
 
         
-
         public String getMessageName() {
         return "ZN_LoadZoneNamesRsp";
         }

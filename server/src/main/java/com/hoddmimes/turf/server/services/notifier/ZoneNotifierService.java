@@ -27,8 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
-public class ZoneNotifierService implements TurfServiceInterface
-{
+public class ZoneNotifierService implements TurfServiceInterface {
     private static SimpleDateFormat SUBSCR_TIME = new SimpleDateFormat("dd/MM HH:ss:ss");
 
     private TurfServerInterface mTurfIf;
@@ -37,12 +36,12 @@ public class ZoneNotifierService implements TurfServiceInterface
     private Mailer mMailer;
     private MongoAux mDbAux;
 
-    public ZoneNotifierService( ) {
-        mLogger = LogManager.getLogger( this.getClass().getSimpleName());
+    public ZoneNotifierService() {
+        mLogger = LogManager.getLogger(this.getClass().getName());
     }
 
     @Override
-    public JsonObject execute(MessageInterface tRqstMsg ) {
+    public JsonObject execute(MessageInterface tRqstMsg) {
         if (tRqstMsg instanceof ZN_RegisterUserRqst) {
             return executeRegisterUser((ZN_RegisterUserRqst) tRqstMsg);
         }
@@ -70,12 +69,12 @@ public class ZoneNotifierService implements TurfServiceInterface
         }
 
         return TGStatus.createError("No " + this.getClass().getSimpleName() + " service method found for request \"" +
-                    tRqstMsg.getMessageName() + "\"", null ).toJson();
+                tRqstMsg.getMessageName() + "\"", null).toJson();
 
     }
 
     @Override
-    public void initialize( TurfServerInterface pTurfServerInterface ) {
+    public void initialize(TurfServerInterface pTurfServerInterface) {
         mTurfIf = pTurfServerInterface;
         tZoneFilter = new EventFilterNewZoneTakeOver();
 
@@ -86,21 +85,21 @@ public class ZoneNotifierService implements TurfServiceInterface
         mDbAux = pTurfServerInterface.getDbAux();
 
         // Initialize mailer
-        mMailer =   new  Mailer(tCfg.getMailerHost(),
+        mMailer = new Mailer(tCfg.getMailerHost(),
                 587,
                 tCfg.getMailerUser(),
                 tCfg.getMailerPassword(),
                 "text/html", true);
     }
 
-    private boolean validMailAddress( String pMailAddress ) {
+    private boolean validMailAddress(String pMailAddress) {
         String tMailPatternString = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
-        Pattern tMailPattern = Pattern.compile( tMailPatternString );
-        Matcher m = tMailPattern.matcher( pMailAddress );
+        Pattern tMailPattern = Pattern.compile(tMailPatternString);
+        Matcher m = tMailPattern.matcher(pMailAddress);
         return m.matches();
     }
 
-    private String createUpdatePasswordBody( User pUser ) {
+    private String createUpdatePasswordBody(User pUser) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body><br><br>");
         sb.append("<h3>Turf zone taken notification,  user password update</h3><br>");
@@ -108,13 +107,13 @@ public class ZoneNotifierService implements TurfServiceInterface
         sb.append("<br><br>");
         sb.append("<p style=\"margin-left:30px;\">");
         sb.append("<a  href=\"" + mTurfIf.getServerConfiguration().getBaseURL() + "turf/updatePassword.html?id=" + pUser.getConfirmationId().get() +
-                "&addr=" + pUser.getMailAddr().get()+ "\">");
+                "&addr=" + pUser.getMailAddr().get() + "\">");
         sb.append("Update Password</a>");
         sb.append("</p></body></html>");
         return sb.toString();
     }
 
-    private String createRegisterUserBody( User pUser ) {
+    private String createRegisterUserBody(User pUser) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body><br><br>");
         sb.append("<h3>Turf zone taken notification mail address registered</h3><br>");
@@ -124,13 +123,13 @@ public class ZoneNotifierService implements TurfServiceInterface
         sb.append("<br><br>");
         sb.append("<p style=\"margin-left:30px;\">");
         sb.append("<a  href=\"" + mTurfIf.getServerConfiguration().getBaseURL() + "turf/app/znMailConfirmation?id=" + pUser.getConfirmationId().get() +
-                    "&addr=" + pUser.getMailAddr().get()+ "\">");
+                "&addr=" + pUser.getMailAddr().get() + "\">");
         sb.append("Confirm mail adress</a>");
         sb.append("</p></body></html>");
         return sb.toString();
     }
 
-    private boolean sendUpdatePasswordMail( User pUser ) {
+    private boolean sendUpdatePasswordMail(User pUser) {
         String tBody = createUpdatePasswordBody(pUser);
         try {
             mMailer.sendMessage(true, "no-reply@turf-zone-taken.com", pUser.getMailAddr().get(), null,
@@ -142,7 +141,7 @@ public class ZoneNotifierService implements TurfServiceInterface
     }
 
 
-    private boolean sendConfirmationMail( User pUser ) {
+    private boolean sendConfirmationMail(User pUser) {
         String tBody = createRegisterUserBody(pUser);
         try {
             mMailer.sendMessage(true, "no-reply@turf-zone-taken.com", pUser.getMailAddr().get(), null,
@@ -154,7 +153,7 @@ public class ZoneNotifierService implements TurfServiceInterface
     }
 
 
-    private JsonObject executeLoadZoneName( ZN_LoadZoneNamesRqst pRqstMsg ) {
+    private JsonObject executeLoadZoneName(ZN_LoadZoneNamesRqst pRqstMsg) {
         String tResponseString = null;
         String jResponseString = null;
 
@@ -162,134 +161,132 @@ public class ZoneNotifierService implements TurfServiceInterface
         Map<String, List<TurfZone>> tRegionMap = mTurfIf.getZonesByRegionNames();
 
         List<String> tRegionNames = tRegionMap.keySet().stream().collect(Collectors.toList());
-        jZoneNameRsp.setRegionNames( tRegionNames );
+        jZoneNameRsp.setRegionNames(tRegionNames);
 
-        for( String tKey : tRegionMap.keySet()) {
+        for (String tKey : tRegionMap.keySet()) {
             ZN_ZoneNames zns = new ZN_ZoneNames();
-            zns.setRegion( tKey );
-            List<String> tNames = tRegionMap.get( tKey ).stream().map(z->z.getName()).collect(Collectors.toList());
-            zns.setNames( tNames );
-            jZoneNameRsp.addRegions( zns );
+            zns.setRegion(tKey);
+            List<String> tNames = tRegionMap.get(tKey).stream().map(z -> z.getName()).collect(Collectors.toList());
+            zns.setNames(tNames);
+            jZoneNameRsp.addRegions(zns);
         }
 
         return jZoneNameRsp.toJson();
     }
 
-    private JsonObject executeLoadZoneSubscriptions( ZN_LoadZoneSubscriptionsRqst pRqst ) {
+    private JsonObject executeLoadZoneSubscriptions(ZN_LoadZoneSubscriptionsRqst pRqst) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ZN_LoadZoneSubscriptionsRsp tResponse = new ZN_LoadZoneSubscriptionsRsp();
 
-        List<Subscription> tSubscrList =  mDbAux.findSubscriptionByMailAddr( pRqst.getMailAddress().get());
-        for ( Subscription s: tSubscrList ) {
+        List<Subscription> tSubscrList = mDbAux.findSubscriptionByMailAddr(pRqst.getMailAddress().get());
+        for (Subscription s : tSubscrList) {
             ZN_SubscriptionData tZoneData = new ZN_SubscriptionData();
-            tZoneData.setNotifications( s.getNotifications().get());
-            tZoneData.setSubscrId( s.getMongoId() );
-            tZoneData.setSubscrTime( s.getCreateTime().get());
-            tZoneData.setNotificationTime( s.getNotificationTime().get());
-            tZoneData.setZoneName( s.getZoneName().get());
-            tResponse.addSubscriptions( tZoneData );
+            tZoneData.setNotifications(s.getNotifications().get());
+            tZoneData.setSubscrId(s.getMongoId());
+            tZoneData.setSubscrTime(s.getCreateTime().get());
+            tZoneData.setNotificationTime(s.getNotificationTime().get());
+            tZoneData.setZoneName(s.getZoneName().get());
+            tResponse.addSubscriptions(tZoneData);
         }
 
         return tResponse.toJson();
     }
 
-    private JsonObject executeRemoveSubscription( ZN_RemoveZoneSubscriptionRqst pRqstMsg ) {
-        Subscription tSubscr = mDbAux.findSubscriptionByMongoId( pRqstMsg.getSubscrId().get() );
+    private JsonObject executeRemoveSubscription(ZN_RemoveZoneSubscriptionRqst pRqstMsg) {
+        Subscription tSubscr = mDbAux.findSubscriptionByMongoId(pRqstMsg.getSubscrId().get());
         if (tSubscr == null) {
             return TGStatus.createError("Subscription id: \"" + pRqstMsg.getSubscrId().get() + "\" is not found", null).toJson();
         }
         try {
-            if (mDbAux.deleteSubscriptionByMongoId( pRqstMsg.getSubscrId().get()) > 0) {
+            if (mDbAux.deleteSubscriptionByMongoId(pRqstMsg.getSubscrId().get()) > 0) {
                 return TGStatus.create(true, "Subscription id: \"" + pRqstMsg.getSubscrId().get() + "\" successfully removed").toJson();
             } else {
                 return TGStatus.createError("Subscription id: \"" + pRqstMsg.getSubscrId().get() + "\" is not found", null).toJson();
             }
-        }
-        catch( Exception e ) {
+        } catch (Exception e) {
             return TGStatus.createError("Failed to remove subscription id: \"" + pRqstMsg.getSubscrId().get() + "\"", e).toJson();
         }
     }
 
-    private JsonObject executeaddZoneSubscription( ZN_AddZoneSubscriptionRqst pAddZoneSubscr ) {
+    private JsonObject executeaddZoneSubscription(ZN_AddZoneSubscriptionRqst pAddZoneSubscr) {
         try {
             Subscription tSubscr = new Subscription();
-            tSubscr.setMailAddr( pAddZoneSubscr.getMailAddress().get());
-            TurfZone tZone = this.mTurfIf.getZoneByName( pAddZoneSubscr.getZone().get());
+            tSubscr.setMailAddr(pAddZoneSubscr.getMailAddress().get());
+            TurfZone tZone = this.mTurfIf.getZoneByName(pAddZoneSubscr.getZone().get());
             if (tZone == null) {
                 return TGStatus.createError("Zone \"" + pAddZoneSubscr.getZone().get() + "\" is not found", null).toJson();
             }
-            tSubscr.setZoneName( pAddZoneSubscr.getZone().get());
-            tSubscr.setZoneId( tZone.getId());
-            tSubscr.setCreateTime( SUBSCR_TIME.format( System.currentTimeMillis()));
+            tSubscr.setZoneName(pAddZoneSubscr.getZone().get());
+            tSubscr.setZoneId(tZone.getId());
+            tSubscr.setCreateTime(SUBSCR_TIME.format(System.currentTimeMillis()));
             tSubscr.setNotificationTime("00:00:00");
             tSubscr.setNotifications(0);
 
             mDbAux.insertSubscription(tSubscr);
             return TGStatus.createSuccessResponse().toJson();
-        }
-        catch( Exception e ) {
+        } catch (Exception e) {
             return TGStatus.createError("Failed to add zone subscription", e).toJson();
         }
     }
 
     private JsonObject executeMailConfirmation(ZN_MailConfirmation pRqstMsg) {
-        if (!validMailAddress( pRqstMsg.getMailAddress().get() )) {
+        if (!validMailAddress(pRqstMsg.getMailAddress().get())) {
             return TGStatus.createError("Invalid mail address", null).toJson();
         }
 
-        List<User> tUsers = mDbAux.findUser( pRqstMsg.getMailAddress().get());
+        List<User> tUsers = mDbAux.findUser(pRqstMsg.getMailAddress().get());
         if ((tUsers == null) || (tUsers.size() == 0)) {
             return TGStatus.createError("Mail address does not exist", null).toJson();
         }
 
         User tUser = tUsers.get(0);
-        if (tUser.getConfirmationId().get().compareTo( pRqstMsg.getConfirmationId().get()) != 0) {
-            return TGStatus.create(false,"Confirmation id did not match").toJson();
+        if (tUser.getConfirmationId().get().compareTo(pRqstMsg.getConfirmationId().get()) != 0) {
+            return TGStatus.create(false, "Confirmation id did not match").toJson();
         }
 
         if (tUser.getConfirmed().get()) {
-            return TGStatus.create(true,"User mail address already confirmed","/turf/znlogon.html").toJson();
+            return TGStatus.create(true, "User mail address already confirmed", "/turf/znlogon.html").toJson();
         }
 
-        tUser.setConfirmed( true );
+        tUser.setConfirmed(true);
         mLogger.info("Mail address " + pRqstMsg.getMailAddress().get() + " is now confirmed");
 
-        UpdateResult tUpdResult = mDbAux.updateUser( pRqstMsg.getMailAddress().get(), tUser, false);
+        UpdateResult tUpdResult = mDbAux.updateUser(pRqstMsg.getMailAddress().get(), tUser, false);
         if (tUpdResult.getModifiedCount() == 1) {
-            return TGStatus.create(true,"User mail address successfully confirmed","/turf/znLogon.html").toJson();
+            return TGStatus.create(true, "User mail address successfully confirmed", "/turf/znLogon.html").toJson();
         }
 
-        return TGStatus.create(false,"User confirmation was not done (modify count == " + tUpdResult.getModifiedCount() + ")").toJson();
+        return TGStatus.create(false, "User confirmation was not done (modify count == " + tUpdResult.getModifiedCount() + ")").toJson();
     }
 
     private JsonObject executeUpdatePassword(ZN_UpdatePasswordRqst pRqstMsg) {
-        if (!validMailAddress( pRqstMsg.getMailAddress().get() )) {
+        if (!validMailAddress(pRqstMsg.getMailAddress().get())) {
             return TGStatus.createError("Invalid mail address", null).toJson();
         }
 
-        List<User> tUsers = mDbAux.findUser( pRqstMsg.getMailAddress().get());
+        List<User> tUsers = mDbAux.findUser(pRqstMsg.getMailAddress().get());
         if ((tUsers == null) || (tUsers.size() == 0)) {
             return TGStatus.createError("Mail address does not exist", null).toJson();
         }
 
         User tUser = tUsers.get(0);
-        if (tUser.getConfirmationId().get().compareTo( pRqstMsg.getConfirmationId().get()) != 0) {
-            return TGStatus.create(false,"Confirmation id did not match").toJson();
+        if (tUser.getConfirmationId().get().compareTo(pRqstMsg.getConfirmationId().get()) != 0) {
+            return TGStatus.create(false, "Confirmation id did not match").toJson();
         }
-        tUser.setPassword( PasswordRules.hashPassword( pRqstMsg.getPassword().get()));
+        tUser.setPassword(PasswordRules.hashPassword(pRqstMsg.getPassword().get()));
 
 
         mLogger.info("User " + pRqstMsg.getMailAddress().get() + ", password is now updated");
 
-        UpdateResult tUpdResult = mDbAux.updateUser( pRqstMsg.getMailAddress().get(), tUser, false);
+        UpdateResult tUpdResult = mDbAux.updateUser(pRqstMsg.getMailAddress().get(), tUser, false);
         if (tUpdResult.getModifiedCount() == 1) {
-            return TGStatus.create(true,"User \"" + pRqstMsg.getMailAddress().get() + "\" is successfully updated","/turf/znLogon.html").toJson();
+            return TGStatus.create(true, "User \"" + pRqstMsg.getMailAddress().get() + "\" is successfully updated", "/turf/znLogon.html").toJson();
         }
 
-        return TGStatus.create(false,"Failed to update user password (mod count = " + tUpdResult.getModifiedCount() + ")").toJson();
+        return TGStatus.create(false, "Failed to update user password (mod count = " + tUpdResult.getModifiedCount() + ")").toJson();
     }
 
-    private JsonObject executeResetPassword( ZN_ResetPasswordRqst pRqstMsg ) {
+    private JsonObject executeResetPassword(ZN_ResetPasswordRqst pRqstMsg) {
         if (!validMailAddress(pRqstMsg.getMailAddress().get())) {
             return TGStatus.createError("Invalid mail address", null).toJson();
         }
@@ -321,22 +318,21 @@ public class ZoneNotifierService implements TurfServiceInterface
         }
     }
 
-    private JsonObject executeRegisterUser( ZN_RegisterUserRqst pRqstMsg ) {
+    private JsonObject executeRegisterUser(ZN_RegisterUserRqst pRqstMsg) {
 
-        if (!validMailAddress( pRqstMsg.getMailAddress().get() )) {
+        if (!validMailAddress(pRqstMsg.getMailAddress().get())) {
             return TGStatus.createError("Invalid mail address", null).toJson();
         }
 
         PasswordRules tPwdRules = mTurfIf.getServerConfiguration().getZoneNotifyConfiguration().getPasswordRules();
         try {
-            tPwdRules.validatePassword( pRqstMsg.getPassword().get());
-        }
-        catch( Exception e) {
+            tPwdRules.validatePassword(pRqstMsg.getPassword().get());
+        } catch (Exception e) {
             return TGStatus.createError("Invalid password", e).toJson();
         }
 
 
-        List<User> tUsers = mDbAux.findUser( pRqstMsg.getMailAddress().get());
+        List<User> tUsers = mDbAux.findUser(pRqstMsg.getMailAddress().get());
         if ((tUsers != null) && (tUsers.size() > 0)) {
             return TGStatus.createError("mail address already registered/used", null).toJson();
         }
@@ -344,14 +340,14 @@ public class ZoneNotifierService implements TurfServiceInterface
         String tConfirmId = UUID.randomUUID().toString();
 
         User tUser = new User();
-        tUser.setMailAddr( pRqstMsg.getMailAddress().get() );
-        tUser.setPassword( tPwdRules.hashPassword( pRqstMsg.getPassword().get()));
+        tUser.setMailAddr(pRqstMsg.getMailAddress().get());
+        tUser.setPassword(tPwdRules.hashPassword(pRqstMsg.getPassword().get()));
         tUser.setLoginCounts(0);
-        tUser.setLastLogin( Turf.SDF.format( System.currentTimeMillis()));
-        tUser.setConfirmed( false );
+        tUser.setLastLogin(Turf.SDF.format(System.currentTimeMillis()));
+        tUser.setConfirmed(false);
         tUser.setConfirmationId(tConfirmId);
 
-        if (sendConfirmationMail( tUser )) {
+        if (sendConfirmationMail(tUser)) {
             try {
                 mDbAux.insertUser(tUser);
             } catch (Exception e) {
@@ -359,7 +355,7 @@ public class ZoneNotifierService implements TurfServiceInterface
                 return TGStatus.createError("failed to register user in DB", e).toJson();
             }
             mLogger.info("User " + tUser.getMailAddr().get() + " successfully registered");
-            return TGStatus.create( true,"Successfully register user","/turf/znLogon.html").toJson();
+            return TGStatus.create(true, "Successfully register user", "/turf/znLogon.html").toJson();
         } else {
             mLogger.error("Failed to register user (sending confirmation mail)");
             return TGStatus.createError("failed to register user (confirmation mail error)", null).toJson();
@@ -368,49 +364,51 @@ public class ZoneNotifierService implements TurfServiceInterface
     }
 
 
-
     @Override
-    public void processZoneUpdates( JsonElement pZoneUpdates ) {
-        List<ZoneEvent> tZones = tZoneFilter.getNewTakeover( pZoneUpdates.getAsJsonArray() );
+    public void processZoneUpdates(JsonElement pZoneUpdates) {
+        List<ZoneEvent> tZones = tZoneFilter.getNewTakeover(pZoneUpdates.getAsJsonArray());
 
-        for( ZoneEvent ze: tZones ) {
-            List<Subscription> tSubscriptions = mDbAux.findSubscriptionByZoneId( ze.getZoneId() );
-            for( Subscription sub : tSubscriptions ) {
-                notifyUser( sub, ze );
+        for (ZoneEvent ze : tZones) {
+            List<Subscription> tSubscriptions = mDbAux.findSubscriptionByZoneId(ze.getZoneId());
+            for (Subscription sub : tSubscriptions) {
+                notifyUser(sub, ze);
             }
         }
     }
 
 
-
-    private String createBody( ZoneEvent pZonEvt ) {
+    private String createBody(ZoneEvent pZonEvt) {
         String tTimStr = Turf.SDF.format(pZonEvt.getLatestTakeOverTime());
         StringBuilder sb = new StringBuilder();
         sb.append("<html><br><br><br>");
         sb.append("<p align=\"center\" style=\"font-family:verdana;font-size:100%;\">");
-        sb.append("Zone \"" + pZonEvt.getZoneName() + "\" taken.<br>" );
+        sb.append("Zone \"" + pZonEvt.getZoneName() + "\" taken.<br>");
         sb.append("Take over at " + tTimStr + "<br>");
-        sb.append("Current owner\"" + pZonEvt.getCurrentOwner() +"\" previous owner \"" + pZonEvt.getPreviousOwner() + "\" <br>");
+        sb.append("Current owner\"" + pZonEvt.getCurrentOwner() + "\" previous owner \"" + pZonEvt.getPreviousOwner() + "\" <br>");
         sb.append("</p></html>");
         return sb.toString();
     }
 
-    public void notifyUser( Subscription pSubscr, ZoneEvent pZonEvt )
-    {
-        String tBody = createBody( pZonEvt );
+    public void notifyUser(Subscription pSubscr, ZoneEvent pZonEvt) {
+        String tBody = createBody(pZonEvt);
         String tHeader = "Zone \"" + pZonEvt.getZoneName() + "\" taken";
 
-        mLogger.info("Notificat mail sent to " + pSubscr.getMailAddr().get() + " zone take \"" + pZonEvt +
-                "\" take-time: " + Turf.SDFDate.format( pZonEvt.getLatestTakeOverTime()));
+        mLogger.info("Notification mail sent to " + pSubscr.getMailAddr().get() + " zone take \"" + pZonEvt +
+                "\" take-time: " + Turf.SDFDate.format(pZonEvt.getLatestTakeOverTime()));
 
-        pSubscr.setNotificationTime( SUBSCR_TIME.format( System.currentTimeMillis()));
-        pSubscr.setNotifications( pSubscr.getNotifications().get() + 1);
-        mDbAux.updateSubscriptionByMongoId( pSubscr.getMongoId(), pSubscr);
+        pSubscr.setNotificationTime(SUBSCR_TIME.format(System.currentTimeMillis()));
+        pSubscr.setNotifications(pSubscr.getNotifications().get() + 1);
+        mDbAux.updateSubscriptionByMongoId(pSubscr.getMongoId(), pSubscr);
 
-        mMailer.sendMessage( true,
-                "turf-noreply@hoddmimes.com",
-                pSubscr.getMailAddr().get(),
-                null,
-                tHeader, tBody);
+        try {
+            mMailer.sendMessage(true,
+                    "turf-noreply@hoddmimes.com",
+                    pSubscr.getMailAddr().get(),
+                    null,
+                    tHeader, tBody);
+        } catch (Throwable t) {
+            mLogger.error("Failed to send notify mail", t);
+        }
+
     }
 }

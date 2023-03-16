@@ -38,7 +38,7 @@ public class ZoneDensityService implements TurfServiceInterface {
     private GeometryFactory mGeometryFactory;
 
     public ZoneDensityService( ) {
-        mLogger = LogManager.getLogger( this.getClass().getSimpleName());
+        mLogger = LogManager.getLogger( this.getClass().getName());
          mGeometryFactory = JTSFactoryFinder.getGeometryFactory();
     }
 

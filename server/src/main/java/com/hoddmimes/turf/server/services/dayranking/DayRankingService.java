@@ -54,7 +54,7 @@ public class DayRankingService implements TurfServiceInterface {
 
         mTurfIf = pTurfServerInterface;
         mDbAux = mTurfIf.getDbAux();
-        mLogger = LogManager.getLogger(this.getClass().getSimpleName());
+        mLogger = LogManager.getLogger(this.getClass().getName());
         mConfig = mTurfIf.getServerConfiguration().getDayRankingConfiguration();;
         mRankingUsers = new HashMap<>();
         mRankingInitUsers = new HashMap<>();
@@ -75,6 +75,8 @@ public class DayRankingService implements TurfServiceInterface {
         int  tTotDistance = 0;
         int  tTotUsers = 0;
         List<ZoneEvent> tTakeOverEvents = mZoneFilter.getNewTakeover(pZoneUpdates.getAsJsonArray());
+        mLogger.debug("<processZoneUpdates> Dayranking zoneUpdates: "  + pZoneUpdates.getAsJsonArray().size() + " takeOverEvents: " + tTakeOverEvents.size());
+
         for( ZoneEvent toe: tTakeOverEvents) {
             DayRankingUser ru = mRankingUsers.get( toe.getCurrentOwnerId());
             if (ru != null) {
@@ -100,14 +102,13 @@ public class DayRankingService implements TurfServiceInterface {
             }
             mUserZones.put( toe.getCurrentOwnerId(), toe);
         }
-        if ((tTotTime > 0) && (tTotDistance > 0)) {
-            if (mConfig.getDebug()) {
-                mLogger.debug("DayRanking (update zones) Users found: " + tTotUsers +
+
+
+        mLogger.debug("DayRanking (update zones) Users found: " + tTotUsers +
                         " tot-time: " + Turf.formatTimeDiff((tTotTime * 1000L)) +
                         " tot-distance: " + tTotDistance + " m.");
 
-            }
-        }
+
     }
 
     @Override
@@ -169,13 +170,13 @@ public class DayRankingService implements TurfServiceInterface {
             double tKm = dru.getDistance().orElse(0) / 1000.0d;
             u.setDistance( tKm ); // Distance in Km
 
-            if (dru.getTime().isPresent()) {
+            if (dru.getTime().isPresent() && (dru.getTime().get() > 0)) {
                 double tSpeed = (dru.getDistance().orElse(0) / dru.getTime().get()) * 3.6d;
                 u.setSpeed(tSpeed);
             } else {
                 u.setSpeed( 0d );
             }
-
+            mLogger.debug( u.toJson().toString());
             drUsers.add(u);
 
         }
@@ -359,6 +360,8 @@ public class DayRankingService implements TurfServiceInterface {
             return ru;
         }
         private void setStartDayRankingData( DayRankingConfiguration.Region pRegion, List<JsonObject> tUserArray ) {
+                mLogger.debug("setStartDayRankingData, set start of day ranking day region: " + pRegion.getName() + " users: " + tUserArray.size());
+
                 DayRankingRegion drr = new DayRankingRegion();
                 drr.setDate(mService.mCurrentDate);
                 drr.setRegionId(pRegion.getId());
@@ -407,6 +410,8 @@ public class DayRankingService implements TurfServiceInterface {
             DayRankingUser ru = new DayRankingUser();
             ru.setFinalized( false );
             ru.setLatestTakeTime(0L);
+            ru.setDistance(0);
+            ru.setTime(0L);
             ru.setDate( mCurrentDate );
             ru.setUser(pTurfUser.getUserName());
             ru.setUserId( pTurfUser.getUserId());
@@ -436,6 +441,7 @@ public class DayRankingService implements TurfServiceInterface {
                     DayRankingUser ru = mService.mRankingUsers.get(tu.getUserId());
                     if (ru == null) {
                         ru = createDayRankingUser(tu);
+                        mLogger.trace("New add user: " + tu.getUserName() + " region: " + tu.getRegionName() + " to UserDayRanking");
                         mService.mRankingUsers.put(tu.getUserId(), ru);
                         tIns++;
                     }
@@ -458,10 +464,14 @@ public class DayRankingService implements TurfServiceInterface {
             }
             long tExecTime = System.currentTimeMillis() - tNow;
             if (mConfig.getDebug()) {
+
                 SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
                 mService.mLogger.debug("<updateRankingData> region: " + pRegion.getName() + " int-found: " + tFnd + " updates: " + tUpd + " insert: " + tIns +
-                        " dbSave: " + tDBSave + " exec-time: " + tExecTime + " ms. (turf-usr-arr: " + tUserArray.size() + ") users dist: " + tDistance +
-                        " users time: " + tTime);
+                        " dbSave: " + tDBSave + " exec-time: " + tExecTime + " ms. (turf-usr-arr: " + tUserArray.size() + ") \n                                    " +
+                        " (ranking-users: " + mRankingUsers.size() +  ") (ranking-init-users: " + mRankingInitUsers.size() +
+                        ") users dist: " + tDistance + " users time: " + tTime );
+
+
             }
             return tUpd;
         }
@@ -488,10 +498,11 @@ public class DayRankingService implements TurfServiceInterface {
             return false;
         }
 
-        void refresh() { //Frotz
+        void refresh( long pDismissTime ) { //Frotz
             int tUserUpdated = 0, tTurfUsers = 0;
             // Check if we passed date boundary, if so finalize date and initialize for a new day
-            if (newDay()) {
+            boolean tForceNewDay = false;
+            if (newDay() || tForceNewDay) {
                 finalizeDay();
             }
 
@@ -504,7 +515,7 @@ public class DayRankingService implements TurfServiceInterface {
                 if (tUserRanking != null) {
                     tTurfUsers += tUserRanking.size();
                     // Check if Ranking Start Data exists
-                    if (!mRankingRegions.containsKey( r.getId())) {
+                    if (!mService.mRankingRegions.containsKey( r.getId())) {
                         setStartDayRankingData( r, tUserRanking );
                     } else {
                         tUserUpdated += updateRankingData(r, tUserRanking);
@@ -514,9 +525,9 @@ public class DayRankingService implements TurfServiceInterface {
                 }
             }
 
-            if (!mConfig.getDebug()) {
-                mService.mLogger.info("<updateUserRanking> turf-users: " + tTurfUsers + " updated users: " + tUserUpdated );
-            }
+
+            mService.mLogger.debug("<updateUserRanking> turf-users: " + tTurfUsers + " updated users: " + tUserUpdated + " dismissTime: " + pDismissTime );
+
         }
 
         private long calcDismissTime( long pWaitTimeMs ) {
@@ -530,11 +541,12 @@ public class DayRankingService implements TurfServiceInterface {
 
         @Override
         public void run() {
+            long tDismissTime = 0;
             mService.mLogger.info("Start DayRankingService refresh thread");
             while( true ) {
-                refresh();
+                refresh(tDismissTime);
                 try {
-                    long tDismissTime = calcDismissTime(mService.mConfig.getRefreshUserIntervalMS());
+                    tDismissTime = calcDismissTime(mService.mConfig.getRefreshUserIntervalMS());
                     Thread.sleep(tDismissTime);
                 } catch (InterruptedException e) {
                     return;

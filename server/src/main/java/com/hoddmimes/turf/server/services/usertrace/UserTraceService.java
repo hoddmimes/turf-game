@@ -38,7 +38,7 @@ public class UserTraceService implements TurfServiceInterface {
     public void initialize(TurfServerInterface pTurfServerInterface) {
         mZoneFilter = new EventFilterNewZoneTakeOver();
         mTurfIf = pTurfServerInterface;
-        mLogger = LogManager.getLogger(this.getClass().getSimpleName());
+        mLogger = LogManager.getLogger(this.getClass().getName());
         mConfig = mTurfIf.getServerConfiguration().getUserTraceConfiguration();
         mUsers = new HashMap<>();
         mLatestConfigRecheck = System.currentTimeMillis();

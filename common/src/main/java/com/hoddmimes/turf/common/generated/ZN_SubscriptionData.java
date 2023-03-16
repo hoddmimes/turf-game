@@ -108,7 +108,6 @@ import com.google.gson.GsonBuilder;
               return  Optional.ofNullable(mSubscrId);
             }
         
-
         public String getMessageName() {
         return "ZN_SubscriptionData";
         }

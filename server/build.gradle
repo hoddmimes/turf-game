@@ -1,0 +1,131 @@
+import groovy.json.JsonSlurper
+
+buildscript {
+    repositories { flatDir name: 'libs', dirs: "../libs" }
+    dependencies { classpath 'com.hoddmimes.versionplugin:versionplugin:1.0' }
+}
+
+plugins {
+    id 'java'
+    id 'org.hidetake.ssh' version '2.11.2'
+}
+
+apply plugin: 'com.hoddmimes.versionplugin'
+
+VersionTask {
+    versionFile = "$project.rootDir/version.json"
+    generatedVersionFile = "$project.projectDir/src/main/java/com/hoddmimes/turf/server/generated/Version.java"
+}
+
+tasks.register('bumpMinorVersion', com.hoddmimes.versionplugin.VersionTask) {
+    action = "minor"
+}
+
+tasks.register('bumpMajorVersion', com.hoddmimes.versionplugin.VersionTask) {
+    action = "major"
+}
+
+tasks.register('generateVersion', com.hoddmimes.versionplugin.VersionTask)
+
+remotes {
+    hoddmimes {
+        host = 'www.hoddmimes.com'
+        user = 'bertilsson'
+        port = 11721
+        identity = file( System.getProperty("user.home") + '/.ssh/id_rsa')
+    }
+}
+
+tasks.register('copyToHoddmimes') {
+    doLast {
+        def vrs  = tasks.turfVersion.version()
+        def serverJar = "turfServer-" + "$vrs" + ".jar"
+        ssh.run {
+            session(remotes.hoddmimes) {
+                put from:   "$project.rootDir/$serverJar" , into: './'
+                execute "sudo mv $serverJar /usr/local/turf/libs/"
+            }
+        }
+        println("**** $serverJar copied to Hoddmimes")
+    }
+}
+
+
+task(generateTurfObjects, type: JavaExec ) {
+    mainClass = 'JsonTransform'
+    classpath = files('../libs/pojojson-generate-1.3.jar')
+    args  '-xml', './xml_definitions/structureFileSet.xml'
+    doLast {
+        println "Generated Java TURF Server objects"
+    }
+}
+
+task deleteGeneratedFiles(type: Delete) {
+    delete fileTree('./src/main/java/com/hoddmimes/turf/server/generated') {
+        include '*.java'
+    }
+}
+
+
+
+
+tasks.register('generateCode') {
+    doFirst {
+        deleteGeneratedFiles
+    }
+    dependsOn( generateVersion )
+    dependsOn( generateTurfObjects )
+
+    doLast {
+        println "Tur server objects generated"
+    }
+}
+
+task buildServerJar( type : Jar ) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE;
+    archiveBaseName = 'turfServer';
+    destinationDirectory = file("$project.rootDir")
+    archiveVersion = tasks.turfVersion.version()
+
+    from('../common/build/classes/java/main/') {
+        include 'com/hoddmimes/turf/common/**/*'
+    }
+    from('build/classes/java/main/') {
+        include 'com/hoddmimes/turf/server/**/*'
+    }
+    doLast {
+        println "turfServer JAR successfully built"
+    }
+}
+
+compileJava.dependsOn( generateCode )
+build.finalizedBy(buildServerJar)
+
+dependencies {
+    implementation project(':common')
+    implementation fileTree(dir: '../libs', include: 'pojojson-1.3.jar')
+    implementation fileTree(dir: '../libs', include: 'wrapper.jar')
+
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
+
+    implementation group: 'javax.mail', name: 'javax.mail-api', version: '1.6.2'
+    implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
+
+    implementation group: 'org.mongodb', name: 'mongo-java-driver', version: '3.8.2'
+    implementation group: 'org.mongodb', name: 'mongodb-driver-core', version: '3.8.2'
+    implementation group: 'org.mongodb', name: 'bson', version: '3.8.2'
+
+    implementation group: 'org.geotools', name: 'gt-main', version: '28-RC'
+    implementation group: 'org.geotools', name: 'gt-geojson', version: '28-RC'
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}

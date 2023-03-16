@@ -135,7 +135,6 @@ import com.google.gson.GsonBuilder;
               return  Optional.ofNullable(mConfirmationId);
             }
         
-
         public String getMessageName() {
         return "User";
         }

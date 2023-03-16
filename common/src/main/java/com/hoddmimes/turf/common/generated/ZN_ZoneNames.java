@@ -88,7 +88,6 @@ import com.google.gson.GsonBuilder;
             return  Optional.ofNullable(mNames);
             }
         
-
         public String getMessageName() {
         return "ZN_ZoneNames";
         }

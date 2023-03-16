@@ -63,7 +63,6 @@ import com.google.gson.GsonBuilder;
                     this.decode( tDecoder );
                }
     
-
         public String getMessageName() {
         return "ZN_LoadZoneNamesRqst";
         }

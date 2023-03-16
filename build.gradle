@@ -1,211 +1,46 @@
+import groovy.json.JsonSlurper
+
 plugins {
     id 'java'
-    id 'war'
 }
 
-group 'com.hoddmimes.turf'
-version '1.0'
-def appVersion = "1.0-001"
-def versionFile = "server/src/main/java/com/hoddmimes/turf/server/generated/Version.java"
+subprojects {
+    group 'com.hoddmimes.turfgame'
+    version '1.1'
 
-sourceCompatibility = 1.8
-
-repositories {
-    maven {
-        url "https://maven.geotoolkit.org"
-    }
-
-    mavenCentral()
-    maven {
-        url "https://repo1.maven.org/maven2/"
-    }
-    maven {
-        url "https://repo.osgeo.org/repository/release/"
-    }
-    maven {
-        url "https://repo.osgeo.org/repository/snapshot/"
-    }
-    maven {
-        url "https://repo.opengeo.org"
-    }
-}
-
-
-sourceSets {
-    main {
-        java {
-            srcDir 'common/src/main/java'
-            srcDir 'servlet/src/main/java'
-            srcDir 'server/src/main/java'
-            srcDir 'tomcat/src/main/java'
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(15)
         }
     }
-}
 
-task copyLocalsToWebapp( type: Copy ) {
-    from('libs/') {
-        include 'pojojson-1.1.jar'
-    }
-    into('WebContent/WEB-INF/lib')
-}
+    task turfVersion() {
+        def jsonSlurper = new JsonSlurper()
 
-
-task copyToTomcat( type: Copy ) {
-    from('build/libs/') {
-       include 'turf-1.0.war'
-    }
-    rename { filename -> filename.replace 'turf-1.0', 'turf' }
-    into('/usr/local/apache-tomcat-9.0.16/webapps/')
-    doLast {
-        println "WAR file copied to apache-tomcat dir"
+        def build = jsonSlurper.parse(new File("$project.rootDir/version.json"))
+        //print( "$build" )
+        ext.version = { "$build.major" + "." + "$build.minor" }
     }
 }
 
-task copyLog4J( type: Copy ) {
-    from('server/') {
-        include 'log4j2.xml'
-    }
-    into('./build/classes/java/main/')
-    doLast {
-        println "Log4J copied to class path"
-    }
-}
+allprojects {
+        repositories {
+            maven {
+                url "https://maven.geotoolkit.org"
+            }
 
-task copyFiles() {
-    dependsOn( copyLog4J )
-    dependsOn( copyLocalsToWebapp )
-    //dependsOn( copyToTomcat )
-}
-task deleteGeneratedFiles(type: Delete) {
-    delete fileTree('server/src/main/java/com/hoddmimes/turf/server/generated') {
-        include '*.java'
-    }
-    delete fileTree('common/src/main/java/com/hoddmimes/turf/common/generated') {
-        include '*.java'
-    }
-}
-
-task createTurfServerVersion() {
-
-    File dfh = new File( versionFile );
-    dfh.delete();
-
-    def dateAndTime  = new Date().format('yyyy-MM-dd HH:mm:ss.SSS')
-    File fh = new File( versionFile )
-    fh << "package com.hoddmimes.turf.server;\n\n\n"
-    fh << "/*\n"
-    fh << "  ====================================================================================\n"
-    fh << " * Note: This file is automatically gemerate as part of the build process (i.e. build.gradle) \n"
-    fh << " * Do not change or edit this file\n"
-    fh << "  =====================================================================================\n"
-    fh << "*/\n\n"
-    fh << "public class Version\n"
-    fh << "{\n"
-    fh << "    private static final String cBuildDate = \"" + dateAndTime + "\";\n"
-    fh << "    public static final String build = \" version: " + appVersion + " built: \" + cBuildDate;\n"
-    fh << "}\n"
-
-    doLast {
-        println "Create Version file"
-    }
-}
-
-
-task copyToHoddmimes() {
-    doLast {
-        ant.scp( file : "./build/libs/turfServer-1.0.jar", trust : 'yes', keyfile : '${user.home}/.ssh/id_rsa', port : 11721,  todir : "bertilsson@www.hoddmimes.com:/usr/local/turf/libs/");
-        ant.scp( file : "./build/libs/turf-1.0.war", trust : 'yes', keyfile : '${user.home}/.ssh/id_rsa', port : 11721,  todir : "bertilsson@www.hoddmimes.com:/var/lib/tomcat/webapps/turf.war");
-        println("Copy Production");
-    }
-}
-
-
-task(generateTurfObjects, type: JavaExec ) {
-    main = 'JsonTransform'
-    classpath = files('./libs/pojojson-generate-1.1.jar')
-    args  '-xml', './server/xml_definitions/structureFileSet.xml'
-    doLast {
-        println "Generated Java TURF Server objects"
-    }
-}
-
-
-task(generateTurfMessages, type: JavaExec ) {
-    main = 'JsonTransform'
-    classpath = files('./libs/pojojson-generate-1.1.jar')
-    args  '-xml', './common/xml_definitions/turfMessagesFileSet.xml'
-    doLast {
-        println "Generated Java TURF Messages"
-    }
-}
-
-task buildServerJar( type : Jar ) {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE;
-    baseName = 'turfServer';
-    version = '1.0';
-    from('build/classes/java/main/') {
-        include 'com/hoddmimes/turf/common/**/*','com/hoddmimes/turf/server/**/*'
-    }
-    doLast {
-        println "turfServer JAR successfully built"
-    }
-}
-
-
-war.duplicatesStrategy(DuplicatesStrategy.INCLUDE )
-war.baseName='turf'
-project.webAppDirName = 'WebContent'
-
-war {
-    rootSpec.exclude('**/com/hoddmimes/turf/server/**')
-    rootSpec.exclude('**/com/hoddmimes/tomcat/**')
-}
-
-
-
-build.finalizedBy(copyFiles)
-build.finalizedBy(buildServerJar)
-
-compileJava.dependsOn( generateTurfObjects )
-compileJava.dependsOn( generateTurfMessages )
-compileJava.dependsOn( createTurfServerVersion )
-
-clean.dependsOn(deleteGeneratedFiles)
-
-ant.taskdef(
-        name: 'scp',
-        classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
-        classpath: 'libs/ant-jsch.jar:libs/jsch-0.1.54.jar')
-
-
-
-dependencies {
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10'
-    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-logging-juli', version: '8.5.2'
-    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '8.5.45'
-    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: '8.5.45'
-    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: '8.5.45'
-    providedCompile group: 'org.apache.tomcat', name: 'tomcat-annotations-api', version: '8.5.45'
-
-
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
-    implementation group: 'javax.mail', name: 'javax.mail-api', version: '1.6.2'
-    implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
-    implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.29'
-    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '2.29'
-    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.29'
-    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.29'
-
-    implementation group: 'org.mongodb', name: 'mongo-java-driver', version: '3.8.2'
-    implementation group: 'org.mongodb', name: 'mongodb-driver-core', version: '3.8.2'
-    implementation group: 'org.mongodb', name: 'bson', version: '3.8.2'
-
-    implementation group: 'org.geotools', name: 'gt-main', version: '28-RC'
-    implementation group: 'org.geotools', name: 'gt-geojson', version: '28-RC'
-
-    implementation fileTree(dir: 'libs', include: 'pojojson-1.1.jar')
-    implementation fileTree(dir: 'libs', include: 'wrapper.jar')
-    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
-
+            mavenCentral()
+            maven {
+                url "https://repo1.maven.org/maven2/"
+            }
+            maven {
+                url "https://repo.osgeo.org/repository/release/"
+            }
+            maven {
+                url "https://repo.osgeo.org/repository/snapshot/"
+            }
+            maven {
+                url "https://repo.opengeo.org"
+            }
+        }
 }

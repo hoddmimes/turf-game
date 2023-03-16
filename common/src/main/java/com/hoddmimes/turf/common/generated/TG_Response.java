@@ -90,7 +90,6 @@ import com.google.gson.GsonBuilder;
               return  Optional.ofNullable(mOptionPage);
             }
         
-
         public String getMessageName() {
         return "TG_Response";
         }

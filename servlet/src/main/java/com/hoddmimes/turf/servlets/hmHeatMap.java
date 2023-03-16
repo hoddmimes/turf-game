@@ -1,6 +1,7 @@
 package com.hoddmimes.turf.servlets;
 
 import com.hoddmimes.turf.common.TGStatus;
+import com.hoddmimes.turf.servlets.aux.ServletResources;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

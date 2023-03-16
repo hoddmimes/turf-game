@@ -72,7 +72,6 @@ import com.google.gson.GsonBuilder;
               return  Optional.ofNullable(mMailAddress);
             }
         
-
         public String getMessageName() {
         return "ZN_ResetPasswordRqst";
         }

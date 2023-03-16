@@ -1,13 +1,12 @@
 package com.hoddmimes.turf.servlets;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.TG_Response;
 import com.hoddmimes.turf.common.generated.ZN_MailConfirmation;
+import com.hoddmimes.turf.servlets.aux.ServletResources;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 
 

@@ -4,7 +4,7 @@ package com.hoddmimes.turf.authorize;
 
 import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.TG_Response;
-import com.hoddmimes.turf.servlets.ServletResources;
+import com.hoddmimes.turf.servlets.aux.ServletResources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

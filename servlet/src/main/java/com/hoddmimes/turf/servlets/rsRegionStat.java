@@ -1,15 +1,11 @@
 package com.hoddmimes.turf.servlets;
 
-import com.hoddmimes.turf.authorize.Authenticator;
 import com.hoddmimes.turf.common.TGStatus;
-import com.hoddmimes.turf.common.generated.ZN_AddZoneSubscriptionRqst;
+import com.hoddmimes.turf.servlets.aux.ServletResources;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 

@@ -52,7 +52,7 @@ public class RegionStatService implements TurfServiceInterface
     private NumberFormat mNBF;
 
     public RegionStatService() {
-        mLogger = LogManager.getLogger( this.getClass().getSimpleName());
+        mLogger = LogManager.getLogger( this.getClass().getName());
         mRegions = new HashMap<>(237);
         mUsers = new HashMap<>( 1237 );
         mZones = new HashMap<>( 3137 );

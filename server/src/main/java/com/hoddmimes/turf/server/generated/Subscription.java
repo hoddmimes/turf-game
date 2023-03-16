@@ -135,7 +135,6 @@ import com.google.gson.GsonBuilder;
               return  Optional.ofNullable(mNotifications);
             }
         
-
         public String getMessageName() {
         return "Subscription";
         }

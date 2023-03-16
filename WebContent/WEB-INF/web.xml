@@ -6,7 +6,13 @@
 
     <listener>
         <listener-class>com.hoddmimes.turf.authorize.Authenticator</listener-class>
+        <listener-class>com.hoddmimes.turf.servlets.aux.ContextListener</listener-class>
     </listener>
+
+    <context-param>
+        <param-name>log4jConfiguration</param-name>
+        <param-value>WEB-INF/log4j2.xml</param-value>
+    </context-param>
 
     <filter>
         <filter-name>AuthorizationFilter</filter-name>
@@ -24,7 +30,7 @@
 
     <servlet>
         <servlet-name>InitServletResources</servlet-name>
-        <servlet-class>com.hoddmimes.turf.servlets.ServletResources</servlet-class>
+        <servlet-class>com.hoddmimes.turf.servlets.aux.ServletResources</servlet-class>
         <init-param>
             <param-name>turfServerHost</param-name>
             <param-value>localhost</param-value>
@@ -54,16 +60,6 @@
             <param-name>turfTestServerEnabled</param-name>
             <param-value>false</param-value>
         </init-param>
-
-        <init-param>
-            <param-name>logfile</param-name>
-            <param-value>"/var/lib/tomcat/webapps/turf/turfServices.log"</param-value>
-        </init-param>
-        <init-param>
-            <param-name>appendMode</param-name>
-            <param-value>true</param-value>
-        </init-param>
-
 
         <load-on-startup>1</load-on-startup>
     </servlet>

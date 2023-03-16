@@ -81,7 +81,6 @@ import com.google.gson.GsonBuilder;
               return  Optional.ofNullable(mPassword);
             }
         
-
         public String getMessageName() {
         return "TG_LogonRqst";
         }

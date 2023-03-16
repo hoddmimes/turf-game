@@ -1,9 +1,8 @@
 package com.hoddmimes.turf.servlets;
 
 import com.hoddmimes.turf.common.TGStatus;
-import com.hoddmimes.turf.common.generated.ZN_RegisterUserRqst;
+import com.hoddmimes.turf.servlets.aux.ServletResources;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;

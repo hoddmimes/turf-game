@@ -2,6 +2,7 @@ package com.hoddmimes.tomcat;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 
 import java.io.File;
@@ -11,15 +12,20 @@ public class Server
 {
     Tomcat mTomcatServer;
     String mBaseDir =  "./temp";
-    String mAppDir = "WebContent/";
+    String mAppDir = "./WebContent/";
     int    mPort = 8282;
     String   mHostname = "localhost";
 
     private void execute() {
         mTomcatServer = new Tomcat();
         mTomcatServer.setBaseDir(mBaseDir);
-        mTomcatServer.setPort( mPort );
-        mTomcatServer.setHostname( mHostname);
+
+        Connector tConnector = mTomcatServer.getConnector();
+        tConnector.setPort( mPort );
+
+
+        //mTomcatServer.setPort( mPort );
+        //mTomcatServer.setHostname( mHostname );
 
 
         // Define a web application context.
@@ -40,6 +46,8 @@ public class Server
         catch( MalformedURLException e) {
             e.printStackTrace();
         }
+
+
 
         // Define and bind web.xml file location.
 

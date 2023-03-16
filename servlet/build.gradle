@@ -1,0 +1,88 @@
+plugins {
+    id 'java'
+    id 'war'
+    id 'org.hidetake.ssh' version '2.11.2'
+}
+
+
+war {
+    archiveBaseName='turf'
+    webAppDirectory=file('WebContent')
+    archiveVersion = tasks.turfVersion.version()
+    destinationDirectory = file("$project.rootDir")
+    from '../WebContent' // adds a file-set to the root of the archive
+}
+
+remotes {
+    hoddmimes {
+        host = 'www.hoddmimes.com'
+        user = 'bertilsson'
+        port = 11721
+        identity = file( System.getProperty("user.home") + '/.ssh/id_rsa')
+    }
+}
+
+tasks.register('copyToHoddmimes') {
+    doLast {
+        def vrs = tasks.turfVersion.version()
+        def warJar = "turf-" + "$vrs" + ".war"
+        ssh.run {
+            session(remotes.hoddmimes) {
+                put from:   "$project.rootDir/$warJar" , into: './turf.war'
+                execute 'sudo mv ./turf.war /var/lib/tomcat/webapps'
+            }
+        }
+        println("**** $warJar copied to Hoddmimes")
+    }
+}
+
+task buildServletJar( type : Jar ) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE;
+    archiveBaseName = 'turfServlets';
+    destinationDirectory = file("$project.projectDir")
+    archiveVersion = tasks.turfVersion.version()
+
+    from('../common/build/classes/java/main/') {
+        include 'com/hoddmimes/turf/common/**/*'
+    }
+    from('build/classes/java/main/') {
+        include 'com/hoddmimes/turf/**/*'
+    }
+    from('../server/build/classes/java/main/') {
+        include 'com/hoddmimes/turf/server/generated/*'
+    }
+    doLast {
+        println "turfServlets JAR successfully built"
+    }
+}
+
+
+build.finalizedBy(buildServletJar)
+
+dependencies {
+
+    implementation project(':common')
+    implementation project(':server')
+
+    implementation fileTree(dir: '../libs', include: 'pojojson-1.3.jar')
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+    implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
+
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.20.0'
+
+    implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.39'
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '2.39'
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.39'
+    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.39'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration name="turfgame" status="WARN">
+  <Appenders>
+  	<File name="FILE"  fileName="./turf-service.log">
+			<PatternLayout>
+					<Pattern>%d %p %C{1} [%F %t %L] %m %ex%n</Pattern>
+			</PatternLayout>
+  	</File>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      		<PatternLayout>
+      		 	<Pattern>%d{HH:mm:ss.SSS} %C{1} %-5level  - %msg%n</Pattern>
+      		</PatternLayout>
+    </Console>
+  </Appenders>
+
+	<Loggers>
+		<Root level="ERROR">
+			<AppenderRef ref="STDOUT"/>
+		</Root>
+
+		<logger name="com.hoddmimes" level="INFO" additivity="false">
+			<AppenderRef ref="STDOUT"/>
+			<AppenderRef ref="FILE"/>
+		</logger>
+	</Loggers>
+</Configuration>

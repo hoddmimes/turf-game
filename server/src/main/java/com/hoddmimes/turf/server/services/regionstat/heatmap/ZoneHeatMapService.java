@@ -30,7 +30,7 @@ public class ZoneHeatMapService extends Thread implements TurfServiceInterface {
     private EventFilterNewZoneTakeOver mZoneFilter = null;
     private List<Integer> mRegionsOfInterest;
     public ZoneHeatMapService( ) {
-        mLogger = LogManager.getLogger( this.getClass().getSimpleName());
+        mLogger = LogManager.getLogger( this.getClass().getName());
     }
 
 

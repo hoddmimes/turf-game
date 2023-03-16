@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
 
-import org.apache.coyote.http2.Http2Exception;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Element;
 
@@ -235,8 +234,8 @@ public class Turf
 				tOut.close();
 
 				if (tConn.getResponseCode() == 429) {
-					pLogger.warn("[turfServerPOST] path: " + pPath + " rqst: " + pRequestData + " statuss: 429 requesting too frequently, dismiss 2 sec");
-					try {Thread.sleep( 2000L );}
+					pLogger.warn("[turfServerPOST] path: " + pPath + " rqst: " + pRequestData + " status: 429 requesting too frequently, dismiss 2.5 sec");
+					try {Thread.sleep( 2500L );}
 					catch( InterruptedException ie) {}
 					tGotAnswer = false;
 				} else {

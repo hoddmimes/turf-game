@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MessageFiles>
-    <MessageFactory outPath="./server/src/main/java/com/hoddmimes/turf/server/generated/" package="com.hoddmimes.turf.server.generated"/>
-    <MongoAux outPath="./server/src/main/java/com/hoddmimes/turf/server/generated/" package="com.hoddmimes.turf.server.generated"/>
-    <MessageFile file="./server/xml_definitions/turfObjects.xml" outPath="./server/src/main/java/com/hoddmimes/turf/server/generated/" package="com.hoddmimes.turf.server.generated"/>
+    <MessageFactory outPath="./src/main/java/com/hoddmimes/turf/server/generated/" package="com.hoddmimes.turf.server.generated"/>
+    <MongoAux outPath="./src/main/java/com/hoddmimes/turf/server/generated/" package="com.hoddmimes.turf.server.generated"/>
+    <MessageFile file="./xml_definitions/turfObjects.xml" outPath="./src/main/java/com/hoddmimes/turf/server/generated/" package="com.hoddmimes.turf.server.generated"/>
 </MessageFiles>

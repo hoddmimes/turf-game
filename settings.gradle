@@ -1,2 +1,6 @@
 rootProject.name = 'turf-game'
+include 'common'
+include 'server'
+include 'servlet'
+include 'tomcat'
 

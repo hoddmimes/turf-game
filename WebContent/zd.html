@@ -207,6 +207,16 @@
 
       /*geometry Alerts the results */
       posting.done(function( msg ) {
+
+	 if (msg.hasOwnProperty('TG_Response')) {
+             if (!(msg.TG_Response.success)) {
+                 alert('Load session ranking failure, reason: ' + msg.TG_Response.reason);
+             } else {
+                 alert('Load session ranking TG_response, success should never be returned');
+              }
+	      return;
+	 }
+
 	  zoneData.features= msg.ZD_ZonesRsp.features;
 
 	  map.getSource('zoneSource').setData(zoneData);

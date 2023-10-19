@@ -369,6 +369,15 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         }
     }
 
+    private JsonObject checkAndExecuteService( String pServiceName, TurfServiceInterface pService, MessageInterface tRqstMsg ) {
+        if (pService == null) {
+            mLogger.warn("Service \"" + pServiceName + "\" is not started or is not enable");
+            return TGStatus.createError( "Service \"" + pServiceName + "\" is not started or is not enable", null).toJson();
+        }
+
+        return pService.execute( tRqstMsg ).getAsJsonObject();
+    }
+
     private JsonObject turfRequestDispatch( String pJsonRequest ) {
         MessageFactory tFactory = new MessageFactory();
 
@@ -389,27 +398,27 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         }
 
         if (tRqstMsg.getMessageName().startsWith("HM_")) {
-            return this.mZoneHeatMapService.execute( tRqstMsg );
+            return checkAndExecuteService( "ZoneHeatMap", this.mZoneHeatMapService, tRqstMsg );
         }
 
         if (tRqstMsg.getMessageName().startsWith("ZD_")) {
-            return this.mZoneDensityService.execute( tRqstMsg );
+            return checkAndExecuteService("ZoneDensity", this.mZoneDensityService, tRqstMsg );
         }
 
         if (tRqstMsg.getMessageName().startsWith("DR_")) {
-            return this.mDayRankingService.execute( tRqstMsg );
+            return checkAndExecuteService("DayRanking", this.mDayRankingService, tRqstMsg );
         }
 
         if (tRqstMsg.getMessageName().startsWith("ZN_")) {
-            return this.mZoneNotifierService.execute( tRqstMsg );
+            return checkAndExecuteService( "Zone Notifier", this.mZoneNotifierService, tRqstMsg );
         }
 
         if (tRqstMsg.getMessageName().startsWith("RS_")) {
-            return this.mRegionStatService.execute( tRqstMsg );
+            return checkAndExecuteService("RegionStatistical", this.mRegionStatService, tRqstMsg );
         }
 
         if (tRqstMsg.getMessageName().startsWith("ST_")) {
-            return this.mTraceSessionService.execute(tRqstMsg);
+            return checkAndExecuteService("TopSessions", this.mTraceSessionService, tRqstMsg);
         }
 
         if (tRqstMsg.getMessageName().startsWith("TG_")) {

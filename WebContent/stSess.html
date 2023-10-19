@@ -1,0 +1,233 @@
+<html>
+<head>
+   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+   <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
+   <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+   <script
+           src="https://code.jquery.com/jquery-3.3.1.js"
+           integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+           crossorigin="anonymous">
+   </script>
+
+   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   <script src="js/turf.js" type="text/javascript"></script>
+   <script src="js/table.js" type="text/javascript"></script>
+   <script src="js/config.js" type="text/javascript"></script>
+
+   <title>Turf Zone Notification</title>x
+   <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+   <meta name="description" contents="Turf Game Region Statistics">
+   <meta name="keywords" contents="TurfGame Turf game GPS outdoor session statistics">
+   <link rel="stylesheet" type="text/css" href="css/turf.css">
+   <style>
+      #map { position: relative; margin-top: 10px; margin-bottom: 5px; height: 720px;  width: 100%; }
+   </style>
+
+</head>
+<body onload="loadDataFromServer()"/>
+
+<body>
+   <br>
+   <h4 id="sessionDetailsH1" style="margin-left:50px;text-align:left">Session Details</h4>
+      <div id="divRegionStat" class="borderDiv">
+         <br>
+            <table id="tableOverview" class="tableRegionStatClass">
+               <tr><td class="tdRegion">Region</td><td class="tdRegion" id="sessRegion"></td></tr>
+               <tr><td class="tdRegion">Duration</td><td class="tdRegion" id="sessDuration"></td></tr>
+               <tr><td class="tdRegion">Distance</td><td class="tdRegion" id="sessDistance"></td></tr>
+               <tr><td class="tdRegion">Speed</td><td class="tdRegion" id="sessSpeed"></td></tr>
+               <tr><td class="tdRegion">Points</td><td class="tdRegion" id="sessPoints"></td></tr>
+               <tr><td class="tdRegion">Points/Hour</td> <td class="tdRegion" id="sessppHH"></td></tr>
+               <tr><td class="tdRegion">Points/Km</td><td class="tdRegion" id="sessppKM"></td></tr>
+            </table>
+         <br>
+         <br>
+         <table id="tableZones" class="tableRegionStatClass">
+            <tr>
+               <th class="thRegion">Zone</th>
+               <th class="thRegion">Time</th>
+               <th class="thRegion">TP</th>
+               <th class="thRegion">PPH</th>
+               <th class="thRegion">Delta Time</th>
+               <th class="thRegion">Distance (m)</th>
+            </tr>
+         </table>
+      </div>
+
+
+   <div class="center">
+      <div id="map"></div>
+   </div>
+
+
+<script>
+   var map;
+   var groundZero = [18.07176207279832, 59.330789224460716 ];
+
+  var markers = [];
+  var lineData = {'type' : 'Feature',
+        'properties' : {},
+        'geometry': {'type' : 'LineString',
+                 'coordinates' : []
+                }
+       };
+
+  var traceData = {'type' : 'FeatureCollection',
+          'features':[
+              {'type':'Feature',
+              'geometry':{'type':'LineString',
+                  'coordinates':[]
+                 }}]
+         };
+
+  var zoneData =  {'type' : 'FeatureCollection','features': [] };
+
+
+    var zones = [];
+    var zonesTableDef = { 'table' : 'zones_overview',
+                        'keys' : [
+                           {'type' : 'string',    'column' : 0,  'jkey' : 'name',      'cssClass' : 'tdRegion'} ,
+                           {'type' : 'string',    'column' : 1,  'jkey' : 'time',      'cssClass' : 'tdRegion'} ,
+                           {'type' : 'int',       'column' : 2,  'jkey' : 'tp',        'cssClass' : 'tdRegion'} ,
+                           {'type' : 'int',       'column' : 3,  'jkey' : 'pph',       'cssClass' : 'tdRegion'} ,
+                           {'type' : 'string',    'column' : 4,  'jkey' : 'deltaTime', 'cssClass' : 'tdRegion'},
+                           {'type' : 'int',       'column' : 5,  'jkey' : 'distance',  'cssClass' : 'tdRegion'}]};
+
+
+    function loadDataFromServer() {
+      loadSessionData();
+    }
+
+
+   function loadMap()
+   {
+     map = new mapboxgl.Map({
+             container: 'map', // container id
+             style: 'mapbox://styles/mapbox/streets-v11', // style URL
+             center: [zones[0].long,zones[0].lat], // starting position [lng, lat]
+             zoom: 10 }); // starting zoom
+
+      map.on('load', setupInitialSourcesAndLayers );
+
+      map.on('click','zoneLayer', (e) => {
+	     new mapboxgl.Popup()
+               .setLngLat(e.features[0].geometry.coordinates)
+               .setHTML(e.features[0].properties.message)
+               .addTo(map);
+      });
+   }
+
+   function setupInitialSourcesAndLayers() {
+
+      // Set up line source and layer
+      map.addSource('lineSource', {'type':'geojson', 'data':lineData} );
+
+      map.addLayer({
+	  'id': 'lineLayer',
+	  'type': 'line',
+	  'source': 'lineSource',
+	  'layout': {'line-join' : 'round', 'line-cap' : 'round' },
+	  'paint': {
+	      'line-color': 'black',
+	      'line-width': 2
+	  }
+      });
+
+      // Setup zone source and layer
+      var zoneIcon = createZoneIcon();
+      map.addImage('zoneIcon', zoneIcon, { pixelRatio: 2 });
+
+      map.addSource('zoneSource', {type: 'geojson', data: zoneData });
+
+      map.addLayer({
+               'id': 'zoneLayer',
+               'type': 'symbol',
+               'source': 'zoneSource',
+               'layout': {
+	           'icon-image': 'zoneIcon',
+		       'icon-size': 1.0,
+		       'icon-anchor': 'center',
+               'icon-allow-overlap': true
+	       }
+      });
+
+
+  }
+
+    function loadSessionData()
+ 	{
+      var rqst = {ST_SessionRqst : {}};
+
+      let tSessionId = getParameterByName("sessionId");
+      rqst.ST_SessionRqst.sessionId = tSessionId;
+
+      //console.log( 'request-data: ' + JSON.stringify(rqst));
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.ajax( { url:'/turf/app/stLoadSessionTraceRanking', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+      posting.fail(function (jqXHR, status, err) {
+          turfError(jqXHR, status);
+      });
+
+      /* Alerts the results */
+      posting.done(function( msg ) {
+          console.log( msg );
+
+          if (msg.hasOwnProperty('ST_SessionRsp')) {
+               document.getElementById('sessionDetailsH1').innerHTML = msg.ST_SessionRsp.user + " - " + msg.ST_SessionRsp.dateTime;
+               document.getElementById('sessRegion').innerHTML = msg.ST_SessionRsp.region;
+               document.getElementById('sessDuration').innerHTML = msg.ST_SessionRsp.duration;
+               document.getElementById('sessDistance').innerHTML = dblfmt(msg.ST_SessionRsp.distance,'double:2') + ' km';
+                document.getElementById('sessSpeed').innerHTML = dblfmt(msg.ST_SessionRsp.speed,'double:2') + ' km/h';
+               document.getElementById('sessPoints').innerHTML = msg.ST_SessionRsp.points.toString();
+               document.getElementById('sessppHH').innerHTML = dblfmt(msg.ST_SessionRsp.ppHH,'double:2');
+               document.getElementById('sessppKM').innerHTML = dblfmt(msg.ST_SessionRsp.ppKM,'double:2');
+
+
+              zones = msg.ST_SessionRsp.zones;
+
+              for( var i = 0; i < msg.ST_SessionRsp.zones.length; i++ ) {
+                  tableInsert( document.getElementById('tableZones'), zonesTableDef, msg.ST_SessionRsp.zones[i] );
+                  zoneData.features.push( buildMapZone( msg.ST_SessionRsp.zones[i] ));
+                  lineData.geometry.coordinates.push( [msg.ST_SessionRsp.zones[i].long, msg.ST_SessionRsp.zones[i].lat]);
+              }
+		  } else if (msg.hasOwnProperty('TG_Response')) {
+              if (!(msg.TG_Response.success)) {
+    	          alert('Load session ranking failure, reason: ' + msg.TG_Response.reason);
+	          } else {
+		          alert('Load session ranking TG_response, success should never be returned');
+		      }
+		  }
+		  loadMap();
+	  });
+	}
+
+    function buildMapZone( zone ) {
+      var entry = {
+                     'geometry' : {
+                              'coordinates' : [ zone.long, zone.lat ],
+                              'type': 'Point'
+                     },
+                     'properties' : {
+                           'iconSize' : [32,32],
+                           'message' : zone.name
+                     },
+                     'type': 'Feature'
+                  };
+      return entry;
+    }
+
+
+   	function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+</script>
+</body>
+</html>

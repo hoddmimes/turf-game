@@ -123,6 +123,61 @@
         <Attribute name="initDate" type="String"/>
     </Message>
 
+    <!--
+        Session Trace Ranking Messages
+    -->
+    <Message name="ST_RankingRqst" rootMessage="true">
+        <Attribute name="type" type="String"/>
+    </Message>
+
+    <Message name="ST_Session">
+        <Attribute name="rank" type="int"/>
+        <Attribute name="user" type="String"/>
+        <Attribute name="sessionId" type="String"/>
+        <Attribute name="region" type="String"/>
+        <Attribute name="dateTime" type="String"/>
+        <Attribute name="zones" type="int"/>
+        <Attribute name="distance" type="double"/> <!-- Km -->
+        <Attribute name="speed" type="double"/> <!-- Km/h -->
+        <Attribute name="duration" type="String"/>
+        <Attribute name="points" type="int"/>
+        <Attribute name="points_hh" type="double"/>
+        <Attribute name="points_km" type="double"/>
+    </Message>
+
+
+    <Message name="ST_RankingRsp" rootMessage="true">
+        <Attribute name="sessions" type="ST_Session" list="array"/>
+    </Message>
+
+    <Message name="ST_SessionRqst" rootMessage="true">
+        <Attribute name="sessionId" type="String"/>
+    </Message>
+
+    <Message name="ST_Zone">
+        <Attribute name="name" type="String"/>
+        <Attribute name="time" type="String"/>
+        <Attribute name="deltaTime" type="String"/>
+        <Attribute name="tp" type="int"/>
+        <Attribute name="pph" type="int"/>
+        <Attribute name="distance" type="int"/> <!-- meter to previous zone -->
+        <Attribute name="lat" type="double"/>
+        <Attribute name="long" type="double"/>
+    </Message>
+
+    <Message name="ST_SessionRsp" rootMessage="true">
+        <Attribute name="user" type="String"/>
+        <Attribute name="region" type="String"/>
+        <Attribute name="dateTime" type="String"/>
+        <Attribute name="duration" type="String"/>
+        <Attribute name="points" type="int"/>
+        <Attribute name="distance" type="double"/> <!-- Km -->
+        <Attribute name="speed" type="double"/> <!-- Km/H -->
+        <Attribute name="ppHH" type="double"/> <!-- HH -->
+        <Attribute name="ppKM" type="double"/> <!-- Km -->
+
+        <Attribute name="zones" type="ST_Zone" list="array"/>
+    </Message>
 
     <!--
       Day Ranking messages

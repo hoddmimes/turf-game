@@ -4,7 +4,7 @@ package com.hoddmimes.turf.server;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.hoddmimes.jsontransform.MessageInterface;
+import com.hoddmimes.transform.MessageInterface;
 import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.MessageFactory;
 import com.hoddmimes.turf.common.generated.TG_LogonRqst;
@@ -28,10 +28,10 @@ import com.hoddmimes.turf.server.services.density.ZoneDensityService;
 import com.hoddmimes.turf.server.services.regionstat.heatmap.ZoneHeatMapService;
 import com.hoddmimes.turf.server.services.notifier.ZoneNotifierService;
 import com.hoddmimes.turf.server.services.regionstat.RegionStatService;
+import com.hoddmimes.turf.server.services.sessiontrace.TraceSessionService;
 import com.hoddmimes.turf.server.services.usertrace.UserTraceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 import org.w3c.dom.Element;
@@ -42,8 +42,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +65,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
     private ZoneHeatMapService mZoneHeatMapService = null;
 
     private ZoneDensityService mZoneDensityService = null;
+    private TraceSessionService mTraceSessionService = null;
 
 
     private TcpServer mTcpIpServer;
@@ -137,7 +138,27 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         return 0;
     }
 
+    private void traceMemory() {
+        Runtime.getRuntime().gc();
+        long tFree = Runtime.getRuntime().freeMemory();
+        long tTotal = Runtime.getRuntime().totalMemory();
+        long tMax = Runtime.getRuntime().maxMemory();
+
+        NumberFormat nf = NumberFormat.getInstance();
+        nf.setMaximumFractionDigits(2);
+
+        double tUsedMem = (double) (tTotal - tFree) / (1024d * 1024d);
+        double tMaxMem = (double) tMax /   (1024d * 1024d);
+        double tTotalMem = (double) tTotal / (1024d * 1024d);
+        double tFreeMem = (double) tFree / (1024d * 1024d);
+
+        mLogger.info("[memory-trace] Used: " + nf.format( tUsedMem ) + " Free: "  + nf.format( tFreeMem )
+                + " Total: " + nf.format( tTotalMem) + " Max: " + nf.format( tMaxMem ));
+    }
+
     private void execServerTasks() {
+        long mLastMemoryTraceTimeStamp = 0L;
+
         while(!(cServerShouldExit)) {
             JsonElement tZoneUpdateRsp = getZoneEvents();
 
@@ -165,16 +186,26 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
                 if (mZoneDensityService != null) {
                     mZoneDensityService.processZoneUpdates(tZoneUpdateRsp);
                 }
+                if (mTraceSessionService != null) {
+                    mTraceSessionService.processZoneUpdates(tZoneUpdateRsp);
+                }
 
             }
-            try {
-                Thread.sleep( mServerCfg.getApiZoneCollectIntervalMs());
-            }
-            catch( InterruptedException e) {
+
+            long timeStamp = System.currentTimeMillis();
+            while ((!cServerShouldExit) && (timeStamp + mServerCfg.getApiZoneCollectIntervalMs() > System.currentTimeMillis())) {
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                }
                 if (cServerShouldExit) {
                     mLogger.info("Execution server task (thread) is interrupted and will exit");
-                } else {
-                    e.printStackTrace();
+                }
+                if ((mLastMemoryTraceTimeStamp + mServerCfg.getMemoryTraceIntervalMs()) < System.currentTimeMillis()) {
+                    mLastMemoryTraceTimeStamp = System.currentTimeMillis();
+                    if (mServerCfg.isMemoryTraceEnabled()) {
+                        traceMemory();
+                    }
                 }
             }
         }
@@ -194,7 +225,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         mLogger.info("ZoneDictionary loaded [" + mZoneDictionary.getSize() + "] zones.");
         declareTcpIpServer();
 
-
+        if (mServerCfg.startTraceSessions()) {
+            mTraceSessionService = new TraceSessionService();
+            mTraceSessionService.initialize( this );
+        }
 
         if (mServerCfg.startZoneNotify()) {
             mZoneNotifierService = new ZoneNotifierService();
@@ -224,9 +258,6 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
             mZoneDensityService = new ZoneDensityService();
             mZoneDensityService.initialize( this );
         }
-
-
-
     }
 
     private void parseConfiguration( String args[])
@@ -375,6 +406,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
         if (tRqstMsg.getMessageName().startsWith("RS_")) {
             return this.mRegionStatService.execute( tRqstMsg );
+        }
+
+        if (tRqstMsg.getMessageName().startsWith("ST_")) {
+            return this.mTraceSessionService.execute(tRqstMsg);
         }
 
         if (tRqstMsg.getMessageName().startsWith("TG_")) {

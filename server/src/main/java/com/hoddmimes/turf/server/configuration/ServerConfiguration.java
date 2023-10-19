@@ -19,6 +19,9 @@ public class ServerConfiguration
     int    mDbPort = 0;
     String mDbName = null;
 
+    long mMemoryTraceIntervalMs = 0;
+    boolean mMemoryTrace = true;
+
 
     private ZoneNotifyConfiguration mZoneNotifyCfg = null;
     private RegionStatConfiguration mRegionStatCfg = null;
@@ -28,6 +31,7 @@ public class ServerConfiguration
     private ZoneHeatMapConfiguration mZoneHeatMapCfg = null;
 
     private ZoneDensityConfiguration mZoneDensityCfg = null;
+    private TraceSessionsConfiguration mTraceSessionCfg = null;
 
 
 
@@ -63,6 +67,11 @@ public class ServerConfiguration
                 mDayRankCfg.parse(mRoot);
             }
 
+            if (XmlAux.isElementPresent(mRoot, "TraceSessionsService")) {
+                mTraceSessionCfg = new TraceSessionsConfiguration();
+                mTraceSessionCfg.parse(mRoot);
+            }
+
             if (XmlAux.isElementPresent(mRoot, "ZoneHeatMap")) {
                 mZoneHeatMapCfg = new ZoneHeatMapConfiguration();
                 mZoneHeatMapCfg.parse(mRoot);
@@ -89,6 +98,8 @@ public class ServerConfiguration
             mApiTimeZoneOffsetHr =  XmlAux.getIntAttribute( tTurfAPI, "timeZoneOffsetHr", 30);
             mApiHistoryOffsetMin =  XmlAux.getIntAttribute( tTurfAPI, "historyOffsetMin", 30);
             mLocalAllZoneDB = XmlAux.getStringAttribute( tTurfAPI, "localZoneDB", null );
+            mMemoryTrace = XmlAux.getBooleanAttribute( tTurfAPI,"memoryTrace", true);
+            mMemoryTraceIntervalMs = XmlAux.getLongAttribute( tTurfAPI,"memoryTraceIntervalSec", 300) * 1000L;
 
             Element tTcpIp= XmlAux.getElement(mRoot, "TcpIp");
             mTcpIpInterface = XmlAux.getStringAttribute( tTcpIp, "interface", "0.0.0.0");
@@ -132,6 +143,13 @@ public class ServerConfiguration
         return mTcpIpServerPort;
     }
 
+    public boolean isMemoryTraceEnabled() {
+        return mMemoryTrace;
+    }
+    public long getMemoryTraceIntervalMs() {
+        return mMemoryTraceIntervalMs;
+    }
+
     public String getTcpIpInterface() {
         return mTcpIpInterface;
     }
@@ -154,21 +172,27 @@ public class ServerConfiguration
     }
 
     public boolean startZoneNotify() {
-        return (mZoneNotifyCfg == null) ? false : true;
+        return  ((mZoneNotifyCfg == null) || (!mZoneNotifyCfg.isEnabled()))  ? false : true;
     }
-    public boolean startRegionStat() { return (mRegionStatCfg == null) ? false : true; }
+    public boolean startRegionStat() {
+        return ((mRegionStatCfg == null) || (!mRegionStatCfg.isEnabled())) ? false : true;
+    }
     public boolean startUserTrace() {
-        return (mUserTraceCfg == null) ? false : true;
+        return ((mUserTraceCfg == null) || (!mUserTraceCfg.isEnabled()))  ? false : true;
     }
     public boolean startDayRanking() {
-        return (mDayRankCfg == null) ? false : true;
+        return ((mDayRankCfg == null) || (!mDayRankCfg.isEnabled())) ? false : true;
     }
     public boolean startZoneHeatMap() {
-        return (mZoneHeatMapCfg == null) ? false : true;
+        return ((mZoneHeatMapCfg == null) || (!mZoneHeatMapCfg.isEnabled())) ? false : true;
     }
 
     public boolean startZoneDensity() {
-        return (mZoneDensityCfg == null) ? false : true;
+        return ((mZoneDensityCfg == null) || (!mZoneDensityCfg.isEnabled())) ? false : true;
+    }
+
+    public boolean startTraceSessions() {
+        return ((mTraceSessionCfg == null) || (!mTraceSessionCfg.isEnabled())) ? false : true;
     }
 
     public ZoneNotifyConfiguration getZoneNotifyConfiguration() {
@@ -181,5 +205,7 @@ public class ServerConfiguration
     public DayRankingConfiguration getDayRankingConfiguration() { return mDayRankCfg; }
 
     public ZoneHeatMapConfiguration getZoneHeatMapConfiguration() { return mZoneHeatMapCfg; }
+
+    public TraceSessionsConfiguration getTraceSessionsConfiguration() { return mTraceSessionCfg; }
 
 }

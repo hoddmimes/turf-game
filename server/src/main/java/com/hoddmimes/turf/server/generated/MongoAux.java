@@ -48,7 +48,7 @@
     import java.time.LocalDateTime;
     import java.util.ArrayList;
     import java.util.stream.Collectors;
-    import com.hoddmimes.jsontransform.DateUtils;
+    import com.hoddmimes.transform.DateUtils;
 
     
     import com.hoddmimes.turf.server.generated.*;
@@ -66,6 +66,7 @@
            private MongoCollection mDayRankingUserInitCollection;
            private MongoCollection mDayRankingUserCollection;
            private MongoCollection mDayRankingRegionCollection;
+           private MongoCollection mSessionTraceCollection;
            private MongoCollection mUserCollection;
            private MongoCollection mSubscriptionCollection;
            private MongoCollection mFirstEntryCollection;
@@ -91,6 +92,8 @@
                  mDayRankingUserCollection = mDb.getCollection("DayRankingUser");
               
                  mDayRankingRegionCollection = mDb.getCollection("DayRankingRegion");
+              
+                 mSessionTraceCollection = mDb.getCollection("SessionTrace");
               
                  mUserCollection = mDb.getCollection("User");
               
@@ -134,6 +137,8 @@
                 
                     mDayRankingRegionCollection = null;
                 
+                    mSessionTraceCollection = null;
+                
                     mUserCollection = null;
                 
                     mSubscriptionCollection = null;
@@ -160,6 +165,8 @@
                     mDayRankingUserCollection = null;
                 
                     mDayRankingRegionCollection = null;
+                
+                    mSessionTraceCollection = null;
                 
                     mUserCollection = null;
                 
@@ -234,6 +241,10 @@
                           createDayRankingRegionCollection();
                        }
                    
+                       if ((pReset) || (!collectionExit("SessionTrace", tCollectionNames ))) {
+                          createSessionTraceCollection();
+                       }
+                   
                        if ((pReset) || (!collectionExit("User", tCollectionNames ))) {
                           createUserCollection();
                        }
@@ -299,6 +310,14 @@
             createCollection("DayRankingRegion", tKeys, null );
         }
     
+        private void createSessionTraceCollection() {
+            ArrayList<DbKey> tKeys = new ArrayList<>();
+            
+                    tKeys.add( new DbKey("userDateTime", true));
+
+            createCollection("SessionTrace", tKeys, null );
+        }
+    
         private void createUserCollection() {
             ArrayList<DbKey> tKeys = new ArrayList<>();
             
@@ -352,6 +371,10 @@
                 
                     public MongoCollection getDayRankingRegionCollection() {
                       return mDayRankingRegionCollection;
+                    }
+                
+                    public MongoCollection getSessionTraceCollection() {
+                      return mSessionTraceCollection;
                     }
                 
                     public MongoCollection getUserCollection() {
@@ -1517,6 +1540,202 @@
             DayRankingRegion tDayRankingRegion = new DayRankingRegion();
             tDayRankingRegion.decodeMongoDocument( tDoc );
             tResult.add(tDayRankingRegion);
+            }
+            return tResult;
+            }
+        
+        /**
+        * CRUD DELETE methods
+        */
+        public long deleteSessionTrace( Bson pFilter) {
+           DeleteResult tResult = mSessionTraceCollection.deleteMany( pFilter );
+           return tResult.getDeletedCount();
+        }
+
+        public long deleteSessionTraceByMongoId( String pMongoObjectId) {
+            Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            DeleteResult tResult = mSessionTraceCollection.deleteOne( tFilter );
+            return tResult.getDeletedCount();
+        }
+
+        
+            public long deleteSessionTraceByUserDateTime( String pUserDateTime ) {
+                
+            Bson tKeyFilter= Filters.eq("userDateTime", pUserDateTime); 
+                DeleteResult tResult =  mSessionTraceCollection.deleteMany(tKeyFilter);
+                return tResult.getDeletedCount();
+            }
+        
+        /**
+        * CRUD INSERT methods
+        */
+        public void insertSessionTrace( SessionTrace pSessionTrace ) {
+            Document tDoc = pSessionTrace.getMongoDocument();
+            mSessionTraceCollection.insertOne( tDoc );
+            ObjectId _tId = tDoc.getObjectId("_id");
+            if (_tId != null) {
+                pSessionTrace.setMongoId( _tId.toString());
+            }
+        }
+
+        public void insertSessionTrace( List<SessionTrace> pSessionTraceList ) {
+           List<Document> tList = pSessionTraceList.stream().map( SessionTrace::getMongoDocument).collect(Collectors.toList());
+           mSessionTraceCollection.insertMany( tList );
+           for( int i = 0; i < tList.size(); i++ ) {
+             ObjectId _tId = tList.get(i).getObjectId("_id");
+             if (_tId != null) {
+                pSessionTraceList.get(i).setMongoId( _tId.toString());
+             }
+           }
+        }
+
+    
+        /**
+        * CRUD UPDATE (INSERT) methods
+        */
+        public UpdateResult updateSessionTraceByMongoId( String pMongoObjectId, SessionTrace pSessionTrace ) {
+            Bson tFilter =  Filters.eq("_id", new ObjectId(pMongoObjectId));
+            Document tDocSet = new Document("$set", pSessionTrace.getMongoDocument());
+            UpdateResult tUpdSts = mSessionTraceCollection.updateOne( tFilter, tDocSet, new UpdateOptions());
+            return tUpdSts;
+        }
+
+        public UpdateResult updateSessionTrace( SessionTrace pSessionTrace, boolean pUpdateAllowInsert ) {
+        UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+        
+        Bson tKeyFilter= Filters.and( 
+            Filters.eq("userDateTime", pSessionTrace.getUserDateTime().get()) );
+    
+
+
+        Document tDocSet = new Document("$set", pSessionTrace.getMongoDocument());
+
+        UpdateResult tUpdSts = mSessionTraceCollection.updateOne( tKeyFilter, tDocSet, tOptions);
+        return tUpdSts;
+        }
+
+
+        public UpdateResult updateSessionTrace( String pUserDateTime, SessionTrace pSessionTrace, boolean pUpdateAllowInsert ) {
+          UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+          
+        Bson tKeyFilter= Filters.and( 
+            Filters.eq("userDateTime", pUserDateTime) );
+    
+
+           Document tDocSet = new Document("$set", pSessionTrace.getMongoDocument());
+
+           UpdateResult tUpdSts = mSessionTraceCollection.updateOne( tKeyFilter, tDocSet, tOptions);
+           return tUpdSts;
+        }
+
+        public UpdateResult updateSessionTrace( Bson pFilter, SessionTrace pSessionTrace, boolean pUpdateAllowInsert ) {
+           UpdateOptions tOptions = new UpdateOptions().upsert(pUpdateAllowInsert);
+           Document tDocSet = new Document("$set", pSessionTrace.getMongoDocument());
+           UpdateResult tUpdSts = mSessionTraceCollection.updateOne( pFilter, tDocSet, tOptions);
+           return tUpdSts;
+        }
+    
+        /**
+        * CRUD FIND methods
+        */
+
+        public List<SessionTrace> findSessionTrace( Bson pFilter  ) {
+         return findSessionTrace( pFilter, null );
+        }
+
+        public List<SessionTrace> findSessionTrace( Bson pFilter, Bson pSortDoc  ) {
+
+        FindIterable<Document> tDocuments = (pSortDoc == null) ? this.mSessionTraceCollection.find( pFilter ) :
+        this.mSessionTraceCollection.find( pFilter ).sort( pSortDoc );
+
+
+        if (tDocuments == null) {
+        return null;
+        }
+
+        List<SessionTrace> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        SessionTrace tSessionTrace = new SessionTrace();
+        tSessionTrace.decodeMongoDocument( tDoc );
+        tResult.add( tSessionTrace );
+        }
+        return tResult;
+        }
+
+
+
+        public List<SessionTrace> findAllSessionTrace()
+        {
+           List<SessionTrace> tResult = new ArrayList<>();
+
+           FindIterable<Document> tDocuments  = this.mSessionTraceCollection.find();
+           MongoCursor<Document> tIter = tDocuments.iterator();
+           while( tIter.hasNext()) {
+               Document tDoc = tIter.next();
+               SessionTrace tSessionTrace = new SessionTrace();
+               tSessionTrace.decodeMongoDocument( tDoc );
+               tResult.add(tSessionTrace);
+            }
+            return tResult;
+        }
+
+        public SessionTrace findSessionTraceByMongoId( String pMongoObjectId ) {
+        Bson tFilter=  Filters.eq("_id", new ObjectId(pMongoObjectId));
+
+        FindIterable<Document> tDocuments = this.mSessionTraceCollection.find( tFilter );
+        if (tDocuments == null) {
+            return null;
+        }
+
+        List<SessionTrace> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+        Document tDoc = tIter.next();
+        SessionTrace tSessionTrace = new SessionTrace();
+        tSessionTrace.decodeMongoDocument( tDoc );
+        tResult.add( tSessionTrace );
+        }
+        return (tResult.size() > 0) ? tResult.get(0) : null;
+        }
+
+
+        public List<SessionTrace> findSessionTrace( String pUserDateTime ) {
+            
+        Bson tKeyFilter= Filters.and( 
+            Filters.eq("userDateTime", pUserDateTime) );
+    
+
+        FindIterable<Document> tDocuments = this.mSessionTraceCollection.find( tKeyFilter );
+        if (tDocuments == null) {
+           return null;
+        }
+
+        List<SessionTrace> tResult = new ArrayList<>();
+        MongoCursor<Document> tIter = tDocuments.iterator();
+        while ( tIter.hasNext()) {
+           Document tDoc = tIter.next();
+           SessionTrace tSessionTrace = new SessionTrace();
+           tSessionTrace.decodeMongoDocument( tDoc );
+           tResult.add( tSessionTrace );
+        }
+        return tResult;
+        }
+
+        
+            public List<SessionTrace> findSessionTraceByUserDateTime( String pUserDateTime ) {
+            List<SessionTrace> tResult = new ArrayList<>();
+            
+            Bson tKeyFilter= Filters.eq("userDateTime", pUserDateTime); 
+
+            FindIterable<Document> tDocuments  = this.mSessionTraceCollection.find( tKeyFilter );
+            MongoCursor<Document> tIter = tDocuments.iterator();
+            while( tIter.hasNext()) {
+            Document tDoc = tIter.next();
+            SessionTrace tSessionTrace = new SessionTrace();
+            tSessionTrace.decodeMongoDocument( tDoc );
+            tResult.add(tSessionTrace);
             }
             return tResult;
             }

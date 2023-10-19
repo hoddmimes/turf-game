@@ -1,0 +1,142 @@
+<html>
+<head>
+   <script
+           src="https://code.jquery.com/jquery-3.3.1.js"
+           integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+           crossorigin="anonymous">
+   </script>
+   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   <script src="js/turf.js" type="text/javascript"></script>
+   <script src="js/table.js" type="text/javascript"></script>
+
+   <title>Turf Top Sessions</title>
+   <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+   <meta name="description" contents="Turf Game Region Statistics">
+   <meta name="keywords" contents="TurfGame Turf game GPS outdoor session statistics">
+   <link rel="stylesheet" type="text/css" href="css/turf.css">
+</head>
+<body onload="loadDataFromServer()"/>
+
+<body>
+   <br>
+   <h2 id="regionStatH1" style="margin-left:50px;text-align:left">Top Sessions</h2>
+
+      <div style="margin-left:60px;">
+         <label style="font-size:18px;font-family:Arial" for="rankingType">Ranking based upon: </label>
+         <select style="font-size:18px;font-family:Arial" name="ranking" id="rankingType" onChange="changeRanking()">
+            <option value="TIME">Time</option>
+            <option value="DISTANCE">Distance</option>
+         </select>
+       </div>
+
+      <p id="sessionCountTxt" style="text-align: center;font-family:Arial;font-style: italic; Font-Size : 12t;"></p>
+      <div id="divSessionStat" class="borderDiv">
+         <br>
+            <table id="tableSessionRanking" class="tableRegionStatClass">
+               <tr>
+                  <th class="thRegion"></th>
+                  <th class="thRegion">User</th>
+                  <th class="thRegion">Region</th>
+                  <th class="thRegion">Time</th>
+                  <th class="thRegion">Takes</th>
+                  <th class="thRegion">Distance (km)</th>
+                  <th class="thRegion">Speed (km/h)</th>
+                  <th class="thRegion">Duration</th>
+                  <th class="thRegion">Points</th>
+                  <th class="thRegion">Points/Hr</th>
+                  <th class="thRegion">Points/Km</th>
+               </tr>
+            </table>
+      </div>
+   <br>
+
+
+<script>
+
+
+changeRanking
+   var sessions = [];
+   var sessionTableDef= { 'table' : 'session_ranking',
+                       'keys' : [
+                          {'type' : 'int',       'column' : 0,  'jkey' : 'rank',         'cssClass' : 'tdRegion'} ,
+                          {'type' : 'string',    'column' : 1,  'jkey' : 'user',         'cssClass' : 'tdRegion'} ,
+                          {'type' : 'string',    'column' : 2,  'jkey' : 'region',       'cssClass' : 'tdRegion'} ,
+                          {'type' : 'string',    'column' : 3,  'jkey' : 'dateTime',     'cssClass' : 'tdRegion'} ,
+                          {'type' : 'int',       'column' : 4,  'jkey' : 'zones',        'cssClass' : 'tdRegion'},
+                          {'type' : 'double:2',  'column' : 5,  'jkey' : 'distance',     'cssClass' : 'tdRegion'},
+                          {'type' : 'double:2',  'column' : 6,  'jkey' : 'speed',        'cssClass' : 'tdRegion'},
+                          {'type' : 'String',    'column' : 7,  'jkey' : 'duration',     'cssClass' : 'tdRegion'},
+                          {'type' : 'int',       'column' : 8,  'jkey' : 'points',       'cssClass' : 'tdRegion'},
+                          {'type' : 'double:1',  'column' : 9,  'jkey' : 'points_hh',    'cssClass' : 'tdRegion'},
+                          {'type' : 'double:1',  'column' : 10,  'jkey' : 'points_km',    'cssClass' : 'tdRegion'}]};
+
+
+
+
+
+   function loadDataFromServer() {
+     loadSessionRanking();
+   }
+
+
+   function loadSessionRanking()
+    {
+      var rankingType = document.getElementById("rankingType").value;
+      var rqst = {ST_RankingRqst : {'type': rankingType }};
+
+      tTable = document.getElementById('tableSessionRanking')
+      tableClear(tTable, sessionTableDef);
+
+     //console.log( 'request-data: ' + JSON.stringify(rqst));
+
+     /* Send the data using post with element id name and name2*/
+     var posting = $.ajax( { url:'/turf/app/stLoadSessionTraceRanking', type:'POST', data : JSON.stringify(rqst),  contentType : 'application/json; charset=iso-8859-1'});
+
+     posting.fail(function (jqXHR, status, err) {
+         turfError(jqXHR, status);
+     });
+
+     /* Alerts the results */
+     posting.done(function( msg ) {
+         console.log( msg );
+
+         if (msg.hasOwnProperty('ST_RankingRsp')) {
+           if (msg.ST_RankingRsp.sessions.length == 0) {
+              document.getElementById('sessionCountTxt').innerHTML = 'No Top Sessions Found';
+           } else {
+              sessions = msg.ST_RankingRsp.sessions;
+              for( var i = 0; i < msg.ST_RankingRsp.sessions.length; i++ ) {
+                     var tRow = tableInsert( document.getElementById('tableSessionRanking'), sessionTableDef, msg.ST_RankingRsp.sessions[i] );
+                     tRow.cells[0].onclick = addEventListener('click', cellClicked );
+                     tRow.cells[0].className = 'tdCickableText';
+                     tRow.cells[1].onclick = addEventListener('click', cellClicked );
+                     tRow.cells[1].className = 'tdCickableText';
+                     tRow.attachedObject = msg.ST_RankingRsp.sessions[i].sessionId;
+              }
+           }
+        } else if (msg.hasOwnProperty('TG_Response')) {
+             if (!(msg.TG_Response.success)) {
+                 alert('Load session ranking failure, reason: ' + msg.TG_Response.reason);
+             } else {
+                 alert('Load session ranking TG_response, success should never be returned');
+             }
+         }
+     });
+   }
+
+   function changeRanking() {
+      var val = document.getElementById("rankingType").value;
+      loadSessionRanking();
+   }
+
+   function cellClicked( event ) {
+      var row = event.target.closest("tr");
+      if (row) {
+        tSessId = row.attachedObject;
+        window.open('/turf/stSess.html?sessionId=' + tSessId, '_blank');
+      }
+   }
+</script>
+</body>
+</html>

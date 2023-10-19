@@ -15,12 +15,12 @@
 
 
 	<Loggers>
-		<logger name="com.hoddmimes.turf.server.services.dayranking" level="DEBUG" additivity="false">
+		<logger name="com.hoddmimes.turf.server.services.sessiontrace" level="DEBUG" additivity="false">
 			<AppenderRef ref="STDOUT"/>
 			<AppenderRef ref="FILE"/>
 		</logger>
 
-		<Root level="ERROR">
+		<Root level="INFO">
 			<AppenderRef ref="STDOUT"/>
 		</Root>
 

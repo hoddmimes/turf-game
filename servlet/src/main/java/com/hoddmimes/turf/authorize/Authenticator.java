@@ -51,7 +51,7 @@ public class Authenticator implements HttpSessionListener
      * @return
      * @throws Exception
      */
-    public HttpSession authorize( TG_LogonRqst pLogonRqst, HttpServletRequest pRequest ) throws Exception
+    public HttpSession authorize(TG_LogonRqst pLogonRqst, HttpServletRequest pRequest ) throws Exception
     {
         // Check that the request is a POST if not reject the login
         if (!pRequest.getMethod().equals("POST")) {

@@ -1,8 +1,6 @@
 package com.hoddmimes.turf.servlets;
 
 import com.google.gson.JsonObject;
-import com.hoddmimes.jsontransform.MessageInterface;
-import com.hoddmimes.turf.common.generated.MessageFactory;
 
 
 import javax.ws.rs.GET;

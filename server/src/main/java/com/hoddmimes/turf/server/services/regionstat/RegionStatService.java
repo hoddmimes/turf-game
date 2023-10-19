@@ -11,7 +11,7 @@ package com.hoddmimes.turf.server.services.regionstat;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.hoddmimes.jsontransform.MessageInterface;
+import com.hoddmimes.transform.MessageInterface;
 import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.RS_RegionStatisticsRqst;
 import com.hoddmimes.turf.common.generated.RS_RegionStatisticsRsp;
@@ -21,6 +21,7 @@ import com.hoddmimes.turf.server.TurfServiceInterface;
 import com.hoddmimes.turf.server.common.EventFilterNewZoneTakeOver;
 import com.hoddmimes.turf.server.common.Turf;
 import com.hoddmimes.turf.server.common.ZoneEvent;
+import com.hoddmimes.turf.server.configuration.CfgRegion;
 import com.hoddmimes.turf.server.configuration.RegionStatConfiguration;
 import com.hoddmimes.turf.server.generated.FirstEntry;
 import com.hoddmimes.turf.server.generated.HourRegionStat;
@@ -567,8 +568,8 @@ public class RegionStatService implements TurfServiceInterface
     }
 
     private boolean ifExtraRegion( int pId, String pName ) {
-        for (RegionStatConfiguration.ExtraRegion er : mConfig.getExtraRegions()) {
-            if (er.isExtraRegion(pId, pName)) {
+        for (CfgRegion er : mConfig.getExtraRegions()) {
+            if (er.isSame(pId, pName)) {
                 return true;
             }
         }

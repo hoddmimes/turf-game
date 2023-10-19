@@ -19,7 +19,7 @@
 
 package com.hoddmimes.turf.server.generated;
 
-import com.hoddmimes.jsontransform.*;
+import com.hoddmimes.transform.*;
 import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,6 +85,20 @@ public class MessageFactory implements MessageFactoryInterface
             case "DayRankingRegion":
             {
             	DayRankingRegion tMessage = new DayRankingRegion();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "TraceZone":
+            {
+            	TraceZone tMessage = new TraceZone();
+            	tMessage.decode( new JsonDecoder(pJsonMessageString));
+            	return tMessage;
+            }
+			
+            case "SessionTrace":
+            {
+            	SessionTrace tMessage = new SessionTrace();
             	tMessage.decode( new JsonDecoder(pJsonMessageString));
             	return tMessage;
             }

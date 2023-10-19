@@ -7,18 +7,22 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserTraceConfiguration
+public class UserTraceConfiguration extends CoreConfiguration
 {
     private String mLogfilename;
     private List<String> mUsers;
     private boolean      mTraceAll;
     private long         mSessionMaxInactivityMin;
 
+    public UserTraceConfiguration() {
+        super(true);
+    }
     public void parse( Element pRoot ){
         Element tCfg = XmlAux.getElement( pRoot, "UserTraceService");
         mLogfilename = tCfg.getAttribute("logfile");
         mSessionMaxInactivityMin = XmlAux.getIntAttribute( tCfg,"sessionMaxInactivityMin", 30 );
         mTraceAll = XmlAux.getBooleanAttribute( tCfg,"traceAll", false );
+        super.enable(XmlAux.getBooleanAttribute( tCfg,"enabled", true ));
 
         mUsers = new ArrayList<>();
         NodeList tNodeList = tCfg.getElementsByTagName("User");

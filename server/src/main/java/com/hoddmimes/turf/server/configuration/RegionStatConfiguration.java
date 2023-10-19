@@ -8,13 +8,17 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegionStatConfiguration
+public class RegionStatConfiguration extends CoreConfiguration
 {
 
     private DebugContext        mDbgCtx;
     private long                mStatPeriod;
-    private List<ExtraRegion>   mExtraRegions;
+    private List<CfgRegion>   mExtraRegions;
     private double              mTpPphRelation;
+
+    public RegionStatConfiguration() {
+        super(true);
+    }
 
     public void parse( Element pRootElement) {
 
@@ -23,6 +27,8 @@ public class RegionStatConfiguration
         mStatPeriod = hh * 3600L * 1000L;
 
         mTpPphRelation = Double.parseDouble(tRSElement.getAttribute("tpPphRelation"));
+
+        super.enable( XmlAux.getBooleanAttribute(tRSElement,"enabled", true));
 
 
         mDbgCtx = new DebugContext();
@@ -53,7 +59,7 @@ public class RegionStatConfiguration
                         Element tExtraRegion = (Element) tRegionList.item(i);
                         int tId = XmlAux.getIntAttribute( tExtraRegion,"id", 0);
                         String tName = XmlAux.getStringAttribute( tExtraRegion,"name", null);
-                        mExtraRegions.add( new ExtraRegion(tId, tName));
+                        mExtraRegions.add( new CfgRegion( tName, tId ));
                     }
                 }
             }
@@ -68,7 +74,7 @@ public class RegionStatConfiguration
         return mDbgCtx;
     }
 
-    public List<ExtraRegion> getExtraRegions() {
+    public List<CfgRegion> getExtraRegions() {
         return this.mExtraRegions;
     }
 

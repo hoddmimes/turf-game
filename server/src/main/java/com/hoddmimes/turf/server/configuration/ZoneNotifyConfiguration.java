@@ -2,7 +2,7 @@ package com.hoddmimes.turf.server.configuration;
 
 import org.w3c.dom.Element;
 
-public class ZoneNotifyConfiguration
+public class ZoneNotifyConfiguration extends CoreConfiguration
 {
 
 
@@ -13,8 +13,13 @@ public class ZoneNotifyConfiguration
         PasswordRules mPasswRules;
 
 
+        public ZoneNotifyConfiguration() {
+            super(true);
+        }
+
         public void parse( Element pRootElement) {
             Element tZNElement = XmlAux.getElement( pRootElement, "ZoneNotifyService");
+            super.enable( XmlAux.getBooleanAttribute( tZNElement, "enabled", true));
 
             Element tMailElement = XmlAux.getElement( tZNElement, "Mailer");
             mMailUser = XmlAux.getStringAttribute(tMailElement,"user", null);

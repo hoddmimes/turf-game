@@ -3,12 +3,13 @@ package com.hoddmimes.turf.server.services.dayranking;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.hoddmimes.jsontransform.MessageInterface;
+import com.hoddmimes.transform.MessageInterface;
 import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.*;
 import com.hoddmimes.turf.server.TurfServerInterface;
 import com.hoddmimes.turf.server.TurfServiceInterface;
 import com.hoddmimes.turf.server.common.*;
+import com.hoddmimes.turf.server.configuration.CfgRegion;
 import com.hoddmimes.turf.server.configuration.DayRankingConfiguration;
 import com.hoddmimes.turf.server.generated.*;
 import com.hoddmimes.turf.server.generated.DayRankingUser;
@@ -44,7 +45,7 @@ public class DayRankingService implements TurfServiceInterface {
     private volatile Map<Integer, DayRankingInitUser>       mRankingInitUsers;
     private volatile Map<Integer, DayRankingRegion>         mRankingRegions;
     private volatile Map<Integer, ZoneEvent>                mUserZones;
-
+    private volatile Map<Integer, Long>                     mRegionDbSaveTimestamps;
 
 
     @Override
@@ -59,6 +60,7 @@ public class DayRankingService implements TurfServiceInterface {
         mRankingUsers = new HashMap<>();
         mRankingInitUsers = new HashMap<>();
         mRankingRegions = new HashMap<>();
+        mRegionDbSaveTimestamps = new HashMap<>();
         mUserZones = new HashMap<>();
         mLogger.info("Initialize " + this.getClass().getSimpleName());
 
@@ -171,7 +173,7 @@ public class DayRankingService implements TurfServiceInterface {
             u.setDistance( tKm ); // Distance in Km
 
             if (dru.getTime().isPresent() && (dru.getTime().get() > 0)) {
-                double tSpeed = (dru.getDistance().orElse(0) / dru.getTime().get()) * 3.6d;
+                double tSpeed = ((double) dru.getDistance().orElse(0) / ((double) dru.getTime().get()) * 3.6d);
                 u.setSpeed(tSpeed);
             } else {
                 u.setSpeed( 0d );
@@ -198,7 +200,7 @@ public class DayRankingService implements TurfServiceInterface {
     private JsonObject executeGetRegions( DR_RegionRqst pRqst ) {
         DR_RegionRsp tResponse = new DR_RegionRsp();
         ArrayList<DR_Region> tRegionList = new ArrayList<>();
-        for( DayRankingConfiguration.Region r : mConfig.getRegions()) {
+        for( CfgRegion r : mConfig.getRegions()) {
             DR_Region dr = new DR_Region();
             dr.setRegion( r.getName());
             dr.setRegionId( r.getId());
@@ -239,6 +241,7 @@ public class DayRankingService implements TurfServiceInterface {
         if ((tDbRegionList != null) && (tDbRegionList.size() > 0)) {
             for (DayRankingRegion r : tDbRegionList) {
                 mRankingRegions.put( r.getRegionId().get(), r);
+                mRegionDbSaveTimestamps.put( r.getRegionId().get(), 0L);
             }
             mLogger.info("Loaded Region Ranking Data from DB (" + mCurrentDate + "), regions loaded: " + tDbRegionList.size() + " users: " + mRankingUsers.size());
         } else {
@@ -298,7 +301,7 @@ public class DayRankingService implements TurfServiceInterface {
 
         }
 
-        List<JsonObject> getUserRanking(DayRankingConfiguration.Region pRegion ) {
+        List<JsonObject> getUserRanking(CfgRegion pRegion ) {
             ArrayList<JsonObject> jUsers = new ArrayList<>();
 
 
@@ -359,7 +362,7 @@ public class DayRankingService implements TurfServiceInterface {
             ru.setDate( mService.mCurrentDate );
             return ru;
         }
-        private void setStartDayRankingData( DayRankingConfiguration.Region pRegion, List<JsonObject> tUserArray ) {
+        private void setStartDayRankingData( CfgRegion pRegion, List<JsonObject> tUserArray ) {
                 mLogger.debug("setStartDayRankingData, set start of day ranking day region: " + pRegion.getName() + " users: " + tUserArray.size());
 
                 DayRankingRegion drr = new DayRankingRegion();
@@ -369,6 +372,7 @@ public class DayRankingService implements TurfServiceInterface {
                 drr.setFinalized(false);
                 drr.setStartTime(System.currentTimeMillis());
                 mService.mRankingRegions.put(pRegion.getId(), drr);
+                mService.mRegionDbSaveTimestamps.put(pRegion.getId(), 0L);
                 mService.mDbAux.insertDayRankingRegion(drr);
 
 
@@ -420,15 +424,17 @@ public class DayRankingService implements TurfServiceInterface {
             return ru;
         }
 
-        private int updateRankingData(DayRankingConfiguration.Region pRegion, List<JsonObject> tUserArray ) {
+        private int updateRankingData(CfgRegion pRegion, List<JsonObject> tUserArray ) {
             int tUpd = 0, tIns = 0, tFnd = 0;
             long tDistance = 0, tTime = 0;
             boolean tUserChanged;
             long tNow = System.currentTimeMillis();
             boolean tDBSave = false;
-            if ((pRegion.mDBSaveTimestamp + mService.mConfig.getSaveIntervalMS()) < tNow) {
-                tDBSave = true;
-                pRegion.mDBSaveTimestamp = tNow;
+            if (mRegionDbSaveTimestamps.containsKey( pRegion.getId())) {
+                if ((mRegionDbSaveTimestamps.get(pRegion.getId()) + mService.mConfig.getSaveIntervalMS()) < tNow) {
+                    tDBSave = true;
+                    mRegionDbSaveTimestamps.put(pRegion.getId(), tNow);
+                }
             }
 
 
@@ -507,9 +513,9 @@ public class DayRankingService implements TurfServiceInterface {
             }
 
             // get regions that are tracked
-            List<DayRankingConfiguration.Region> mRegions = mService.mConfig.getRegions();
+            List<CfgRegion> mRegions = mService.mConfig.getRegions();
 
-            for( DayRankingConfiguration.Region r : mRegions ) {
+            for( CfgRegion r : mRegions ) {
                 // Get current user ranking for the region
                 List<JsonObject> tUserRanking = getUserRanking( r );
                 if (tUserRanking != null) {

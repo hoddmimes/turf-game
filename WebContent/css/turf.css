@@ -61,6 +61,15 @@ optgroup { font-size:14px; }
     overflow-x: hidden;  /* Hide the horizontal scroll */
 }
 
+#divSessionStat {
+    table-layout:fixed;
+	margin-top:20px;
+	width:1000px;
+	min-height:500px;
+	overflow-y: auto;    /* Trigger vertical scroll    */
+    overflow-x: hidden;  /* Hide the horizontal scroll */
+}
+
 
 .tableRegionStatClass {
 	background:#ffffff;
@@ -190,6 +199,21 @@ optgroup { font-size:14px; }
   padding-right: 15px;
 }
 
+.tdCickableText {
+    text-align: center;
+    font-family: Arial;
+    Font-Size : 11t;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    family : Arial,sans-serif;
+    font-weight: bold; color:gray;
+    border-collapse: collapse;
+    border: 1px solid lightgray;
+    color: blue;
+    text-decoration: underline;
+}
 
 /*
    =========================================

@@ -147,5 +147,6 @@ function tableInsert( pTable, pTabDef, jObject )
           row.cells[ k.column ].onmouseup =  function() {fn.apply(null, [[k.jkey,tRow ]]);}
        }
    }
+   return tRow;
 }
 

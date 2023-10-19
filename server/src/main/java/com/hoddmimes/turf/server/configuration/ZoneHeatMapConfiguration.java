@@ -10,19 +10,25 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ZoneHeatMapConfiguration
+public class ZoneHeatMapConfiguration extends CoreConfiguration
 {
     private List<ColorMap>      mColorMap;
-    private List<Region>        mRegions;
+    private List<CfgRegion>        mRegions;
 
+    public ZoneHeatMapConfiguration() {
+        super( true);
+    }
     public void parse( Element pRootElement) {
         mRegions = new ArrayList<>();
         mColorMap = new ArrayList<>();
 
 
         Element tZoneMapElement = XmlAux.getElement(pRootElement, "ZoneHeatMap");
+        super.enable( XmlAux.getBooleanAttribute( tZoneMapElement, "enabled", true));
+
 
         Element tTakeIntervals = XmlAux.getElement(tZoneMapElement, "TakeIntervals");
+
         if (tTakeIntervals != null) {
             NodeList tIntervalList = tTakeIntervals.getElementsByTagName("Interval");
             if (tIntervalList != null) {
@@ -49,7 +55,7 @@ public class ZoneHeatMapConfiguration
                         Element tRegion = (Element) tRegionList.item(i);
                         int tId  = XmlAux.getIntAttribute( tRegion,"id", 0);
                         String tName  = XmlAux.getStringAttribute( tRegion,"name", null);
-                        mRegions.add( new Region( tId, tName ));
+                        mRegions.add( new CfgRegion(  tName, tId ));
                     }
                 }
             }
@@ -59,28 +65,8 @@ public class ZoneHeatMapConfiguration
 
 
 
-    public static class Region {
-        int mId;
-        String mName;
-
-        public Region( int pId, String pName) {
-            mId = pId;
-            mName = pName;
-        }
-
-        public boolean isRegion( int pId, String pName) {
-            if (pId == mId) {
-                return true;
-            }
-            if ((mName != null) && (pName != null) && (pName.compareTo(mName) == 0)) {
-                return true;
-            }
-            return false;
-        }
-    }
-
     public List<Integer> getRegions() {
-        return mRegions.stream().map( r -> r.mId).collect(Collectors.toList());
+        return mRegions.stream().map( r -> r.getId()).collect(Collectors.toList());
     }
 
     public List<ColorMap> getColorMaps() {

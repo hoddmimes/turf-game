@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.hoddmimes.jsontransform.MessageInterface;
+import com.hoddmimes.transform.MessageInterface;
 import com.hoddmimes.turf.common.TGStatus;
 import com.hoddmimes.turf.common.generated.*;
 import com.hoddmimes.turf.server.TurfServerInterface;

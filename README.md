@@ -38,6 +38,8 @@ server configuration file.
 
 The services are found in under the package https://github.com/hoddmimes/turf-game/tree/master/server/src/main/java/com/hoddmimes/turf/server/services
 
+
+- **[Top Sessions](https://hoddmimes.com/turf/st.html)**, tracking session having more than 25 takes and ranking the best 100 session based upon points achieved per hour.
 - **[Day Ranking](https://hoddmimes.com/turf/dr.html)**, display a daily ranking of turf users in a region. The ranking is reset every 24 hrs at midnight.
 - **Zone Notification**, allows users to setup subscription for zone takes they have an interest in. Every time the zone for
 which they have a subscription is taken a mail is received.

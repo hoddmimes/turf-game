@@ -5,9 +5,9 @@ import com.hoddmimes.turf.common.generated.TG_LogonRqst;
 import org.apache.logging.log4j.Logger;
 
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionListener;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionListener;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -83,12 +83,12 @@ public class Authenticator implements HttpSessionListener
     }
 
     @Override
-    public  void sessionCreated(javax.servlet.http.HttpSessionEvent pSession) {
+    public  void sessionCreated(jakarta.servlet.http.HttpSessionEvent pSession) {
         // by design
     }
 
     @Override
-    public void sessionDestroyed(javax.servlet.http.HttpSessionEvent pSession) {
+    public void sessionDestroyed(jakarta.servlet.http.HttpSessionEvent pSession) {
         this.mSessionMap.remove( pSession );
     }
 }

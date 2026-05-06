@@ -6,7 +6,7 @@ import com.hoddmimes.turf.common.generated.TG_Response;
 import com.hoddmimes.turf.common.generated.ZN_MailConfirmation;
 import com.hoddmimes.turf.servlets.aux.ServletResources;
 
-import javax.ws.rs.*;
+import jakarta.ws.rs.*;
 import java.io.IOException;
 
 

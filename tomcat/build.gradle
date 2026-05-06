@@ -5,29 +5,35 @@ plugins {
 
 compileJava.dependsOn( ':servlet:buildServletJar' )
 
+war {
+    archiveBaseName = 'turf'
+    archiveVersion = '1.2'
+    destinationDirectory = file("$rootDir")
+    from(file("$rootDir/WebContent"))
+}
+
 dependencies {
     implementation fileTree(dir: '../libs', include: 'pojojson-1.4.jar')
     implementation fileTree(dir: '../servlet', include: 'turfServlets-1.2.jar')
 
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
 
-    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+    providedCompile group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
 
-    providedCompile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
-    providedCompile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
-    providedCompile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.20.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.20.0'
 
 
-    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.72'
-    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: '9.0.72'
-    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: '9.0.72'
-    providedCompile group: 'org.apache.tomcat', name: 'tomcat-annotations-api', version: '9.0.72'
+    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '10.1.30'
+    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: '10.1.30'
+    providedCompile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: '10.1.30'
+    providedCompile group: 'org.apache.tomcat', name: 'tomcat-annotations-api', version: '10.1.30'
 
-    implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.39'
-    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '2.39'
-    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.39'
-    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.39'
-    providedCompile group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.8'
+    implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '3.1.10'
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '3.1.10'
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '3.1.10'
+    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '3.1.10'
 
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

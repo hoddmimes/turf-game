@@ -3,7 +3,7 @@ plugins {
 }
 
 task(generateTurfMessages, type: JavaExec ) {
-    archivesBaseName = 'JsonTransform'
+    mainClass = 'JsonTransform'
     classpath = files('../libs/pojojson-generate-1.4.jar')
     args  '-xml', './xml_definitions/turfMessagesFileSet.xml'
     doLast {

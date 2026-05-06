@@ -4,3 +4,12 @@ include 'server'
 include 'servlet'
 include 'tomcat'
 
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.PREFER_SETTINGS
+    repositories {
+        mavenCentral()
+        maven { url = 'https://repo.osgeo.org/repository/release/' }
+        maven { url = 'https://maven.geotoolkit.org' }
+    }
+}
+

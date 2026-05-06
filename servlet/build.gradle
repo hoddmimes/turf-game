@@ -37,6 +37,7 @@ tasks.register('copyToHoddmimes') {
 }
 
 task buildServletJar( type : Jar ) {
+    dependsOn ':common:compileJava', ':server:compileJava', ':servlet:compileJava'
     duplicatesStrategy = DuplicatesStrategy.INCLUDE;
     archiveBaseName = 'turfServlets';
     destinationDirectory = file("$project.projectDir")
@@ -66,18 +67,18 @@ dependencies {
 
     implementation fileTree(dir: '../libs', include: 'pojojson-1.4.jar')
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
-    implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
+    implementation group: 'jakarta.ws.rs', name: 'jakarta.ws.rs-api', version: '3.1.0'
 
-    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+    providedCompile group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.20.0'
 
-    implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.39'
-    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '2.39'
-    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.39'
-    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.39'
+    implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '3.1.10'
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '3.1.10'
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '3.1.10'
+    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '3.1.10'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

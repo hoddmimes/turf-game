@@ -29,6 +29,7 @@ import com.hoddmimes.turf.server.services.regionstat.heatmap.ZoneHeatMapService;
 import com.hoddmimes.turf.server.services.notifier.ZoneNotifierService;
 import com.hoddmimes.turf.server.services.regionstat.RegionStatService;
 import com.hoddmimes.turf.server.services.sessiontrace.TraceSessionService;
+import com.hoddmimes.turf.server.services.suspicioustakes.SuspiciousTakesService;
 import com.hoddmimes.turf.server.services.usertrace.UserTraceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,6 +67,7 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
 
     private ZoneDensityService mZoneDensityService = null;
     private TraceSessionService mTraceSessionService = null;
+    private SuspiciousTakesService mSuspiciousTakesService = null;
 
 
     private TcpServer mTcpIpServer;
@@ -189,6 +191,9 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
                 if (mTraceSessionService != null) {
                     mTraceSessionService.processZoneUpdates(tZoneUpdateRsp);
                 }
+                if (mSuspiciousTakesService != null) {
+                    mSuspiciousTakesService.processZoneUpdates(tZoneUpdateRsp);
+                }
 
             }
 
@@ -257,6 +262,10 @@ public class TurfServer implements TurfServerInterface, TcpServerCallbackIf, Tcp
         if (mServerCfg.startZoneDensity()) {
             mZoneDensityService = new ZoneDensityService();
             mZoneDensityService.initialize( this );
+        }
+        if (mServerCfg.startSuspiciousTakes()) {
+            mSuspiciousTakesService = new SuspiciousTakesService();
+            mSuspiciousTakesService.initialize( this );
         }
     }
 

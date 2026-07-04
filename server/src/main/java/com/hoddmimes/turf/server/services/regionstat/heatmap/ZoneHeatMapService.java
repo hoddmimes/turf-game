@@ -132,14 +132,19 @@ public class ZoneHeatMapService extends Thread implements TurfServiceInterface {
                 List<TurfActivityZone> tTAZList = mDbAux.findTurfActivityZone(tZoneEvent.getRegionId(), tZoneEvent.getZoneId());
                 if ((tTAZList != null) && (tTAZList.size() > 0)) {
                     TurfActivityZone taz = tTAZList.get(0);
-                    long tDiffSec = holdTimeInSeconds(taz.getDateLastTaken().get(), tZoneEvent.getLatestTakeTime());
-                    if (tDiffSec > 0) {
-                        taz.setDateLastTaken(tZoneEvent.getLatestTakeTime());
-                        taz.addHoldSec(tDiffSec);
-                        taz.setUser( tZoneEvent.getCurrentOwner());
-                        mDbAux.updateTurfActivityZone( taz, true);
+
+                    if (!taz.getDateLastTaken().isPresent()) {
+                        mLogger.warn("Take Over Zone does not have a getDateLastTaken \n" + taz.toString());
                     } else {
-                        mLogger.warn("Take over time less or equal to zero seconds");
+                        long tDiffSec = holdTimeInSeconds(taz.getDateLastTaken().get(), tZoneEvent.getLatestTakeTime());
+                        if (tDiffSec > 0) {
+                            taz.setDateLastTaken(tZoneEvent.getLatestTakeTime());
+                            taz.addHoldSec(tDiffSec);
+                            taz.setUser(tZoneEvent.getCurrentOwner());
+                            mDbAux.updateTurfActivityZone(taz, true);
+                        } else {
+                            mLogger.warn("Take over time less or equal to zero seconds");
+                        }
                     }
                 }
             }

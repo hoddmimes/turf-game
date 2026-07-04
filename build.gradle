@@ -8,9 +8,13 @@ subprojects {
     group 'com.hoddmimes.turfgame'
     version '1.1'
 
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+    // Defer until the subproject has applied the java plugin; configuring the
+    // extension directly here would hit the root project instead.
+    plugins.withType(JavaPlugin) {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(17)
+            }
         }
     }
 

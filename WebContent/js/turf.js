@@ -231,7 +231,7 @@ function isEmpty(x)
                     ||
         (x == "")
                     ||
-        (x.replace(/\s/g,"") == "")
+        ('"+x+"'.replace(/\s/g,"") == "")
                     ||
         (!/[^\s]/.test(x))
                     ||

@@ -97,7 +97,7 @@ public class TraceSessionService implements TurfServiceInterface {
                 st.setStartTime( toe.getLatestTakeOverTime());
                 st.setDistance(0.0d);
                 this.mActiveSessions.put( toe.getCurrentOwnerId(), st);
-                mLogger.info("starting a new top-session, user: "  + toe.getCurrentOwner() + " region: " + toe.getRegionName());
+                mLogger.debug("starting a new top-session, user: "  + toe.getCurrentOwner() + " region: " + toe.getRegionName());
             }
             TraceZone tz = new TraceZone();
             tz.setZoneName( toe.getZoneName());
@@ -130,7 +130,7 @@ public class TraceSessionService implements TurfServiceInterface {
              if ((st.getLatestTakeTime().get() + (mConfig.getSessionTimeoutSec() * 1000L)) < System.currentTimeMillis()) {
                  evaluateSessionTrace( st );
                  if (st.getZones().get().size() > 2) {
-                     mLogger.info("completed session owner: " + st.getUsername().get() +
+                     mLogger.debug("completed session owner: " + st.getUsername().get() +
                              " region: " + st.getRegion().get() +
                              " takes: " + st.getZones().get().size() +
                              " points: " + st.getPoints().get() +
@@ -139,7 +139,7 @@ public class TraceSessionService implements TurfServiceInterface {
                              " points/hour: " + nbf.format(st.getSess_pp_hh().get()) +
                              " points/km: " + nbf.format(st.getSess_pp_km().get()));
                  } else {
-                     mLogger.info("completed session owner: " + st.getUsername().get() +
+                     mLogger.debug("completed session owner: " + st.getUsername().get() +
                              " takes: " + st.getZones().get().size() +
                              " points: " + st.getPoints().get());
                  }
@@ -171,9 +171,12 @@ public class TraceSessionService implements TurfServiceInterface {
             mTopSessions.add(pSessionTrace);
             UpdateResult tDbResult = mDbAux.updateSessionTrace( pSessionTrace, true);
             pSessionTrace.setMongoId( tDbResult.getUpsertedId().asObjectId().getValue().toHexString());
-            mLogger.info("New top-session: " + pSessionTrace );
+            NumberFormat nf = NumberFormat.getInstance();
+            nf.setMaximumFractionDigits(2);
+            mLogger.info( sessionTraceFormat("New Top-Session", pSessionTrace));
+
         } else {
-            mLogger.info("NOT a NEW top-session (rank: " + tRank + ") : " + pSessionTrace );
+            mLogger.info(sessionTraceFormat("NOT a NEW top-session" , pSessionTrace ));
         }
     }
 
@@ -190,6 +193,19 @@ public class TraceSessionService implements TurfServiceInterface {
                                                       zl.get(i).getLat().get(), zl.get(i).getLong().get());
         }
         return (tDistance / 1000.0d);
+    }
+
+    private String sessionTraceFormat( String prefix, SessionTrace sess ) {
+        NumberFormat nf = NumberFormat.getInstance();
+        nf.setMaximumFractionDigits(2);
+        return prefix + " user: " + sess.getUsername().get() +
+                " region: " + sess.getRegion().get() +
+                " distance: " + nf.format( sess.getDistance().get()) +
+                " duration: " + formatTimeMs( (sess.getLatestTakeTime().get() - sess.getStartTime().get())) +
+                " takes: " + sess.getZones().get().size() +
+                " points: " + sess.getPoints().get() +
+                " points/hh: " + nf.format( sess.getSess_pp_hh().get()) +
+                " points/km: " + nf.format( sess.getSess_pp_km().get());
     }
 
     private void evaluateSessionTrace( SessionTrace pSessionTrace ) {

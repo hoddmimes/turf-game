@@ -1,5 +1,6 @@
 package com.hoddmimes.turf.server.common;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -10,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,7 +76,7 @@ public class ZoneDictionary extends Thread
         try {
             tZoneArray = Turf.getInstance().turfServerGETSignal("zones/all", mLogger).getAsJsonArray();
             saveZonesToLocalStorage( tZoneArray );
-            mLogger.info("Zone directory loaded from TurfGame server. Toital zones: " + ((tZoneArray == null) ? 0 : tZoneArray.size()));
+            mLogger.info("Zone directory loaded from TurfGame server. Total zones: " + ((tZoneArray == null) ? 0 : tZoneArray.size()));
         }
         catch( HttpException e) {
             if (e.getHttpResponseCode() == 429) {
@@ -150,10 +152,8 @@ public class ZoneDictionary extends Thread
 
     private void saveZonesToLocalStorage( JsonArray pZoneArray ) {
         try {
-            FileOutputStream fp = new FileOutputStream( mLocalAllZonesDbFile );
-            fp.write( pZoneArray.toString().getBytes(StandardCharsets.UTF_8));
-            fp.flush();
-            fp.close();
+            Gson tGson = new Gson();
+            tGson.toJson(pZoneArray, new FileWriter(mLocalAllZonesDbFile));
         }
         catch( Exception e) {
            mLogger.fatal( e );

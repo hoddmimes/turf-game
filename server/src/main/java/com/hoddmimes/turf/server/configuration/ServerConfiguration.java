@@ -32,6 +32,7 @@ public class ServerConfiguration
 
     private ZoneDensityConfiguration mZoneDensityCfg = null;
     private TraceSessionsConfiguration mTraceSessionCfg = null;
+    private SuspiciousTakesConfiguration mSuspiciousTakesCfg = null;
 
 
 
@@ -70,6 +71,11 @@ public class ServerConfiguration
             if (XmlAux.isElementPresent(mRoot, "TraceSessionsService")) {
                 mTraceSessionCfg = new TraceSessionsConfiguration();
                 mTraceSessionCfg.parse(mRoot);
+            }
+
+            if (XmlAux.isElementPresent(mRoot, "SuspiciousTakesService")) {
+                mSuspiciousTakesCfg = new SuspiciousTakesConfiguration();
+                mSuspiciousTakesCfg.parse(mRoot);
             }
 
             if (XmlAux.isElementPresent(mRoot, "ZoneHeatMap")) {
@@ -195,6 +201,10 @@ public class ServerConfiguration
         return ((mTraceSessionCfg == null) || (!mTraceSessionCfg.isEnabled())) ? false : true;
     }
 
+    public boolean startSuspiciousTakes() {
+        return ((mSuspiciousTakesCfg == null) || (!mSuspiciousTakesCfg.isEnabled())) ? false : true;
+    }
+
     public ZoneNotifyConfiguration getZoneNotifyConfiguration() {
         return mZoneNotifyCfg;
     }
@@ -207,5 +217,7 @@ public class ServerConfiguration
     public ZoneHeatMapConfiguration getZoneHeatMapConfiguration() { return mZoneHeatMapCfg; }
 
     public TraceSessionsConfiguration getTraceSessionsConfiguration() { return mTraceSessionCfg; }
+
+    public SuspiciousTakesConfiguration getSuspiciousTakesConfiguration() { return mSuspiciousTakesCfg; }
 
 }
